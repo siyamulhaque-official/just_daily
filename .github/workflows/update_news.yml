@@ -1,0 +1,39 @@
+name: Auto Update News Twice Daily
+
+on:
+  schedule:
+    # বাংলাদেশ সময় সকাল ৮:০০ (UTC 02:00) এবং বিকেল ৫:০০ (UTC 11:00)
+    - cron: '0 2 * * *'
+    - cron: '0 11 * * *'
+  workflow_dispatch: # ম্যানুয়ালি রান করার জন্য
+
+permissions:
+  contents: write # news.json পুশ করার পারমিশন
+
+jobs:
+  update-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install feedparser google-genai
+
+      - name: Run AI Summarizer
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python ai_summarizer.py
+
+      - name: Commit and Push Updated News
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add news.json
+          git commit -m "Auto update daily news [skip ci]" || exit 0
+          git push
