@@ -33,12 +33,12 @@
     .app-screen {
       width: 100%;
       max-width: 480px;
-      padding: 20px 16px 40px 16px;
+      min-height: 100vh;
+      padding: 20px 16px 24px 16px;
       display: flex;
       flex-direction: column;
     }
 
-    /* Back Navigation */
     .top-nav {
       margin-bottom: 20px;
     }
@@ -56,7 +56,6 @@
       border: 1px solid rgba(56, 189, 248, 0.2);
     }
 
-    /* Article Meta */
     .article-meta {
       display: flex;
       align-items: center;
@@ -80,7 +79,6 @@
       color: #fff;
     }
 
-    /* Analysis Box */
     .details-box {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -125,40 +123,67 @@
     .source-link-btn:active {
       background: rgba(56, 189, 248, 0.3);
     }
+
+    .content-area {
+      flex: 1;
+    }
+
+    /* Developer Footer */
+    .app-footer {
+      margin-top: 36px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .app-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s ease;
+    }
+    .app-footer a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
   <main class="app-screen">
-    <nav class="top-nav">
-      <a href="index.html" class="back-btn">← ফিরে যান</a>
-    </nav>
+    <div class="content-area">
+      <nav class="top-nav">
+        <a href="index.html" class="back-btn">← ফিরে যান</a>
+      </nav>
 
-    <article id="article-content">
-      <div class="article-meta">
-        <span class="source-tag" id="source-name">লোড হচ্ছে...</span>
-      </div>
-      <h1 class="article-title" id="news-headline">শিরোনাম লোড হচ্ছে...</h1>
+      <article id="article-content">
+        <div class="article-meta">
+          <span class="source-tag" id="source-name">লোড হচ্ছে...</span>
+        </div>
+        <h1 class="article-title" id="news-headline">শিরোনাম লোড হচ্ছে...</h1>
 
-      <div class="details-box">
-        <div class="summary-text" id="summary-body">বিশ্লেষণ লোড করা হচ্ছে...</div>
-      </div>
+        <div class="details-box">
+          <div class="summary-text" id="summary-body">বিশ্লেষণ লোড করা হচ্ছে...</div>
+        </div>
 
-      <a id="source-url" href="#" target="_blank" rel="noopener noreferrer" class="source-link-btn">
-        সরাসরি মূল সংবাদটি পড়ুন ↗
-      </a>
-    </article>
+        <a id="source-url" href="#" target="_blank" rel="noopener noreferrer" class="source-link-btn">
+          সরাসরি মূল সংবাদটি পড়ুন ↗
+        </a>
+      </article>
+    </div>
+
+    <footer class="app-footer">
+      Developed by <a href="https://siyamulhaque.com" target="_blank" rel="noopener noreferrer">Siyamul Haque</a>
+    </footer>
   </main>
 
   <script>
-    // Markdown-এর ** সরিয়ে বোল্ড ট্যাগে রূপান্তর
     function parseContent(text) {
       if (!text) return '';
       let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       return formatted.replace(/\n/g, '<br>');
     }
 
-    // URL থেকে আইডি নেওয়া
     const params = new URLSearchParams(window.location.search);
     const articleId = parseInt(params.get('id'), 10);
 
