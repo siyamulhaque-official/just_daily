@@ -5,27 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Just Daily</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #07090e;
       --surface: #0f1523;
-      --surface-active: #151d30;
       --border: #1a2337;
       --accent: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.15);
-      --text-title: #f1f5f9;
-      --text-body: #94a3b8;
+      --accent-glow: rgba(56, 189, 248, 0.12);
+      --text-title: #f8fafc;
+      --text-muted: #94a3b8;
       --green: #10b981;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       font-family: 'Hind Siliguri', sans-serif;
@@ -36,7 +30,7 @@
       justify-content: center;
     }
 
-    .app-viewport {
+    .app-screen {
       width: 100%;
       max-width: 480px;
       min-height: 100vh;
@@ -45,12 +39,11 @@
       flex-direction: column;
     }
 
-    /* Top Bar */
     .app-header {
       position: sticky;
       top: 0;
       z-index: 20;
-      background: rgba(7, 9, 14, 0.85);
+      background: rgba(7, 9, 14, 0.88);
       backdrop-filter: blur(14px);
       padding: 12px 0 16px 0;
       border-bottom: 1px solid var(--border);
@@ -63,15 +56,13 @@
     }
     .brand {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       letter-spacing: -0.5px;
       color: #fff;
     }
-    .brand span {
-      color: var(--accent);
-    }
-    .live-status {
+    .brand span { color: var(--accent); }
+    .live-tag {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -92,36 +83,33 @@
     }
     .sync-time {
       font-size: 12px;
-      color: var(--text-body);
+      color: var(--text-muted);
       margin-top: 6px;
+      font-weight: 500;
     }
 
-    /* News Feed */
-    .news-stream {
+    .news-list {
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
 
-    /* News Accordion Card */
-    .news-item {
+    .news-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 18px 16px;
-      cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s ease;
     }
-    .news-item:active {
-      transform: scale(0.985);
-    }
-    .news-item.expanded {
-      background: var(--surface-active);
-      border-color: rgba(56, 189, 248, 0.4);
-      box-shadow: 0 8px 24px var(--accent-glow);
+    .news-card:active {
+      transform: scale(0.98);
+      border-color: var(--accent);
+      background: #141c30;
     }
 
-    .item-meta {
+    .card-meta {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -131,87 +119,31 @@
       font-size: 11px;
       font-weight: 700;
       color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
+      background: var(--accent-glow);
       padding: 2px 8px;
       border-radius: 6px;
     }
-    .toggle-icon {
+    .arrow-indicator {
       margin-left: auto;
-      font-size: 12px;
-      color: var(--text-body);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .news-item.expanded .toggle-icon {
-      transform: rotate(180deg);
-      color: var(--accent);
+      font-size: 14px;
+      color: var(--text-muted);
     }
 
-    .item-title {
+    .news-title {
       font-size: 18px;
       font-weight: 700;
       line-height: 1.45;
       color: var(--text-title);
     }
-
-    /* Expandable Body */
-    .item-details {
-      display: none;
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .news-item.expanded .item-details {
-      display: block;
-      animation: expandContent 0.25s ease forwards;
-    }
-
-    @keyframes expandContent {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .summary-text {
-      font-size: 14.5px;
-      line-height: 1.8;
-      color: #cbd5e1;
-      margin-bottom: 16px;
-    }
-    .summary-text strong {
-      color: var(--accent);
-      font-weight: 600;
-      display: block;
-      margin-top: 10px;
-      margin-bottom: 2px;
-    }
-
-    .source-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-      padding: 11px;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      color: #fff;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 12px;
-      transition: background 0.2s;
-    }
-    .source-btn:hover {
-      background: rgba(56, 189, 248, 0.2);
-    }
   </style>
 </head>
 <body>
 
-  <main class="app-viewport">
+  <main class="app-screen">
     <header class="app-header">
       <div class="header-row">
         <div class="brand">Just <span>Daily</span></div>
-        <div class="live-status">
+        <div class="live-tag">
           <div class="pulse-dot"></div>
           <span>LIVE BRIEF</span>
         </div>
@@ -219,59 +151,56 @@
       <p class="sync-time" id="sync-time">সর্বশেষ সংবাদ লোড করা হচ্ছে...</p>
     </header>
 
-    <section class="news-stream" id="news-stream"></section>
+    <section class="news-list" id="news-list"></section>
   </main>
 
   <script>
-    const bengaliNumbers = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+    const bengaliDigits = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
     function toBengali(str) {
-      return str.toString().replace(/\d/g, d => bengaliNumbers[d]);
+      return str.toString().replace(/\d/g, d => bengaliDigits[d]);
     }
 
-    // Markdown Bold (**) সরিয়ে ক্লিন HTML ট্যাগ তৈরি
-    function cleanMarkdown(text) {
-      if (!text) return '';
-      let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      return parsed.replace(/\n/g, '<br>');
+    // টাইম ফরম্যাট: date-month-year(time )
+    function formatAppTime(rawStr) {
+      if (!rawStr) return '';
+      const parts = rawStr.split(' ');
+      if (parts.length >= 3) {
+        const dateParts = parts[0].split('-');
+        if (dateParts.length === 3) {
+          const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+          const formattedTime = `${parts[1]} ${parts[2]}`;
+          return `${formattedDate}(${formattedTime} )`;
+        }
+      }
+      return rawStr;
     }
 
     fetch('news.json')
       .then(res => res.json())
       .then(data => {
-        document.getElementById('sync-time').innerText = `সর্বশেষ আপডেট: ${data.last_updated}`;
-        const stream = document.getElementById('news-stream');
-        stream.innerHTML = '';
+        document.getElementById('sync-time').innerText = `সর্বশেষ আপডেট: ${formatAppTime(data.last_updated)}`;
+        const list = document.getElementById('news-list');
+        list.innerHTML = '';
 
         data.articles.forEach((item, index) => {
-          const card = document.createElement('article');
-          card.className = 'news-item';
-          
+          const card = document.createElement('a');
+          card.className = 'news-card';
+          // আলাদা আর্টিকেলে যাওয়ার লিংক
+          card.href = `article.html?id=${index}`;
+
           card.innerHTML = `
-            <div class="item-meta">
+            <div class="card-meta">
               <span class="source-tag">${item.source} • #${toBengali(index + 1)}</span>
-              <span class="toggle-icon">▼</span>
+              <span class="arrow-indicator">→</span>
             </div>
-            <h2 class="item-title">${item.title}</h2>
-            
-            <div class="item-details">
-              <div class="summary-text">${cleanMarkdown(item.summary)}</div>
-              <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="source-btn" onclick="event.stopPropagation()">
-                সরাসরি মূল সংবাদটি পড়ুন ↗
-              </a>
-            </div>
+            <h2 class="news-title">${item.title}</h2>
           `;
-
-          // টাইটেলে ট্যাপ করলে এক্সপ্যান্ড হবে
-          card.addEventListener('click', () => {
-            card.classList.toggle('expanded');
-          });
-
-          stream.appendChild(card);
+          list.appendChild(card);
         });
       })
       .catch(err => {
         console.error(err);
-        document.getElementById('sync-time').innerText = "ডেটা লোড করতে সমস্যা হয়েছে।";
+        document.getElementById('sync-time').innerText = "খবর লোড করা সম্ভব হয়নি।";
       });
   </script>
 
