@@ -1,9 +1,8 @@
 # config.py
 import os
 
-# গিটহাব অ্যাকশনস থেকে কি খুঁজবে, না পেলে লোকাল কি ব্যবহার করবে
-API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6LijyLZk6aMCXqCTphNnkXQ2raoNfW_EukKYY9oSTLwNA")
-
+# লোকাল পরিবেশ বা ক্লাউড সিক্রেট থেকে কি নেওয়া হবে
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
 RSS_FEEDS = [
