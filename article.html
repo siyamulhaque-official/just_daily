@@ -51,7 +51,7 @@
       font-size: 15px;
       font-weight: 600;
       background: var(--accent-glow);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 10px;
       border: 1px solid rgba(56, 189, 248, 0.2);
     }
@@ -75,8 +75,27 @@
       font-size: 22px;
       font-weight: 700;
       line-height: 1.4;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       color: #fff;
+    }
+
+    /* Banner Image Styling */
+    .banner-container {
+      width: 100%;
+      max-height: 240px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: none; /* ডিফল্টভাবে লুকানো থাকবে, ছবি পেলে JS ডিসপ্লে অন করবে */
+    }
+    .banner-img {
+      width: 100%;
+      height: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      display: block;
     }
 
     .details-box {
@@ -128,7 +147,6 @@
       flex: 1;
     }
 
-    /* Developer Footer */
     .app-footer {
       margin-top: 36px;
       padding-top: 18px;
@@ -141,10 +159,6 @@
       color: var(--accent);
       text-decoration: none;
       font-weight: 600;
-      transition: opacity 0.2s ease;
-    }
-    .app-footer a:hover {
-      text-decoration: underline;
     }
   </style>
 </head>
@@ -161,6 +175,11 @@
           <span class="source-tag" id="source-name">লোড হচ্ছে...</span>
         </div>
         <h1 class="article-title" id="news-headline">শিরোনাম লোড হচ্ছে...</h1>
+
+        <!-- Headline-এর ঠিক নিচে ব্যানার ইমেজ -->
+        <div class="banner-container" id="banner-container">
+          <img id="banner-img" class="banner-img" src="" alt="News Image">
+        </div>
 
         <div class="details-box">
           <div class="summary-text" id="summary-body">বিশ্লেষণ লোড করা হচ্ছে...</div>
@@ -187,7 +206,7 @@
     const params = new URLSearchParams(window.location.search);
     const articleId = parseInt(params.get('id'), 10);
 
-    fetch('news.json')
+    fetch('news.json?t=' + new Date().getTime(), { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const article = data.articles[articleId];
@@ -196,8 +215,21 @@
           document.getElementById('news-headline').innerText = article.title;
           document.getElementById('summary-body').innerHTML = parseContent(article.summary);
           document.getElementById('source-url').href = article.link;
+
+          // ব্যানার ছবি প্রদর্শন লজিক
+          if (article.image) {
+            const bannerBox = document.getElementById('banner-container');
+            const bannerImg = document.getElementById('banner-img');
+            bannerImg.src = article.image;
+            bannerBox.style.display = 'block';
+
+            // ছবি লোড হতে ব্যর্থ হলে ফ্রেম স্বয়ংক্রিয়ভাবে লুকিয়ে ফেলা হবে
+            bannerImg.onerror = function() {
+              bannerBox.style.display = 'none';
+            };
+          }
         } else {
-          document.getElementById('article-content').innerHTML = '<p>সংবাদটি পাওয়া যায়নি।</p>';
+          document.getElementById('article-content').innerHTML = '<p style="text-align:center; color:var(--text-muted);">সংবাদটি পাওয়া যায়নি।</p>';
         }
       })
       .catch(err => {
