@@ -1,9 +1,9 @@
 import os
 import json
+import re
 from datetime import datetime, timezone, timedelta
 import feedparser
 
-# Gemini SDK ইমপোর্ট হ্যান্ডলিং (নতুন এবং পুরাতন উভয় লাইব্রেরির জন্য নিরাপদ)
 try:
     from google import genai
     USING_NEW_SDK = True
@@ -12,9 +12,8 @@ except ImportError:
         import google.generativeai as genai
         USING_NEW_SDK = False
     except ImportError:
-        raise ImportError("কোনো Gemini SDK পাওয়া যায়নি! চালান: pip install google-genai")
+        raise ImportError("Gemini SDK পাওয়া যায়নি! pip install google-genai রান করুন।")
 
-# আরএসএস ফিড কনফিগারেশন (বাংলা ও ইংরেজি মিলিয়ে মোট ১২টি সংবাদ)
 RSS_FEEDS = [
     {
         "source": "প্রথম আলো",
@@ -37,9 +36,6 @@ RSS_FEEDS = [
 ]
 
 def get_api_key():
-    """
-    গিটহাব অ্যাকশনস এনভায়রনমেন্ট ভ্যারিয়েবল অথবা লোকাল config.py থেকে কি সংগ্রহ করে
-    """
     key = os.environ.get("GEMINI_API_KEY")
     if not key:
         try:
@@ -49,10 +45,41 @@ def get_api_key():
             pass
     return key
 
+def extract_image(entry):
+    """
+    বিভিন্ন আরএসএস ফিডের ট্যাগ বিশ্লেষণ করে খবরের মূল ব্যানার ছবি বের করে
+    """
+    # ১. media_content ট্যাগ চেক
+    if "media_content" in entry and entry.media_content:
+        for media in entry.media_content:
+            if "url" in media:
+                return media["url"]
+
+    # ২. media_thumbnail ট্যাগ চেক (যেমন: BBC)
+    if "media_thumbnail" in entry and entry.media_thumbnail:
+        for media in entry.media_thumbnail:
+            if "url" in media:
+                return media["url"]
+
+    # ৩. enclosures ট্যাগ চেক (যেমন: Daily Star)
+    if "enclosures" in entry and entry.enclosures:
+        for enc in entry.enclosures:
+            if enc.get("type", "").startswith("image") or "url" in enc:
+                return enc.get("url") or enc.get("href")
+
+    # ৪. summary বা description-এর ভেতরের <img> ট্যাগ থেকে খোঁজা
+    content_raw = entry.get("summary", "") + entry.get("description", "")
+    match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', content_raw)
+    if match:
+        return match.group(1)
+
+    return None
+
+def clean_html(raw_html):
+    """HTML ট্যাগ মুছে সাধারণ টেক্সট তৈরি করে"""
+    return re.sub(r'<[^>]+>', ' ', raw_html).strip()
+
 def call_gemini(api_key, prompt):
-    """
-    Gemini API কল করার জেনেরিক ফাংশন
-    """
     if USING_NEW_SDK:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
@@ -67,57 +94,56 @@ def call_gemini(api_key, prompt):
         return response.text.strip()
 
 def generate_summary(api_key, title, context_text, lang):
-    """
-    ভাষা অনুযায়ী ৩-পয়েন্ট সামারি তৈরি করার প্রম্পট হ্যান্ডলার
-    """
+    clean_context = clean_html(context_text)
+
     if lang == "en":
         prompt = f"""
-Summarize this news article for students into exactly 3 structured points in clean text:
+You are an expert news editor. Summarize the following news article for high school and college students into exactly 3 structured points.
+
+STRICT RULES:
+1. Write 100% in pure ENGLISH. Absolutely DO NOT translate to Bengali.
+2. Use the exact bullet format:
 **1. Core Concept:** (What happened in 1-2 clear sentences)
 **2. Background:** (Why it happened / key context)
-**3. Importance & Impact:** (Why readers or students should care)
+**3. Importance & Impact:** (Why readers/students should care)
+3. Do not include any introductory or concluding text.
 
-Rules:
-- Write strictly in simple, professional ENGLISH. Do NOT translate to Bengali.
-- Keep the exact bold headings: **1. Core Concept:**, **2. Background:**, **3. Importance & Impact:**
-- Do not write generic intros or pleasantries.
-
-Title: {title}
-Context: {context_text}
+Headline: {title}
+Context: {clean_context}
 """
     else:
         prompt = f"""
-এই সংবাদটি একজন শিক্ষার্থীর সহজে বোঝার জন্য নিচের ৩টি পয়েন্টে সংক্ষেপ করো:
+তুমি একজন দক্ষ সংবাদ সম্পাদক। শিক্ষার্থীদের সহজে বোঝার জন্য নিচের সংবাদটি ৩টি পয়েন্টে সংক্ষেপ করো।
+
+নিয়ম:
+১. সম্পূর্ণ উত্তরটি শুদ্ধ বাংলায় লিখবে। কোনো ইংরেজি অনুবাদ করবে না।
+২. হুবহু এই ফরম্যাটটি ব্যবহার করবে:
 **১. মূল ঘটনা বা Core Concept:** (সংক্ষিপ্ত ১-২ বাক্যে)
 **২. পেছনের কারণ বা ব্যাকগ্রাউন্ড:** (কেন ঘটনাটি ঘটল)
 **৩. এর প্রভাব বা গুরুত্ব:** (শিক্ষার্থীদের কেন এটি জানা জরুরি)
-
-নিয়ম:
-- সম্পূর্ণ উত্তরটি সহজ ও প্রাঞ্জল বাংলায় লিখবে। কোনো ভূমিকা বা উপসংহার লিখবে না।
-- হুবহু এই বোল্ড হেডিংগুলো ব্যবহার করবে: **১. মূল ঘটনা বা Core Concept:**, **২. পেছনের কারণ বা ব্যাকগ্রাউন্ড:**, **৩. এর প্রভাব বা গুরুত্ব:**।
+৩. কোনো ভূমিকা বা উপসংহার লিখবে না।
 
 শিরোনাম: {title}
-বিষয়বস্তু: {context_text}
+বিষয়বস্তু: {clean_context}
 """
 
     try:
         return call_gemini(api_key, prompt)
     except Exception as e:
         print(f"এআই সামারি তৈরিতে এরর: {e}")
-        return context_text[:180] + "..." if context_text else "বিস্তারিত তথ্য পাওয়া যায়নি।"
+        return clean_context[:180] + "..." if clean_context else "বিস্তারিত তথ্য পাওয়া যায়নি।"
 
 def main():
     api_key = get_api_key()
     if not api_key:
-        print("ত্রুটি: কোনো GEMINI_API_KEY পাওয়া যায়নি! GitHub Secrets বা config.py চেক করুন।")
+        print("ত্রুটি: GEMINI_API_KEY পাওয়া যায়নি!")
         return
 
     articles = []
-    print("সংবাদ সংগ্রহ ও সামারাইজেশন প্রক্রিয়া শুরু হচ্ছে...\n" + "=" * 50)
+    print("সংবাদ ও ছবি সংগ্রহের কাজ শুরু হচ্ছে...\n" + "=" * 50)
 
-    # ফিড থেকে সংবাদ রিড করা
     for feed_info in RSS_FEEDS:
-        print(f"\n[{feed_info['source']}] থেকে সংবাদ রিড করা হচ্ছে...")
+        print(f"\n[{feed_info['source']}] ফিড রিড করা হচ্ছে...")
         try:
             feed = feedparser.parse(feed_info["url"])
             selected_entries = feed.entries[:feed_info["limit"]]
@@ -126,18 +152,20 @@ def main():
                 title = entry.get("title", "No Title").strip()
                 link = entry.get("link", "#").strip()
                 summary_raw = entry.get("summary", entry.get("description", ""))
+                image_url = extract_image(entry)
 
-                print(f"-> প্রসেস করা হচ্ছে: {title}")
+                print(f"-> প্রসেস হচ্ছে: {title} (ছবি: {'হ্যাঁ' if image_url else 'না'})")
                 ai_brief = generate_summary(api_key, title, summary_raw, feed_info["lang"])
 
                 articles.append({
                     "source": feed_info["source"],
                     "title": title,
                     "link": link,
+                    "image": image_url,
                     "summary": ai_brief
                 })
         except Exception as err:
-            print(f"ফিড পার্স করতে সমস্যা ({feed_info['source']}): {err}")
+            print(f"ফিড পার্স এরর ({feed_info['source']}): {err}")
 
     # বাংলাদেশ সময় নির্ধারণ (UTC+6)
     bd_time = datetime.now(timezone(timedelta(hours=6)))
@@ -148,12 +176,11 @@ def main():
         "articles": articles
     }
 
-    # news.json ফাইলে সংরক্ষণ
     with open("news.json", "w", encoding="utf-8") as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
 
     print("\n" + "=" * 50)
-    print(f"সফলভাবে মোট {len(articles)}টি সংবাদ প্রসেস করে 'news.json' ফাইলে সেভ করা হয়েছে!")
+    print(f"মোট {len(articles)}টি খবর 'news.json' ফাইলে আপডেট সম্পন্ন!")
 
 if __name__ == "__main__":
     main()
