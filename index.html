@@ -6,7 +6,7 @@
   <title>Just Daily</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #07090e;
@@ -34,7 +34,7 @@
       width: 100%;
       max-width: 480px;
       min-height: 100vh;
-      padding: 20px 16px 40px 16px;
+      padding: 20px 16px 24px 16px;
       display: flex;
       flex-direction: column;
     }
@@ -92,6 +92,7 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
+      flex: 1;
     }
 
     .news-card {
@@ -135,6 +136,25 @@
       line-height: 1.45;
       color: var(--text-title);
     }
+
+    /* Developer Footer */
+    .app-footer {
+      margin-top: 36px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .app-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s ease;
+    }
+    .app-footer a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -152,6 +172,10 @@
     </header>
 
     <section class="news-list" id="news-list"></section>
+
+    <footer class="app-footer">
+      Developed by <a href="https://siyamulhaque.com" target="_blank" rel="noopener noreferrer">Siyamul Haque</a>
+    </footer>
   </main>
 
   <script>
@@ -160,7 +184,7 @@
       return str.toString().replace(/\d/g, d => bengaliDigits[d]);
     }
 
-    // টাইম ফরম্যাট: date-month-year(time )
+    // টাইম ফরম্যাট: date-month-year (time)
     function formatAppTime(rawStr) {
       if (!rawStr) return '';
       const parts = rawStr.split(' ');
@@ -169,7 +193,7 @@
         if (dateParts.length === 3) {
           const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
           const formattedTime = `${parts[1]} ${parts[2]}`;
-          return `${formattedDate}(${formattedTime} )`;
+          return `${formattedDate} (${formattedTime})`;
         }
       }
       return rawStr;
@@ -185,7 +209,6 @@
         data.articles.forEach((item, index) => {
           const card = document.createElement('a');
           card.className = 'news-card';
-          // আলাদা আর্টিকেলে যাওয়ার লিংক
           card.href = `article.html?id=${index}`;
 
           card.innerHTML = `
