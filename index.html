@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Student News Brief</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 20px;
+      color: #1e293b;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header {
+      margin-bottom: 25px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      color: #0f172a;
+    }
+    .update-badge {
+      font-size: 13px;
+      color: #64748b;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .source-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2563eb;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card h3 {
+      margin: 8px 0 12px 0;
+      font-size: 18px;
+    }
+    .card h3 a {
+      text-decoration: none;
+      color: #0f172a;
+    }
+    .card h3 a:hover {
+      color: #2563eb;
+    }
+    .summary-text {
+      white-space: pre-line;
+      line-height: 1.6;
+      font-size: 15px;
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>দৈনিক সংবাদ সংক্ষেপ (AI Powered)</h1>
+      <div id="update-time" class="update-badge">লোড হচ্ছে...</div>
+    </div>
+
+    <div id="news-cards"></div>
+  </div>
+
+  <script>
+    fetch('news.json')
+      .then(response => {
+        if (!response.ok) throw new Error("JSON ফাইল পাওয়া যায়নি");
+        return response.json();
+      })
+      .then(data => {
+        document.getElementById('update-time').innerText = "সর্বশেষ আপডেট: " + data.last_updated;
+        const container = document.getElementById('news-cards');
+        
+        data.articles.forEach(article => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <span class="source-tag">${article.source}</span>
+            <h3><a href="${article.link}" target="_blank" rel="noopener noreferrer">${article.title}</a></h3>
+            <div class="summary-text">${article.summary}</div>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading news:", err);
+        document.getElementById('update-time').innerText = "ডেটা লোড করতে সমস্যা হয়েছে।";
+      });
+  </script>
+
+</body>
+</html>
