@@ -2,103 +2,276 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Student News Brief</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Just Daily</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f8fafc;
+    :root {
+      --bg: #07090e;
+      --surface: #0f1523;
+      --surface-active: #151d30;
+      --border: #1a2337;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --text-title: #f1f5f9;
+      --text-body: #94a3b8;
+      --green: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
-      color: #1e293b;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
+
+    body {
+      font-family: 'Hind Siliguri', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-title);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
     }
-    .header {
-      margin-bottom: 25px;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 10px;
+
+    .app-viewport {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      padding: 20px 16px 40px 16px;
+      display: flex;
+      flex-direction: column;
     }
-    .header h1 {
-      margin: 0 0 8px 0;
+
+    /* Top Bar */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(7, 9, 14, 0.85);
+      backdrop-filter: blur(14px);
+      padding: 12px 0 16px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 24px;
-      color: #0f172a;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
     }
-    .update-badge {
-      font-size: 13px;
-      color: #64748b;
+    .brand span {
+      color: var(--accent);
     }
-    .card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    .live-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green);
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+    }
+    .sync-time {
+      font-size: 12px;
+      color: var(--text-body);
+      margin-top: 6px;
+    }
+
+    /* News Feed */
+    .news-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* News Accordion Card */
+    .news-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    }
+    .news-item:active {
+      transform: scale(0.985);
+    }
+    .news-item.expanded {
+      background: var(--surface-active);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+
+    .item-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
     }
     .source-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .toggle-icon {
+      margin-left: auto;
       font-size: 12px;
-      font-weight: 600;
-      color: #2563eb;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      color: var(--text-body);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .card h3 {
-      margin: 8px 0 12px 0;
+    .news-item.expanded .toggle-icon {
+      transform: rotate(180deg);
+      color: var(--accent);
+    }
+
+    .item-title {
       font-size: 18px;
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--text-title);
     }
-    .card h3 a {
-      text-decoration: none;
-      color: #0f172a;
+
+    /* Expandable Body */
+    .item-details {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .card h3 a:hover {
-      color: #2563eb;
+    .news-item.expanded .item-details {
+      display: block;
+      animation: expandContent 0.25s ease forwards;
     }
+
+    @keyframes expandContent {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .summary-text {
-      white-space: pre-line;
-      line-height: 1.6;
-      font-size: 15px;
-      color: #334155;
+      font-size: 14.5px;
+      line-height: 1.8;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+    .summary-text strong {
+      color: var(--accent);
+      font-weight: 600;
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 2px;
+    }
+
+    .source-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 11px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .source-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="header">
-      <h1>দৈনিক সংবাদ সংক্ষেপ (AI Powered)</h1>
-      <div id="update-time" class="update-badge">লোড হচ্ছে...</div>
-    </div>
+  <main class="app-viewport">
+    <header class="app-header">
+      <div class="header-row">
+        <div class="brand">Just <span>Daily</span></div>
+        <div class="live-status">
+          <div class="pulse-dot"></div>
+          <span>LIVE BRIEF</span>
+        </div>
+      </div>
+      <p class="sync-time" id="sync-time">সর্বশেষ সংবাদ লোড করা হচ্ছে...</p>
+    </header>
 
-    <div id="news-cards"></div>
-  </div>
+    <section class="news-stream" id="news-stream"></section>
+  </main>
 
   <script>
+    const bengaliNumbers = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+    function toBengali(str) {
+      return str.toString().replace(/\d/g, d => bengaliNumbers[d]);
+    }
+
+    // Markdown Bold (**) সরিয়ে ক্লিন HTML ট্যাগ তৈরি
+    function cleanMarkdown(text) {
+      if (!text) return '';
+      let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      return parsed.replace(/\n/g, '<br>');
+    }
+
     fetch('news.json')
-      .then(response => {
-        if (!response.ok) throw new Error("JSON ফাইল পাওয়া যায়নি");
-        return response.json();
-      })
+      .then(res => res.json())
       .then(data => {
-        document.getElementById('update-time').innerText = "সর্বশেষ আপডেট: " + data.last_updated;
-        const container = document.getElementById('news-cards');
-        
-        data.articles.forEach(article => {
-          const card = document.createElement('div');
-          card.className = 'card';
+        document.getElementById('sync-time').innerText = `সর্বশেষ আপডেট: ${data.last_updated}`;
+        const stream = document.getElementById('news-stream');
+        stream.innerHTML = '';
+
+        data.articles.forEach((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'news-item';
+          
           card.innerHTML = `
-            <span class="source-tag">${article.source}</span>
-            <h3><a href="${article.link}" target="_blank" rel="noopener noreferrer">${article.title}</a></h3>
-            <div class="summary-text">${article.summary}</div>
+            <div class="item-meta">
+              <span class="source-tag">${item.source} • #${toBengali(index + 1)}</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+            <h2 class="item-title">${item.title}</h2>
+            
+            <div class="item-details">
+              <div class="summary-text">${cleanMarkdown(item.summary)}</div>
+              <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="source-btn" onclick="event.stopPropagation()">
+                সরাসরি মূল সংবাদটি পড়ুন ↗
+              </a>
+            </div>
           `;
-          container.appendChild(card);
+
+          // টাইটেলে ট্যাপ করলে এক্সপ্যান্ড হবে
+          card.addEventListener('click', () => {
+            card.classList.toggle('expanded');
+          });
+
+          stream.appendChild(card);
         });
       })
       .catch(err => {
-        console.error("Error loading news:", err);
-        document.getElementById('update-time').innerText = "ডেটা লোড করতে সমস্যা হয়েছে।";
+        console.error(err);
+        document.getElementById('sync-time').innerText = "ডেটা লোড করতে সমস্যা হয়েছে।";
       });
   </script>
 
