@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Just Daily — খবর বিস্তারিত</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --surface: #0f1523;
+      --border: #1a2337;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.12);
+      --text-title: #f8fafc;
+      --text-body: #cbd5e1;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Hind Siliguri', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-title);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-screen {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px 16px 40px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Back Navigation */
+    .top-nav {
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      background: var(--accent-glow);
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Article Meta */
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .source-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .article-title {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    /* Analysis Box */
+    .details-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+    .summary-text {
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--text-body);
+    }
+    .summary-text strong {
+      display: block;
+      color: var(--accent);
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 14px;
+      margin-bottom: 4px;
+    }
+    .summary-text strong:first-child {
+      margin-top: 0;
+    }
+
+    .source-link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .source-link-btn:active {
+      background: rgba(56, 189, 248, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <main class="app-screen">
+    <nav class="top-nav">
+      <a href="index.html" class="back-btn">← ফিরে যান</a>
+    </nav>
+
+    <article id="article-content">
+      <div class="article-meta">
+        <span class="source-tag" id="source-name">লোড হচ্ছে...</span>
+      </div>
+      <h1 class="article-title" id="news-headline">শিরোনাম লোড হচ্ছে...</h1>
+
+      <div class="details-box">
+        <div class="summary-text" id="summary-body">বিশ্লেষণ লোড করা হচ্ছে...</div>
+      </div>
+
+      <a id="source-url" href="#" target="_blank" rel="noopener noreferrer" class="source-link-btn">
+        সরাসরি মূল সংবাদটি পড়ুন ↗
+      </a>
+    </article>
+  </main>
+
+  <script>
+    // Markdown-এর ** সরিয়ে বোল্ড ট্যাগে রূপান্তর
+    function parseContent(text) {
+      if (!text) return '';
+      let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      return formatted.replace(/\n/g, '<br>');
+    }
+
+    // URL থেকে আইডি নেওয়া
+    const params = new URLSearchParams(window.location.search);
+    const articleId = parseInt(params.get('id'), 10);
+
+    fetch('news.json')
+      .then(res => res.json())
+      .then(data => {
+        const article = data.articles[articleId];
+        if (article) {
+          document.getElementById('source-name').innerText = article.source;
+          document.getElementById('news-headline').innerText = article.title;
+          document.getElementById('summary-body').innerHTML = parseContent(article.summary);
+          document.getElementById('source-url').href = article.link;
+        } else {
+          document.getElementById('article-content').innerHTML = '<p>সংবাদটি পাওয়া যায়নি।</p>';
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('summary-body').innerText = 'তথ্য লোড করতে সমস্যা হয়েছে।';
+      });
+  </script>
+
+</body>
+</html>
