@@ -9,11 +9,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --palma-bg: #ece9e2;
-      --palma-card: #f9f8f5;
-      --ink-black: #0d0d0d;
-      --ink-subtle: #4a4a4a;
-      --ink-border: #1a1a1a;
+      --bg-paper: #eeebe4;
+      --card-paper: #f8f6f0;
+      --ink-black: #0f0f0f;
+      --ink-muted: #555555;
+      --ink-border: #181818;
     }
 
     * {
@@ -30,7 +30,7 @@
 
     body {
       font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--palma-bg);
+      background-color: var(--bg-paper);
       color: var(--ink-black);
       min-height: 100vh;
       display: flex;
@@ -58,7 +58,7 @@
       font-size: 13.5px;
       font-weight: 700;
       border: 1.5px solid var(--ink-border);
-      background: var(--palma-card);
+      background: var(--card-paper);
       padding: 5px 12px;
       border-radius: 6px;
       box-shadow: 1.5px 1.5px 0px var(--ink-border);
@@ -76,7 +76,7 @@
       padding: 2px 8px;
       border-radius: 4px;
       background: var(--ink-black);
-      color: var(--palma-bg) !important;
+      color: var(--bg-paper) !important;
       margin-bottom: 10px;
     }
 
@@ -88,7 +88,6 @@
       margin-bottom: 16px;
     }
 
-    /* Boox Palma 300 PPI E-Paper Photo Frame */
     .photo-frame {
       width: 100%;
       border: 1.5px solid var(--ink-border);
@@ -106,9 +105,8 @@
       filter: grayscale(100%) contrast(118%);
     }
 
-    /* Reader Document Card */
     .reader-card {
-      background: var(--palma-card);
+      background: var(--card-paper);
       border: 1.5px solid var(--ink-border);
       border-radius: 10px;
       padding: 18px 16px;
@@ -127,7 +125,7 @@
       font-weight: 700;
       margin-top: 14px;
       margin-bottom: 4px;
-      border-bottom: 1px dashed #b0ada6;
+      border-bottom: 1px dashed #b5b1a8;
       padding-bottom: 2px;
     }
     .summary-text strong:first-child { margin-top: 0; }
@@ -141,7 +139,7 @@
       padding: 12px;
       font-size: 14px;
       font-weight: 700;
-      color: var(--palma-bg) !important;
+      color: var(--bg-paper) !important;
       background: var(--ink-black);
       border: 1.5px solid var(--ink-border);
       border-radius: 6px;
@@ -158,7 +156,7 @@
       border-top: 1.5px solid var(--ink-border);
       text-align: center;
       font-size: 12.5px;
-      color: var(--ink-subtle);
+      color: var(--ink-muted);
     }
     .app-footer a {
       color: var(--ink-black) !important;
@@ -207,6 +205,13 @@
       return res.replace(/\n/g, '<br>');
     }
 
+    function extractPureText(str) {
+      if (!str) return '';
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(str, 'text/html');
+      return doc.body.textContent || doc.body.innerText || '';
+    }
+
     const params = new URLSearchParams(window.location.search);
     const articleId = parseInt(params.get('id'), 10);
 
@@ -216,7 +221,7 @@
         const item = data.articles[articleId];
         if (item) {
           document.getElementById('source-name').innerText = item.source;
-          document.getElementById('headline').innerText = item.title;
+          document.getElementById('headline').innerText = extractPureText(item.title);
           document.getElementById('summary-text').innerHTML = renderMarkdown(item.summary);
           document.getElementById('source-link').href = item.link;
 
