@@ -3,179 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Just Daily</title>
+  <title>Just Daily - Color E-Ink</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-paper: #eeebe4;       /* Boox Palma ম্যাট ই-ইঙ্ক স্ক্রিন */
-      --card-paper: #f8f6f0;     /* ক্লিন পেপার কার্ড */
-      --ink-black: #0f0f0f;      /* গাঢ় কালো কালি */
-      --ink-muted: #555555;      /* সেকেন্ডারি টেক্সট */
-      --ink-border: #181818;     /* ক্রিস্প শার্প বর্ডার */
+      /* Kaleido 3 Color E-Ink Palette */
+      --paper-bg: #f4f1ea;        /* Warm newsprint background */
+      --paper-card: #fcfaf5;      /* Slightly brighter card */
+      --ink-dark: #2c2c2c;        /* Pigment black */
+      --ink-border: #d4cfc5;      /* Soft page border */
+      --ink-accent: #6b8699;      /* Muted E-ink blue */
+      --ink-tag: #e8dbce;         /* Muted E-ink orange/sand */
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* ব্লু লিংক বা ডিফল্ট আন্ডারলাইন পুরোপুরি নিষিদ্ধ */
-    a, a:visited, a:hover, a:active {
-      color: inherit !important;
-      text-decoration: none !important;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    a, a:visited, a:hover, a:active { color: inherit !important; text-decoration: none !important; }
 
     body {
-      font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg-paper);
-      color: var(--ink-black);
+      font-family: 'Hind Siliguri', sans-serif;
+      background-color: var(--paper-bg);
+      color: var(--ink-dark);
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      -webkit-font-smoothing: antialiased;
     }
 
     .app-screen {
       width: 100%;
       max-width: 480px;
-      min-height: 100vh;
       padding: 22px 16px 30px 16px;
       display: flex;
       flex-direction: column;
     }
 
-    /* Minimalist E-Paper Header */
     .app-header {
       border-bottom: 2px solid var(--ink-border);
       padding-bottom: 12px;
       margin-bottom: 18px;
     }
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
     .brand {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 26px;
       font-weight: 800;
+      color: var(--ink-dark);
       letter-spacing: -0.5px;
-      color: var(--ink-black);
     }
     .status-meta {
       display: flex;
       justify-content: space-between;
       font-size: 12px;
-      color: var(--ink-muted);
-      margin-top: 8px;
+      color: #7a756d;
+      margin-top: 6px;
       font-weight: 600;
-      border-top: 1px dashed #c2beb5;
-      padding-top: 6px;
     }
 
-    /* Feed List */
-    .news-feed {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      flex: 1;
-    }
+    .news-feed { display: flex; flex-direction: column; gap: 14px; flex: 1; }
 
-    /* E-Ink Card */
     .news-card {
-      background: var(--card-paper);
-      border: 1.5px solid var(--ink-border);
-      border-radius: 10px;
-      padding: 15px 14px;
-      display: block;
-      box-shadow: 2px 2px 0px var(--ink-border);
+      background: var(--paper-card);
+      border: 1px solid var(--ink-border);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
       cursor: pointer;
-      transition: transform 0.08s ease;
     }
-    .news-card:active {
-      transform: translate(1px, 1px);
-      box-shadow: 1px 1px 0px var(--ink-border);
-      background: #e6e3dc;
-    }
+    .news-card:active { background: #f2efe9; }
 
     .card-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .source-tag {
       font-size: 11px;
       font-weight: 700;
-      border: 1px solid var(--ink-border);
-      padding: 1px 7px;
+      padding: 2px 8px;
       border-radius: 4px;
-      background: #e2ded5;
-      color: var(--ink-black);
+      background: var(--ink-tag);
+      color: #5c4a3d;
     }
-    .index-indicator {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--ink-muted);
-    }
+    .index-indicator { font-size: 12px; font-weight: 700; color: #9a9488; }
 
     .news-title {
-      font-size: 17.5px;
+      font-size: 18px;
       font-weight: 700;
-      line-height: 1.42;
-      color: var(--ink-black) !important;
+      line-height: 1.4;
+      color: var(--ink-dark) !important;
     }
 
     .app-footer {
       margin-top: 36px;
       padding-top: 16px;
-      border-top: 1.5px solid var(--ink-border);
+      border-top: 1px solid var(--ink-border);
       text-align: center;
-      font-size: 12.5px;
-      color: var(--ink-muted);
+      font-size: 13px;
+      color: #7a756d;
     }
-    .app-footer a {
-      color: var(--ink-black) !important;
-      text-decoration: underline !important;
-      font-weight: 700;
-    }
+    .app-footer a { color: var(--ink-accent) !important; font-weight: 700; }
   </style>
 </head>
 <body>
 
   <main class="app-screen">
     <header class="app-header">
-      <div class="header-top">
-        <h1 class="brand">Just Daily</h1>
-      </div>
+      <h1 class="brand">Just Daily</h1>
       <div class="status-meta">
         <span id="sync-time">আপডেট লোড হচ্ছে...</span>
-        <span>TWICE DAILY</span>
+        <span>COLOR E-INK</span>
       </div>
     </header>
 
     <section class="news-feed" id="news-feed"></section>
 
     <footer class="app-footer">
-      Developed by <a href="https://siyamulhaque.com" target="_blank" rel="noopener noreferrer">Siyamul Haque</a>
+      Developed by <a href="https://siyamulhaque.com" target="_blank">Siyamul Haque</a>
     </footer>
   </main>
 
   <script>
     const bnDigits = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
-    function toBn(num) {
-      return num.toString().replace(/\d/g, d => bnDigits[d]);
-    }
+    function toBn(num) { return num.toString().replace(/\d/g, d => bnDigits[d]); }
 
-    // টাইটেলের ভেতর যদি কোনো লুকানো <a> ট্যাগ বা HTML থাকে তা সম্পূর্ণ মুছে ফেলার ফিল্টার
     function extractPureText(str) {
       if (!str) return '';
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(str, 'text/html');
+      const doc = new DOMParser().parseFromString(str, 'text/html');
       return doc.body.textContent || doc.body.innerText || '';
     }
 
@@ -199,26 +154,17 @@
         data.articles.forEach((item, index) => {
           const card = document.createElement('a');
           card.className = 'news-card';
-          // নিশ্চিতভাবে ভেতরের article.html পেজে পাঠাবে
           card.href = `article.html?id=${index}`;
-
-          const cleanTitle = extractPureText(item.title);
-
           card.innerHTML = `
             <div class="card-top">
               <span class="source-tag">${item.source}</span>
               <span class="index-indicator">#${toBn(index + 1)} →</span>
             </div>
-            <h2 class="news-title">${cleanTitle}</h2>
+            <h2 class="news-title">${extractPureText(item.title)}</h2>
           `;
           feed.appendChild(card);
         });
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById('sync-time').innerText = "তথ্য লোড করা যায়নি।";
       });
   </script>
-
 </body>
 </html>
