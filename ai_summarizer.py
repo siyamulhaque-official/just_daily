@@ -8,7 +8,6 @@ import feedparser
 
 # DeepSeek API Configuration
 DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
-# স্ক্রিনশটের ডকুমেন্টেশন অনুযায়ী লেটেস্ট ফ্ল্যাশ মডেলটি ব্যবহার করা হলো
 DEEPSEEK_MODEL = "deepseek-flash" 
 
 RSS_FEEDS = [
@@ -43,27 +42,39 @@ def generate_summary_deepseek(api_key, title, context, lang):
     clean_title = clean_text(title)
 
     if lang == 'en':
-        system_prompt = "You are a professional journalistic editor summarizing public news for student readers."
+        system_prompt = "You are a professional journalistic editor providing clear, natural, and comprehensive news summaries."
         user_prompt = f"""
-Summarize this news article in exactly 3 structured points.
-**1. Core Concept:** (What happened in 1-2 concise sentences)
-**2. Background:** (Key context)
-**3. Importance & Impact:** (Why this matters)
+Summarize this news article so it is easily understandable.
+Do not force a specific length. Use exactly as much text and as many points as needed to properly explain the news. 
 
-Rules: Write strictly in pure ENGLISH. Never use Bengali. Do not add any introductory or concluding text.
+Structure the response naturally. You may include:
+- The core event (What happened)
+- Important background or details
+- The impact or why it matters
+
+Rules:
+- Write strictly in pure ENGLISH. Never use Bengali.
+- Use bold text (`**Heading:**`) for the key points so it looks visually structured.
+- Make it flow naturally based on the depth of the specific news article.
 
 Headline: {clean_title}
 Details: {clean_context}
 """
     else:
-        system_prompt = "তুমি একজন দক্ষ সংবাদ সম্পাদক। শিক্ষার্থীদের সহজে বোঝার জন্য সংবাদ সংক্ষেপ করো।"
+        system_prompt = "তুমি একজন দক্ষ সংবাদ সম্পাদক। তুমি পাঠকদের সহজে বোঝার জন্য ন্যাচারালভাবে সংবাদ সংক্ষেপ করো।"
         user_prompt = f"""
-নিচের সংবাদটি ৩টি পয়েন্টে সংক্ষেপ করো:
-**১. মূল ঘটনা বা Core Concept:** (১-২ বাক্যে)
-**২. পেছনের কারণ বা ব্যাকগ্রাউন্ড:** (কেন ঘটল)
-**৩. এর প্রভাব বা গুরুত্ব:** (কেন জানা জরুরি)
+নিচের সংবাদটি সাধারণ পাঠকদের সহজে বোঝার জন্য সংক্ষেপ করো।
+সংবাদটি পরিষ্কারভাবে বোঝাতে যতটুকু ব্যাখ্যা এবং যতগুলো পয়েন্ট দরকার, ঠিক ততটুকুই ব্যবহার করবে। কোনো নির্দিষ্ট লাইন বা পয়েন্টের বাধ্যবাধকতা নেই, খবরের গুরুত্ব অনুযায়ী স্বাভাবিকভাবে লিখবে।
 
-নিয়ম: সম্পূর্ণ উত্তর শুদ্ধ বাংলায় লিখবে। কোনো ভূমিকা বা উপসংহার লিখবে না।
+প্রয়োজন অনুযায়ী নিচের বিষয়গুলো কভার করবে:
+- মূল ঘটনা (কী ঘটেছে)
+- পেছনের কারণ বা বিস্তারিত তথ্য
+- এর প্রভাব বা গুরুত্ব
+
+নিয়ম:
+- সম্পূর্ণ উত্তর শুদ্ধ ও প্রাঞ্জল বাংলায় লিখবে। কোনো ইংরেজি ব্যবহার করবে না।
+- পয়েন্টগুলোর নাম অবশ্যই বোল্ড (`**পয়েন্টের নাম:**`) করে দেবে যাতে দেখতে সুন্দর লাগে।
+- কোনো অপ্রয়োজনীয় ভূমিকা বা উপসংহার লিখবে না।
 
 শিরোনাম: {clean_title}
 বিষয়বস্তু: {clean_context}
@@ -75,8 +86,8 @@ Details: {clean_context}
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        "temperature": 0.3, # কম টেম্পারেচার দিলে টু-দ্য-পয়েন্ট এবং নির্ভুল উত্তর পাওয়া যায়
-        "max_tokens": 800
+        "temperature": 0.3, # টেম্পারেচার আবার কমানো হয়েছে যাতে অতিরিক্ত কথা না বলে একদম টু-দ্য-পয়েন্ট থাকে
+        "max_tokens": 1000
     }
 
     req = urllib.request.Request(
@@ -94,7 +105,7 @@ Details: {clean_context}
             return result['choices'][0]['message']['content'].strip()
     except Exception as e:
         print(f"DeepSeek API Error ({clean_title[:15]}): {e}")
-        return clean_context[:200] + "..." if clean_context else "বিস্তারিত তথ্য মূল লিংকে উপলব্ধ।"
+        return clean_context[:300] + "..." if clean_context else "বিস্তারিত তথ্য মূল লিংকে উপলব্ধ।"
 
 def main():
     api_key = os.environ.get("DEEPSEEK_API_KEY")
@@ -103,7 +114,7 @@ def main():
         return
 
     articles = []
-    print("DeepSeek-এর মাধ্যমে সংবাদ সংগ্রহ ও সামারি শুরু হচ্ছে...\n" + "=" * 50)
+    print("DeepSeek-এর মাধ্যমে সংবাদ সংগ্রহ ও ন্যাচারাল সামারি শুরু হচ্ছে...\n" + "=" * 50)
 
     for feed_info in RSS_FEEDS:
         try:
