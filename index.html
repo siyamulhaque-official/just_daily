@@ -3,157 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Just Daily</title>
+  <title>Just Daily — E-Paper Edition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Hind+Siliguri:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07090e;
-      --surface: #0f1523;
-      --border: #1a2337;
-      --accent: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.12);
-      --text-title: #f8fafc;
-      --text-muted: #94a3b8;
-      --green: #10b981;
+      --paper: #f6f4ee;       /* কিন্ডলের ক্লাসিক ম্যাট পেপার ব্যাকগ্রাউন্ড */
+      --paper-card: #ffffff;  /* কার্ডের পিওর পেপার কালার */
+      --ink: #111111;        /* গাঢ় ব্ল্যাক ইঙ্ক */
+      --ink-muted: #555555;  /* হালকা কালি */
+      --ink-border: #222222; /* ক্রিস্প ই-ইঙ্ক বর্ডার */
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     body {
-      font-family: 'Hind Siliguri', sans-serif;
-      background-color: var(--bg);
-      color: var(--text-title);
+      font-family: 'Hind Siliguri', 'Newsreader', serif;
+      background-color: var(--paper);
+      color: var(--ink);
       min-height: 100vh;
       display: flex;
       justify-content: center;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
     }
 
     .app-screen {
       width: 100%;
       max-width: 480px;
       min-height: 100vh;
-      padding: 20px 16px 24px 16px;
+      padding: 24px 18px 30px 18px;
       display: flex;
       flex-direction: column;
     }
 
+    /* E-Ink Newspaper Header */
     .app-header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: rgba(7, 9, 14, 0.88);
-      backdrop-filter: blur(14px);
-      padding: 12px 0 16px 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 2px solid var(--ink-border);
+      padding-bottom: 12px;
       margin-bottom: 20px;
     }
-    .header-row {
+    .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .brand {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Cinzel', serif;
       font-size: 26px;
       font-weight: 700;
-      letter-spacing: -0.5px;
-      color: #fff;
+      letter-spacing: 1px;
+      color: var(--ink);
+      text-transform: uppercase;
     }
-    .brand span { color: var(--accent); }
-    .live-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      padding: 4px 10px;
-      border-radius: 99px;
+    .eink-pill {
+      font-family: 'Hind Siliguri', sans-serif;
       font-size: 11px;
-      font-weight: 600;
-      color: var(--green);
+      font-weight: 700;
+      border: 1.5px solid var(--ink);
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--ink);
+      color: var(--paper);
+      letter-spacing: 0.5px;
     }
-    .pulse-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--green);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--green);
-    }
-    .sync-time {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 6px;
+    .sync-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      margin-top: 8px;
       font-weight: 500;
+      border-top: 1px solid #dedede;
+      padding-top: 6px;
     }
 
-    .news-list {
+    /* News Feed Stream */
+    .news-feed {
       display: flex;
       flex-direction: column;
       gap: 14px;
       flex: 1;
     }
 
+    /* Tactile Paper Card */
     .news-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px 16px;
+      background: var(--paper-card);
+      border: 1.5px solid var(--ink-border);
+      border-radius: 8px;
+      padding: 16px 14px;
       text-decoration: none;
+      color: inherit;
       display: block;
-      transition: all 0.2s ease;
+      box-shadow: 2px 2px 0px var(--ink-border); /* ক্লাসিক ফ্ল্যাট ই-ইঙ্ক ড্রপ শ্যাডো */
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
     .news-card:active {
-      transform: scale(0.98);
-      border-color: var(--accent);
-      background: #141c30;
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0px var(--ink-border);
+      background: #f0eee6;
     }
 
     .card-meta {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .source-tag {
       font-size: 11px;
       font-weight: 700;
-      color: var(--accent);
-      background: var(--accent-glow);
-      padding: 2px 8px;
-      border-radius: 6px;
+      text-transform: uppercase;
+      border: 1px solid var(--ink-border);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--ink);
+      background: var(--paper);
     }
-    .arrow-indicator {
-      margin-left: auto;
-      font-size: 14px;
-      color: var(--text-muted);
+    .index-num {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
     }
 
     .news-title {
-      font-size: 18px;
+      font-size: 17.5px;
       font-weight: 700;
       line-height: 1.45;
-      color: var(--text-title);
+      color: var(--ink);
     }
 
-    /* Developer Footer */
+    /* Footer */
     .app-footer {
       margin-top: 36px;
-      padding-top: 18px;
-      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      border-top: 1.5px solid var(--ink-border);
       text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
+      font-size: 12.5px;
+      color: var(--ink-muted);
     }
     .app-footer a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-      transition: opacity 0.2s ease;
-    }
-    .app-footer a:hover {
+      color: var(--ink);
       text-decoration: underline;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -161,17 +159,17 @@
 
   <main class="app-screen">
     <header class="app-header">
-      <div class="header-row">
-        <div class="brand">Just <span>Daily</span></div>
-        <div class="live-tag">
-          <div class="pulse-dot"></div>
-          <span>LIVE BRIEF</span>
-        </div>
+      <div class="header-top">
+        <h1 class="brand">Just Daily</h1>
+        <span class="eink-pill">E-PAPER</span>
       </div>
-      <p class="sync-time" id="sync-time">সর্বশেষ সংবাদ লোড করা হচ্ছে...</p>
+      <div class="sync-meta">
+        <span id="sync-time">আপডেট লোড হচ্ছে...</span>
+        <span>TWICE DAILY</span>
+      </div>
     </header>
 
-    <section class="news-list" id="news-list"></section>
+    <section class="news-feed" id="news-feed"></section>
 
     <footer class="app-footer">
       Developed by <a href="https://siyamulhaque.com" target="_blank" rel="noopener noreferrer">Siyamul Haque</a>
@@ -184,27 +182,25 @@
       return str.toString().replace(/\d/g, d => bengaliDigits[d]);
     }
 
-    // টাইম ফরম্যাট: date-month-year (time)
+    // টাইম ফরম্যাট: DD-MM-YYYY (HH:MM AM/PM)
     function formatAppTime(rawStr) {
       if (!rawStr) return '';
       const parts = rawStr.split(' ');
       if (parts.length >= 3) {
         const dateParts = parts[0].split('-');
         if (dateParts.length === 3) {
-          const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-          const formattedTime = `${parts[1]} ${parts[2]}`;
-          return `${formattedDate} (${formattedTime})`;
+          return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]} (${parts[1]} ${parts[2]})`;
         }
       }
       return rawStr;
     }
 
-    fetch('news.json')
+    fetch('news.json?t=' + new Date().getTime(), { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
-        document.getElementById('sync-time').innerText = `সর্বশেষ আপডেট: ${formatAppTime(data.last_updated)}`;
-        const list = document.getElementById('news-list');
-        list.innerHTML = '';
+        document.getElementById('sync-time').innerText = `তারিখ: ${formatAppTime(data.last_updated)}`;
+        const container = document.getElementById('news-feed');
+        container.innerHTML = '';
 
         data.articles.forEach((item, index) => {
           const card = document.createElement('a');
@@ -213,17 +209,17 @@
 
           card.innerHTML = `
             <div class="card-meta">
-              <span class="source-tag">${item.source} • #${toBengali(index + 1)}</span>
-              <span class="arrow-indicator">→</span>
+              <span class="source-tag">${item.source}</span>
+              <span class="index-num">#${toBengali(index + 1)} →</span>
             </div>
             <h2 class="news-title">${item.title}</h2>
           `;
-          list.appendChild(card);
+          container.appendChild(card);
         });
       })
       .catch(err => {
         console.error(err);
-        document.getElementById('sync-time').innerText = "খবর লোড করা সম্ভব হয়নি।";
+        document.getElementById('sync-time').innerText = "তথ্য লোড করা যায়নি।";
       });
   </script>
 
