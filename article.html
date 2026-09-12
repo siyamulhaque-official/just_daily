@@ -6,14 +6,14 @@
   <title>Just Daily — Reader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --paper: #f6f4ee;
-      --paper-card: #ffffff;
-      --ink: #111111;
-      --ink-muted: #555555;
-      --ink-border: #222222;
+      --palma-bg: #ece9e2;
+      --palma-card: #f9f8f5;
+      --ink-black: #0d0d0d;
+      --ink-subtle: #4a4a4a;
+      --ink-border: #1a1a1a;
     }
 
     * {
@@ -23,10 +23,15 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    a, a:visited, a:hover, a:active {
+      color: inherit !important;
+      text-decoration: none !important;
+    }
+
     body {
-      font-family: 'Hind Siliguri', 'Newsreader', serif;
-      background-color: var(--paper);
-      color: var(--ink);
+      font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--palma-bg);
+      color: var(--ink-black);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -37,29 +42,23 @@
       width: 100%;
       max-width: 480px;
       min-height: 100vh;
-      padding: 22px 18px 30px 18px;
+      padding: 20px 16px 30px 16px;
       display: flex;
       flex-direction: column;
     }
 
-    .content-area {
-      flex: 1;
-    }
+    .content-area { flex: 1; }
 
-    /* Top Action Bar */
-    .top-nav {
-      margin-bottom: 16px;
-    }
+    .top-nav { margin-bottom: 16px; }
     .back-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      color: var(--ink);
-      text-decoration: none;
+      color: var(--ink-black) !important;
       font-size: 13.5px;
       font-weight: 700;
       border: 1.5px solid var(--ink-border);
-      background: var(--paper-card);
+      background: var(--palma-card);
       padding: 5px 12px;
       border-radius: 6px;
       box-shadow: 1.5px 1.5px 0px var(--ink-border);
@@ -74,10 +73,10 @@
       font-size: 11px;
       font-weight: 700;
       border: 1px solid var(--ink-border);
-      padding: 2px 7px;
-      border-radius: 3px;
-      background: var(--ink);
-      color: var(--paper);
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--ink-black);
+      color: var(--palma-bg) !important;
       margin-bottom: 10px;
     }
 
@@ -85,58 +84,55 @@
       font-size: 21px;
       font-weight: 700;
       line-height: 1.4;
-      color: var(--ink);
+      color: var(--ink-black);
       margin-bottom: 16px;
     }
 
-    /* E-Ink Newspaper Photo Frame (Grayscale + High Contrast) */
-    .eink-image-box {
+    /* Boox Palma 300 PPI E-Paper Photo Frame */
+    .photo-frame {
       width: 100%;
       border: 1.5px solid var(--ink-border);
-      background: #000;
-      border-radius: 6px;
+      background: #222;
+      border-radius: 8px;
       overflow: hidden;
-      margin-bottom: 20px;
-      display: none; /* ছবি পাওয়া গেলে JS অন করবে */
+      margin-bottom: 18px;
+      display: none;
     }
-    .eink-image-box img {
+    .photo-frame img {
       width: 100%;
-      max-height: 230px;
+      max-height: 240px;
       object-fit: cover;
       display: block;
-      filter: grayscale(100%) contrast(120%); /* সত্যিকারের খবরের কাগজের সাদাকালো ছবি */
+      filter: grayscale(100%) contrast(118%);
     }
 
-    /* Structured Summary (Book/Paper Reader Style) */
-    .summary-card {
-      background: var(--paper-card);
+    /* Reader Document Card */
+    .reader-card {
+      background: var(--palma-card);
       border: 1.5px solid var(--ink-border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 18px 16px;
       box-shadow: 2px 2px 0px var(--ink-border);
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
-    .summary-body {
+    .summary-text {
       font-size: 15px;
       line-height: 1.85;
-      color: var(--ink);
+      color: var(--ink-black);
     }
-    .summary-body strong {
+    .summary-text strong {
       display: block;
-      color: var(--ink);
+      color: var(--ink-black);
       font-size: 15.5px;
       font-weight: 700;
       margin-top: 14px;
       margin-bottom: 4px;
-      border-bottom: 1px dashed #bbb;
+      border-bottom: 1px dashed #b0ada6;
       padding-bottom: 2px;
     }
-    .summary-body strong:first-child {
-      margin-top: 0;
-    }
+    .summary-text strong:first-child { margin-top: 0; }
 
-    /* Solid Ink Action Button */
-    .source-btn {
+    .action-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -145,16 +141,15 @@
       padding: 12px;
       font-size: 14px;
       font-weight: 700;
-      text-decoration: none;
-      color: var(--paper);
-      background: var(--ink);
+      color: var(--palma-bg) !important;
+      background: var(--ink-black);
       border: 1.5px solid var(--ink-border);
       border-radius: 6px;
       box-shadow: 2px 2px 0px var(--ink-border);
     }
-    .source-btn:active {
+    .action-btn:active {
       transform: translate(1px, 1px);
-      box-shadow: 1px 1px 0px;
+      box-shadow: 0px 0px 0px;
     }
 
     .app-footer {
@@ -163,11 +158,11 @@
       border-top: 1.5px solid var(--ink-border);
       text-align: center;
       font-size: 12.5px;
-      color: var(--ink-muted);
+      color: var(--ink-subtle);
     }
     .app-footer a {
-      color: var(--ink);
-      text-decoration: underline;
+      color: var(--ink-black) !important;
+      text-decoration: underline !important;
       font-weight: 700;
     }
   </style>
@@ -180,22 +175,21 @@
         <a href="index.html" class="back-btn">← ফিরে যান</a>
       </nav>
 
-      <article id="article-view">
+      <article id="article-root">
         <div>
-          <span class="source-label" id="source-name">সংবাদপত্র</span>
+          <span class="source-label" id="source-name">সংবাদ</span>
         </div>
         <h1 class="headline" id="headline">শিরোনাম লোড হচ্ছে...</h1>
 
-        <!-- E-Ink গ্রে-স্কেল ইমেজ ব্যানার -->
-        <div class="eink-image-box" id="image-box">
-          <img id="article-img" src="" alt="Photo">
+        <div class="photo-frame" id="photo-frame">
+          <img id="article-img" src="" alt="News Image">
         </div>
 
-        <div class="summary-card">
-          <div class="summary-body" id="summary-body">বিশ্লেষণ প্রস্তুত করা হচ্ছে...</div>
+        <div class="reader-card">
+          <div class="summary-text" id="summary-text">বিশ্লেষণ প্রস্তুত হচ্ছে...</div>
         </div>
 
-        <a id="source-link" href="#" target="_blank" rel="noopener noreferrer" class="source-btn">
+        <a id="source-link" href="#" target="_blank" rel="noopener noreferrer" class="action-btn">
           মূল সংবাদপত্রে পড়ুন ↗
         </a>
       </article>
@@ -207,9 +201,9 @@
   </main>
 
   <script>
-    function formatMarkdown(text) {
-      if (!text) return '';
-      let res = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    function renderMarkdown(txt) {
+      if (!txt) return '';
+      let res = txt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       return res.replace(/\n/g, '<br>');
     }
 
@@ -223,23 +217,23 @@
         if (item) {
           document.getElementById('source-name').innerText = item.source;
           document.getElementById('headline').innerText = item.title;
-          document.getElementById('summary-body').innerHTML = formatMarkdown(item.summary);
+          document.getElementById('summary-text').innerHTML = renderMarkdown(item.summary);
           document.getElementById('source-link').href = item.link;
 
           if (item.image) {
-            const box = document.getElementById('image-box');
+            const frame = document.getElementById('photo-frame');
             const img = document.getElementById('article-img');
             img.src = item.image;
-            box.style.display = 'block';
-            img.onerror = () => { box.style.display = 'none'; };
+            frame.style.display = 'block';
+            img.onerror = () => { frame.style.display = 'none'; };
           }
         } else {
-          document.getElementById('article-view').innerHTML = '<p style="text-align:center;">সংবাদটি পাওয়া যায়নি।</p>';
+          document.getElementById('article-root').innerHTML = '<p style="text-align:center;">সংবাদটি পাওয়া যায়নি।</p>';
         }
       })
       .catch(err => {
         console.error(err);
-        document.getElementById('summary-body').innerText = 'তথ্য লোড করতে সমস্যা হয়েছে।';
+        document.getElementById('summary-text').innerText = 'তথ্য লোড করতে সমস্যা হয়েছে।';
       });
   </script>
 
