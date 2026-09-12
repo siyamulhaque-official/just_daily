@@ -2,19 +2,14 @@ import os
 import json
 import re
 import html
+import urllib.request
 from datetime import datetime, timezone, timedelta
 import feedparser
 
-try:
-    from google import genai
-    from google.genai import types
-    USING_NEW_SDK = True
-except ImportError:
-    try:
-        import google.generativeai as genai
-        USING_NEW_SDK = False
-    except ImportError:
-        raise ImportError("Gemini SDK পাওয়া যায়নি! pip install google-genai রান করুন।")
+# DeepSeek API Configuration
+DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
+# স্ক্রিনশটের ডকুমেন্টেশন অনুযায়ী লেটেস্ট ফ্ল্যাশ মডেলটি ব্যবহার করা হলো
+DEEPSEEK_MODEL = "deepseek-flash" 
 
 RSS_FEEDS = [
     {"source": "প্রথম আলো", "url": "https://www.prothomalo.com/feed", "lang": "bn", "limit": 4},
@@ -43,64 +38,72 @@ def extract_image(entry):
     if match: return match.group(1)
     return None
 
-def generate_summary(api_key, title, context, lang):
+def generate_summary_deepseek(api_key, title, context, lang):
     clean_context = clean_text(context)
     clean_title = clean_text(title)
 
-    prompt = f"""
+    if lang == 'en':
+        system_prompt = "You are a professional journalistic editor summarizing public news for student readers."
+        user_prompt = f"""
 Summarize this news article in exactly 3 structured points.
 **1. Core Concept:** (What happened in 1-2 concise sentences)
 **2. Background:** (Key context)
 **3. Importance & Impact:** (Why this matters)
 
-Rules: Write strictly in pure {'ENGLISH. Never use Bengali.' if lang == 'en' else 'BENGALI. Never use English.'}
-Title: {clean_title}
+Rules: Write strictly in pure ENGLISH. Never use Bengali. Do not add any introductory or concluding text.
+
+Headline: {clean_title}
 Details: {clean_context}
-""" if lang == 'en' else f"""
-শিক্ষার্থীদের সহজে বোঝার জন্য নিচের সংবাদটি ৩টি পয়েন্টে সংক্ষেপ করো:
+"""
+    else:
+        system_prompt = "তুমি একজন দক্ষ সংবাদ সম্পাদক। শিক্ষার্থীদের সহজে বোঝার জন্য সংবাদ সংক্ষেপ করো।"
+        user_prompt = f"""
+নিচের সংবাদটি ৩টি পয়েন্টে সংক্ষেপ করো:
 **১. মূল ঘটনা বা Core Concept:** (১-২ বাক্যে)
 **২. পেছনের কারণ বা ব্যাকগ্রাউন্ড:** (কেন ঘটল)
 **৩. এর প্রভাব বা গুরুত্ব:** (কেন জানা জরুরি)
 
-নিয়ম: সম্পূর্ণ উত্তর শুদ্ধ বাংলায় লিখবে। কোনো ভূমিকা লিখবে না।
+নিয়ম: সম্পূর্ণ উত্তর শুদ্ধ বাংলায় লিখবে। কোনো ভূমিকা বা উপসংহার লিখবে না।
+
 শিরোনাম: {clean_title}
 বিষয়বস্তু: {clean_context}
 """
 
+    data = {
+        "model": DEEPSEEK_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "temperature": 0.3, # কম টেম্পারেচার দিলে টু-দ্য-পয়েন্ট এবং নির্ভুল উত্তর পাওয়া যায়
+        "max_tokens": 800
+    }
+
+    req = urllib.request.Request(
+        DEEPSEEK_API_URL,
+        data=json.dumps(data).encode('utf-8'),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+    )
+
     try:
-        if USING_NEW_SDK:
-            client = genai.Client(api_key=api_key)
-            config = types.GenerateContentConfig(
-                safety_settings=[
-                    types.SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="BLOCK_NONE"),
-                    types.SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="BLOCK_NONE"),
-                    types.SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="BLOCK_NONE"),
-                    types.SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="BLOCK_NONE")
-                ]
-            )
-            res = client.models.generate_content(model='gemini-2.5-flash', contents=prompt, config=config)
-            return res.text.strip()
-        else:
-            genai.configure(api_key=api_key)
-            safety = [
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"}
-            ]
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            res = model.generate_content(prompt, safety_settings=safety)
-            return res.text.strip()
+        with urllib.request.urlopen(req) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            return result['choices'][0]['message']['content'].strip()
     except Exception as e:
-        print(f"API Error ({clean_title[:15]}): {e}")
+        print(f"DeepSeek API Error ({clean_title[:15]}): {e}")
         return clean_context[:200] + "..." if clean_context else "বিস্তারিত তথ্য মূল লিংকে উপলব্ধ।"
 
 def main():
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key: return
+    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    if not api_key: 
+        print("ত্রুটি: DEEPSEEK_API_KEY পাওয়া যায়নি! GitHub Secrets চেক করুন।")
+        return
 
     articles = []
-    print("সংবাদ সংগ্রহ শুরু হচ্ছে...\n" + "=" * 50)
+    print("DeepSeek-এর মাধ্যমে সংবাদ সংগ্রহ ও সামারি শুরু হচ্ছে...\n" + "=" * 50)
 
     for feed_info in RSS_FEEDS:
         try:
@@ -112,7 +115,7 @@ def main():
                 image_url = extract_image(entry)
 
                 print(f"-> প্রসেসিং: {clean_title[:30]}...")
-                ai_brief = generate_summary(api_key, clean_title, summary_raw, feed_info["lang"])
+                ai_brief = generate_summary_deepseek(api_key, clean_title, summary_raw, feed_info["lang"])
 
                 articles.append({
                     "source": feed_info["source"],
