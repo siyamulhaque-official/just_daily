@@ -2,8 +2,8 @@ name: Auto Update News Twice Daily
 
 on:
   schedule:
-    # 02:00 UTC = বাংলাদেশ সময় সকাল ৮:০০ টা
-    # 11:00 UTC = বাংলাদেশ সময় বিকাল ৫:০০ টা
+    # 02:00 UTC = বাংলাদেশ সময় সকাল 8:00 AM
+    # 11:00 UTC = বাংলাদেশ সময় বিকাল 5:00 PM
     - cron: '0 2,11 * * *'
   workflow_dispatch: # ম্যানুয়ালি রান করার বাটন
 
@@ -21,7 +21,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install feedparser google-genai
+          pip install feedparser beautifulsoup4 requests
 
       - name: Run News Summarizer
         env:
@@ -33,5 +33,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add news.json
-          git commit -m "Auto update daily news [skip ci]" || exit 0
+          git commit -m "Auto update daily news with full text [skip ci]" || exit 0
           git push
