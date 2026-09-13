@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Just Daily — Article</title>
+<title>Just Daily</title>
+<meta name="description" content="A quiet, paper-toned reader for the day's stories.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --paper-bg: #ece9e2;
@@ -15,7 +16,6 @@
     --ink-subtle: #4a4a4a;
     --ink-border: #1a1a1a;
     --ink-faint: #c9c5ba;
-    --highlight-tone: #ded7ad;
   }
 
   * { box-sizing: border-box; }
@@ -34,6 +34,7 @@
   img {
     display: block;
     max-width: 100%;
+    /* "Kaleido"-style e-paper image treatment */
     filter: saturate(40%) contrast(120%) sepia(20%);
   }
 
@@ -42,476 +43,311 @@
     color: var(--paper-card);
   }
 
+  /* ---------- Header ---------- */
+
   header {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 10;
     background: var(--paper-bg);
     border-bottom: 1px solid var(--ink-border);
-    padding: 16px 20px;
+    padding: 18px 20px 0;
   }
 
-  .back-link {
-    max-width: 680px;
+  .header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    max-width: 920px;
     margin: 0 auto;
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--ink-subtle);
   }
+
+  .wordmark {
+    font-weight: 800;
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+  }
+
+  .wordmark::after {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--ink-black);
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .updated-at {
+    font-size: 0.78rem;
+    color: var(--ink-subtle);
+    white-space: nowrap;
+  }
+
+  nav.filters {
+    max-width: 920px;
+    margin: 14px auto 0;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+  }
+  nav.filters::-webkit-scrollbar { display: none; }
+
+  .filter-pill {
+    flex: 0 0 auto;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border: 1px solid var(--ink-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-black);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .filter-pill.active {
+    background: var(--ink-black);
+    color: var(--paper-card);
+  }
+
+  /* ---------- Feed layout ---------- */
 
   main {
-    max-width: 680px;
+    max-width: 920px;
     margin: 0 auto;
-    padding: 32px 20px 80px;
+    padding: 28px 20px 60px;
+  }
+
+  .status-line {
+    color: var(--ink-subtle);
+    font-size: 0.9rem;
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  .feed-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  @media (min-width: 720px) {
+    .feed-grid { grid-template-columns: repeat(2, 1fr); }
+    .feed-grid > .card.lead { grid-column: 1 / -1; }
+  }
+
+  .card {
+    background: var(--paper-card);
+    border: 1px solid var(--ink-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .card .thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--ink-faint);
+    border-bottom: 1px solid var(--ink-border);
+  }
+
+  .card.lead .thumb { aspect-ratio: 21 / 9; }
+
+  .card-body {
+    padding: 16px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
   }
 
   .meta-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     color: var(--ink-subtle);
-    margin-bottom: 14px;
   }
 
-  .meta-row .category { font-weight: 600; color: var(--ink-black); }
+  .meta-row .category {
+    font-weight: 600;
+    color: var(--ink-black);
+  }
 
   .meta-row .dot {
     width: 3px;
     height: 3px;
     border-radius: 50%;
     background: var(--ink-subtle);
-  }
-
-  h1.headline {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 800;
-    font-size: 1.85rem;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-    margin: 0 0 22px;
-  }
-
-  .lead-image {
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    object-fit: cover;
-    border: 1px solid var(--ink-border);
-    margin-bottom: 28px;
-  }
-
-  #articleBody {
-    font-family: 'Merriweather', serif;
-    font-size: 1.05rem;
-    line-height: 1.85;
-    color: var(--ink-black);
-  }
-
-  #articleBody p {
-    margin: 0 0 1.3em;
-  }
-
-  #articleBody p:last-child { margin-bottom: 0; }
-
-  .highlighted-text {
-    background: var(--highlight-tone);
-    padding: 0.05em 0.1em;
-    border-radius: 2px;
-  }
-
-  .summary-box {
-    margin: 44px 0 24px;
-    background: var(--paper-card);
-    border: 1px solid var(--ink-border);
-    padding: 20px 22px;
-  }
-
-  .summary-box .label {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: var(--ink-subtle);
-    margin-bottom: 10px;
-  }
-
-  .summary-box p {
-    font-family: 'Merriweather', serif;
-    font-size: 0.98rem;
-    line-height: 1.75;
-    margin: 0;
-  }
-
-  .original-link {
-    display: inline-block;
-    width: 100%;
-    text-align: center;
-    padding: 13px 20px;
-    border: 1px solid var(--ink-border);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    font-size: 0.92rem;
-    background: var(--ink-black);
-    color: var(--paper-card);
-  }
-
-  .status-line {
-    color: var(--ink-subtle);
-    font-size: 0.9rem;
-    padding: 60px 0;
-    text-align: center;
-  }
-
-  /* ---------- Selection popup ---------- */
-
-  #selectionMenu {
-    display: none;
-    position: absolute;
-    transform: translate(-50%, -100%);
-    align-items: center;
-    gap: 6px;
-    background: var(--ink-black);
-    color: var(--paper-card);
-    border: 1px solid var(--ink-black);
-    padding: 8px 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    z-index: 50;
-  }
-
-  #selectionMenu:active { opacity: 0.85; }
-
-  /* ---------- Bottom sheet ---------- */
-
-  #sheetBackdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 10, 10, 0.25);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-    z-index: 60;
-  }
-
-  #sheetBackdrop.open {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  #bottomSheet {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--paper-card);
-    border-top: 1px solid var(--ink-border);
-    padding: 18px 22px calc(24px + env(safe-area-inset-bottom));
-    transform: translateY(100%);
-    transition: transform 0.28s ease;
-    z-index: 70;
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-
-  #bottomSheet.open { transform: translateY(0); }
-
-  .sheet-handle {
-    width: 36px;
-    height: 4px;
-    background: var(--ink-faint);
-    border-radius: 2px;
-    margin: 0 auto 16px;
-  }
-
-  .sheet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  #sheetSelectedText {
-    font-family: 'Merriweather', serif;
-    font-style: italic;
-    font-size: 0.95rem;
-    color: var(--ink-subtle);
-  }
-
-  #sheetClose {
     flex: 0 0 auto;
-    background: none;
-    border: 1px solid var(--ink-border);
-    width: 28px;
-    height: 28px;
-    font-size: 0.9rem;
-    line-height: 1;
-    cursor: pointer;
-    color: var(--ink-black);
   }
 
-  #sheetResult {
+  .card h2 {
+    margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.95rem;
-    line-height: 1.8;
-    color: var(--ink-black);
+    font-weight: 700;
+    line-height: 1.28;
+    font-size: 1.05rem;
   }
 
-  #sheetResult strong { font-weight: 700; }
+  .card.lead h2 { font-size: 1.55rem; }
 
-  .sheet-loading { color: var(--ink-subtle); font-style: italic; }
+  .card p.snippet {
+    margin: 2px 0 0;
+    font-family: 'Merriweather', serif;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ink-subtle);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card.lead p.snippet { -webkit-line-clamp: 2; font-size: 0.95rem; }
+
+  footer {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 20px 20px 50px;
+    color: var(--ink-subtle);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--ink-faint);
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <a class="back-link" href="index.html">&larr; Just Daily</a>
+  <div class="header-row">
+    <span class="wordmark">Just Daily</span>
+    <span class="updated-at" id="updatedAt"></span>
+  </div>
+  <nav class="filters" id="filters">
+    <button class="filter-pill active" data-category="All">All</button>
+    <button class="filter-pill" data-category="Global Affairs">Global Affairs</button>
+    <button class="filter-pill" data-category="Tech &amp; Innovation">Tech &amp; Innovation</button>
+    <button class="filter-pill" data-category="Deep Reads">Deep Reads</button>
+  </nav>
 </header>
 
 <main>
-  <div id="statusLine" class="status-line">Loading article…</div>
-  <article id="articleContainer" style="display:none;">
-    <div class="meta-row">
-      <span class="category" id="articleCategory"></span>
-      <span class="dot"></span>
-      <span id="articleSource"></span>
-      <span class="dot"></span>
-      <span id="articleTime"></span>
-    </div>
-    <h1 class="headline" id="articleHeadline"></h1>
-    <img class="lead-image" id="articleImage" alt="" style="display:none;">
-
-    <div id="articleBody"></div>
-
-    <div class="summary-box" id="summaryBox" style="display:none;">
-      <div class="label">AI Summary</div>
-      <p id="summaryText"></p>
-    </div>
-
-    <a class="original-link" id="originalLink" target="_blank" rel="noopener">Read Original Article</a>
-  </article>
+  <div id="statusLine" class="status-line">Fetching today's stories…</div>
+  <div id="feed" class="feed-grid"></div>
 </main>
 
-<!-- Floating "Translate & Highlight" menu, positioned dynamically near the selection -->
-<button id="selectionMenu" type="button">Translate &amp; Highlight</button>
-
-<!-- Bottom sheet for translation / dictionary results -->
-<div id="sheetBackdrop"></div>
-<div id="bottomSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div id="sheetSelectedText"></div>
-    <button id="sheetClose" aria-label="Close">&times;</button>
-  </div>
-  <div id="sheetResult"></div>
-</div>
+<footer>
+  Just Daily reads the day's stories in one quiet, paper-toned page.
+</footer>
 
 <script>
-  // ---------------------------------------------------------------------
-  // Configuration — point this at your deployed Cloudflare Worker.
-  // ---------------------------------------------------------------------
-  const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
-
-  let currentSelectionRange = null;
-
-  // ---------------------------------------------------------------------
-  // Load and render the article
-  // ---------------------------------------------------------------------
+  const state = {
+    articles: [],
+    category: 'All',
+  };
 
   function timeAgo(isoString) {
     if (!isoString) return '';
     const then = new Date(isoString).getTime();
-    const diffMin = Math.round((Date.now() - then) / 60000);
+    const now = Date.now();
+    const diffMin = Math.round((now - then) / 60000);
     if (diffMin < 1) return 'just now';
     if (diffMin < 60) return `${diffMin}m ago`;
     const diffHr = Math.round(diffMin / 60);
     if (diffHr < 24) return `${diffHr}h ago`;
-    return `${Math.round(diffHr / 24)}d ago`;
+    const diffDay = Math.round(diffHr / 24);
+    return `${diffDay}d ago`;
   }
 
-  function renderParagraphs(fullText) {
-    const container = document.getElementById('articleBody');
-    const paragraphs = (fullText || '')
-      .split(/\n{2,}/)
-      .map(p => p.trim())
-      .filter(Boolean);
+  function cardTemplate(article, isLead) {
+    const img = article.image
+      ? `<img class="thumb" src="${article.image}" alt="" loading="lazy" onerror="this.style.display='none'">`
+      : '';
+    const snippet = article.ai_summary || article.full_text || '';
 
-    if (paragraphs.length === 0) {
-      container.innerHTML = '<p>Full article text is not available for this story.</p>';
-      return;
-    }
-
-    container.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+    return `
+      <a class="card ${isLead ? 'lead' : ''}" href="article.html?id=${encodeURIComponent(article.id)}">
+        ${img}
+        <div class="card-body">
+          <div class="meta-row">
+            <span class="category">${article.category}</span>
+            <span class="dot"></span>
+            <span>${article.source}</span>
+            <span class="dot"></span>
+            <span>${timeAgo(article.published_bst)}</span>
+          </div>
+          <h2>${article.title}</h2>
+          <p class="snippet">${snippet}</p>
+        </div>
+      </a>
+    `;
   }
 
-  async function loadArticle() {
+  function render() {
+    const feed = document.getElementById('feed');
     const statusLine = document.getElementById('statusLine');
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
 
-    if (!id) {
-      statusLine.textContent = 'No article specified.';
+    const filtered = state.category === 'All'
+      ? state.articles
+      : state.articles.filter(a => a.category === state.category);
+
+    if (filtered.length === 0) {
+      feed.innerHTML = '';
+      statusLine.textContent = 'No stories in this category yet.';
+      statusLine.style.display = 'block';
       return;
     }
 
+    statusLine.style.display = 'none';
+    feed.innerHTML = filtered
+      .map((article, i) => cardTemplate(article, i === 0))
+      .join('');
+  }
+
+  async function init() {
+    const statusLine = document.getElementById('statusLine');
     try {
       const res = await fetch('news.json', { cache: 'no-store' });
       if (!res.ok) throw new Error('Bad response');
       const data = await res.json();
-      const article = (data.articles || []).find(a => a.id === id);
 
-      if (!article) {
-        statusLine.textContent = "Couldn't find that article.";
+      state.articles = (data.articles || []).slice().sort((a, b) =>
+        new Date(b.published_bst) - new Date(a.published_bst)
+      );
+
+      if (data.generated_at_bst) {
+        document.getElementById('updatedAt').textContent =
+          'Updated ' + timeAgo(data.generated_at_bst);
+      }
+
+      if (state.articles.length === 0) {
+        statusLine.textContent = 'No stories yet — check back soon.';
         return;
       }
 
-      document.title = `${article.title} — Just Daily`;
-      document.getElementById('articleCategory').textContent = article.category;
-      document.getElementById('articleSource').textContent = article.source;
-      document.getElementById('articleTime').textContent = timeAgo(article.published_bst);
-      document.getElementById('articleHeadline').textContent = article.title;
-
-      if (article.image) {
-        const img = document.getElementById('articleImage');
-        img.src = article.image;
-        img.alt = article.title;
-        img.style.display = 'block';
-        img.onerror = () => { img.style.display = 'none'; };
-      }
-
-      renderParagraphs(article.full_text);
-
-      if (article.ai_summary) {
-        document.getElementById('summaryBox').style.display = 'block';
-        document.getElementById('summaryText').textContent = article.ai_summary;
-      }
-
-      document.getElementById('originalLink').href = article.link;
-
-      statusLine.style.display = 'none';
-      document.getElementById('articleContainer').style.display = 'block';
+      render();
     } catch (err) {
-      statusLine.textContent = "Couldn't load this article. Try refreshing.";
-      console.error('Failed to load article', err);
+      statusLine.textContent = "Couldn't load today's stories. Try refreshing.";
+      console.error('Failed to load news.json', err);
     }
   }
 
-  // ---------------------------------------------------------------------
-  // Selection detection + floating "Translate & Highlight" menu
-  // ---------------------------------------------------------------------
+  document.getElementById('filters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-pill');
+    if (!btn) return;
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    state.category = btn.dataset.category;
+    render();
+  });
 
-  function hideSelectionMenu() {
-    document.getElementById('selectionMenu').style.display = 'none';
-    currentSelectionRange = null;
-  }
-
-  function showSelectionMenu(rect) {
-    const menu = document.getElementById('selectionMenu');
-    menu.style.top = `${rect.top + window.scrollY - 12}px`;
-    menu.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
-    menu.style.display = 'flex';
-  }
-
-  function handleSelection() {
-    const selection = window.getSelection();
-    const articleBody = document.getElementById('articleBody');
-
-    if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
-      hideSelectionMenu();
-      return;
-    }
-
-    const range = selection.getRangeAt(0);
-    if (!articleBody.contains(range.commonAncestorContainer)) {
-      hideSelectionMenu();
-      return;
-    }
-
-    const text = selection.toString().trim();
-    if (!text) {
-      hideSelectionMenu();
-      return;
-    }
-
-    currentSelectionRange = range.cloneRange();
-    showSelectionMenu(range.getBoundingClientRect());
-  }
-
-  function wrapRangeInHighlight(range) {
-    const span = document.createElement('span');
-    span.className = 'highlighted-text';
-    try {
-      range.surroundContents(span);
-    } catch (e) {
-      // Selection spans multiple elements — extract then re-wrap instead.
-      const fragment = range.extractContents();
-      span.appendChild(fragment);
-      range.insertNode(span);
-    }
-  }
-
-  // ---------------------------------------------------------------------
-  // Bottom sheet + DeepSeek translation call
-  // ---------------------------------------------------------------------
-
-  function openBottomSheet(selectedText) {
-    document.getElementById('sheetSelectedText').textContent = `"${selectedText}"`;
-    document.getElementById('sheetResult').innerHTML =
-      '<span class="sheet-loading">Consulting the dictionary…</span>';
-    document.getElementById('bottomSheet').classList.add('open');
-    document.getElementById('sheetBackdrop').classList.add('open');
-  }
-
-  function closeBottomSheet() {
-    document.getElementById('bottomSheet').classList.remove('open');
-    document.getElementById('sheetBackdrop').classList.remove('open');
-  }
-
-  async function requestTranslation(text) {
-    try {
-      const res = await fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Request failed');
-      document.getElementById('sheetResult').innerHTML = data.result || 'No result returned.';
-    } catch (err) {
-      document.getElementById('sheetResult').innerHTML =
-        'Could not reach the translator right now. Please try again.';
-      console.error('Translation request failed', err);
-    }
-  }
-
-  async function handleTranslateClick() {
-    if (!currentSelectionRange) return;
-    const text = currentSelectionRange.toString().trim();
-    if (!text) return;
-
-    wrapRangeInHighlight(currentSelectionRange);
-    window.getSelection().removeAllRanges();
-    hideSelectionMenu();
-
-    openBottomSheet(text);
-    await requestTranslation(text);
-  }
-
-  // ---------------------------------------------------------------------
-  // Wire up events
-  // ---------------------------------------------------------------------
-
-  document.addEventListener('mouseup', handleSelection);
-  document.addEventListener('touchend', handleSelection);
-  document.getElementById('selectionMenu').addEventListener('click', handleTranslateClick);
-  document.getElementById('sheetClose').addEventListener('click', closeBottomSheet);
-  document.getElementById('sheetBackdrop').addEventListener('click', closeBottomSheet);
-  window.addEventListener('scroll', hideSelectionMenu, { passive: true });
-
-  loadArticle();
+  init();
 </script>
 
 </body>
