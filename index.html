@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Just Daily - Color E-Ink</title>
+  <title>Just Daily - E-Reader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Kaleido 3 Color E-Ink Palette */
-      --paper-bg: #f4f1ea;        /* Warm newsprint background */
-      --paper-card: #fcfaf5;      /* Slightly brighter card */
-      --ink-dark: #2c2c2c;        /* Pigment black */
-      --ink-border: #d4cfc5;      /* Soft page border */
-      --ink-accent: #6b8699;      /* Muted E-ink blue */
-      --ink-tag: #e8dbce;         /* Muted E-ink orange/sand */
+      /* Pure Monochrome E-Ink Palette */
+      --paper-bg: #ece9e2;       /* ম্যাট অফ-হোয়াইট (কাগজের মতো) */
+      --paper-card: #f9f8f5;     /* কার্ডের একটু উজ্জ্বল অফ-হোয়াইট */
+      --ink-black: #0a0a0a;      /* একদম গাঢ় কালো কালি */
+      --ink-subtle: #4a4a4a;     /* হালকা গ্রে কালি */
+      --ink-border: #1a1a1a;     /* ধারালো বর্ডার */
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -23,12 +22,13 @@
     a, a:visited, a:hover, a:active { color: inherit !important; text-decoration: none !important; }
 
     body {
-      font-family: 'Hind Siliguri', sans-serif;
+      font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--paper-bg);
-      color: var(--ink-dark);
+      color: var(--ink-black);
       min-height: 100vh;
       display: flex;
       justify-content: center;
+      -webkit-font-smoothing: antialiased;
     }
 
     .app-screen {
@@ -42,35 +42,42 @@
     .app-header {
       border-bottom: 2px solid var(--ink-border);
       padding-bottom: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
     .brand {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 26px;
       font-weight: 800;
-      color: var(--ink-dark);
+      color: var(--ink-black);
       letter-spacing: -0.5px;
     }
     .status-meta {
       display: flex;
       justify-content: space-between;
       font-size: 12px;
-      color: #7a756d;
+      color: var(--ink-subtle);
       margin-top: 6px;
       font-weight: 600;
+      border-top: 1px dashed #c0bcba;
+      padding-top: 6px;
     }
 
     .news-feed { display: flex; flex-direction: column; gap: 14px; flex: 1; }
 
     .news-card {
       background: var(--paper-card);
-      border: 1px solid var(--ink-border);
+      border: 1.5px solid var(--ink-border);
       border-radius: 8px;
       padding: 16px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+      box-shadow: 2px 2px 0px var(--ink-border);
       cursor: pointer;
+      transition: transform 0.08s ease;
     }
-    .news-card:active { background: #f2efe9; }
+    .news-card:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0px var(--ink-border);
+      background: #e4e1d9;
+    }
 
     .card-top {
       display: flex;
@@ -78,32 +85,36 @@
       align-items: center;
       margin-bottom: 10px;
     }
-    .source-tag {
-      font-size: 11px;
+    
+    /* Category Tag - Pure Monochrome */
+    .category-tag {
+      font-size: 10.5px;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: var(--ink-tag);
-      color: #5c4a3d;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid var(--ink-border);
+      background: var(--paper-bg);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .index-indicator { font-size: 12px; font-weight: 700; color: #9a9488; }
+    .source-name { font-size: 12px; font-weight: 700; color: var(--ink-subtle); }
 
     .news-title {
-      font-size: 18px;
+      font-size: 17.5px;
       font-weight: 700;
       line-height: 1.4;
-      color: var(--ink-dark) !important;
+      color: var(--ink-black) !important;
     }
 
     .app-footer {
       margin-top: 36px;
       padding-top: 16px;
-      border-top: 1px solid var(--ink-border);
+      border-top: 1.5px solid var(--ink-border);
       text-align: center;
-      font-size: 13px;
-      color: #7a756d;
+      font-size: 12.5px;
+      color: var(--ink-subtle);
     }
-    .app-footer a { color: var(--ink-accent) !important; font-weight: 700; }
+    .app-footer a { color: var(--ink-black) !important; font-weight: 700; text-decoration: underline !important; }
   </style>
 </head>
 <body>
@@ -113,7 +124,7 @@
       <h1 class="brand">Just Daily</h1>
       <div class="status-meta">
         <span id="sync-time">আপডেট লোড হচ্ছে...</span>
-        <span>COLOR E-INK</span>
+        <span>E-PAPER EDITION</span>
       </div>
     </header>
 
@@ -125,9 +136,6 @@
   </main>
 
   <script>
-    const bnDigits = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
-    function toBn(num) { return num.toString().replace(/\d/g, d => bnDigits[d]); }
-
     function extractPureText(str) {
       if (!str) return '';
       const doc = new DOMParser().parseFromString(str, 'text/html');
@@ -151,19 +159,28 @@
         const feed = document.getElementById('news-feed');
         feed.innerHTML = '';
 
+        if (!data.articles || data.articles.length === 0) {
+           feed.innerHTML = '<p style="text-align:center;">No articles found.</p>';
+           return;
+        }
+
         data.articles.forEach((item, index) => {
           const card = document.createElement('a');
           card.className = 'news-card';
           card.href = `article.html?id=${index}`;
           card.innerHTML = `
             <div class="card-top">
-              <span class="source-tag">${item.source}</span>
-              <span class="index-indicator">#${toBn(index + 1)} →</span>
+              <span class="category-tag">${item.category || "News"}</span>
+              <span class="source-name">${item.source}</span>
             </div>
             <h2 class="news-title">${extractPureText(item.title)}</h2>
           `;
           feed.appendChild(card);
         });
+      })
+      .catch(err => {
+        document.getElementById('sync-time').innerText = "ডেটা লোড করতে সমস্যা হয়েছে।";
+        console.error(err);
       });
   </script>
 </body>
