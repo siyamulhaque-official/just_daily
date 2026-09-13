@@ -1,172 +1,276 @@
-import os
-import json
-import re
-import html
-import urllib.request
-from datetime import datetime, timezone, timedelta
-import feedparser
-from bs4 import BeautifulSoup
-import ssl
+#!/usr/bin/env python3
+"""
+Just Daily — AI News Summarizer
+================================
+Fetches headlines from a curated set of RSS feeds, scrapes the full body
+text of each article, generates a professional AI summary via DeepSeek,
+and writes everything to news.json for the static frontend to consume.
 
-# SSL Certificate ইস্যু এড়ানোর জন্য
-ssl._create_default_https_context = ssl._create_unverified_context
+Run manually:
+    DEEPSEEK_API_KEY=sk-xxxx python ai_summarizer.py
 
-# DeepSeek API Configuration
-DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
-DEEPSEEK_MODEL = "deepseek-flash" 
-
-# শুধুমাত্র ইংলিশ গ্লোবাল নিউজ এবং টেক/আর্টিকেল প্ল্যাটফর্ম
-RSS_FEEDS = [
-    {"source": "Al Jazeera", "url": "https://www.aljazeera.com/xml/rss/all.xml", "category": "Global Affairs", "limit": 4},
-    {"source": "BBC World", "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "category": "Global Affairs", "limit": 4},
-    {"source": "TechCrunch", "url": "https://techcrunch.com/feed/", "category": "Tech & Innovation", "limit": 3},
-    {"source": "Dev.to", "url": "https://dev.to/feed", "category": "Deep Reads", "limit": 3}
-]
-
-def clean_text(raw_html):
-    if not raw_html: return ""
-    no_tags = re.sub(r'<[^>]+>', '', raw_html)
-    return html.unescape(no_tags).strip()
-
-def extract_image(entry):
-    """RSS থেকে ইমেজ এক্সট্র্যাক্ট করে"""
-    if "media_content" in entry and entry.media_content:
-        for media in entry.media_content:
-            if "url" in media: return media["url"]
-    if "media_thumbnail" in entry and entry.media_thumbnail:
-        for media in entry.media_thumbnail:
-            if "url" in media: return media["url"]
-    if "enclosures" in entry and entry.enclosures:
-        for enc in entry.enclosures:
-            if enc.get("type", "").startswith("image") or "url" in enc:
-                return enc.get("url") or enc.get("href")
-    desc = entry.get("summary", "") + entry.get("description", "")
-    match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', desc)
-    if match: return match.group(1)
-    return ""
-
-def fetch_full_article_text(url):
-    """মূল ওয়েবসাইটে ঢুকে সম্পূর্ণ আর্টিকেলটি স্ক্র্যাপ করে আনে"""
-    try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
-        html_content = urllib.request.urlopen(req, timeout=10).read()
-        soup = BeautifulSoup(html_content, 'html.parser')
-
-        # অপ্রয়োজনীয় ট্যাগগুলো (স্ক্রিপ্ট, অ্যাড, স্টাইল) বাদ দেওয়া
-        for script in soup(["script", "style", "header", "footer", "nav", "aside", "form"]):
-            script.extract()
-
-        # আর্টিকেলের সব প্যারাগ্রাফ <p> ট্যাগ থেকে সংগ্রহ করা
-        paragraphs = soup.find_all('p')
-        text_blocks = [p.get_text().strip() for p in paragraphs if len(p.get_text().strip()) > 30]
-        
-        full_text = '\n\n'.join(text_blocks)
-        
-        # DeepSeek-এর টোকেন বাঁচাতে টেক্সট সাইজ ৫০০০ ক্যারেক্টারে লিমিট করা
-        if len(full_text) > 5000:
-            full_text = full_text[:5000] + "...\n[Read more on the source link]"
-            
-        return full_text
-    except Exception as e:
-        print(f"    [!] স্ক্র্যাপিং ফেইলড ({url}): {e}")
-        return ""
-
-def generate_summary_deepseek(api_key, title, full_text):
-    """DeepSeek দিয়ে আর্টিকেলের ওপর বেস করে ডাইনামিক সামারি তৈরি করে"""
-    system_prompt = "You are a professional journalistic editor providing clear, natural, and comprehensive news summaries."
-    user_prompt = f"""
-Summarize this news article so it is easily understandable.
-Read the full text and extract the most important information. Do not force a specific length. Use exactly as much text and as many points as needed to properly explain the news.
-
-Structure the response naturally. You may include:
-- The core event (What happened)
-- Important background or details
-- The impact or why it matters
-
-Rules:
-- Write strictly in pure ENGLISH.
-- Use bold text (`**Heading:**`) for the key points so it looks visually structured.
-- Do not write generic intros or pleasantries.
-
-Headline: {title}
-Full Article Text: {full_text}
+Run on a schedule via .github/workflows/update_news.yml
 """
 
-    data = {
+import json
+import os
+import re
+import time
+from datetime import datetime, timedelta, timezone
+
+import feedparser
+import requests
+from bs4 import BeautifulSoup
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+# NOTE: confirm this matches the exact model name active on your DeepSeek
+# account/dashboard before relying on it in production.
+DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-flash")
+
+MAX_ARTICLE_CHARS = 5000
+MAX_ARTICLES_PER_SOURCE = 8
+REQUEST_TIMEOUT = 15
+OUTPUT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "news.json")
+
+# "BST" in this project refers to Bangladesh Standard Time (UTC+6),
+# not British Summer Time.
+BST = timezone(timedelta(hours=6))
+
+FEEDS = [
+    {
+        "name": "Al Jazeera",
+        "category": "Global Affairs",
+        "url": "https://www.aljazeera.com/xml/rss/all.xml",
+    },
+    {
+        "name": "BBC World",
+        "category": "Global Affairs",
+        "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
+    },
+    {
+        "name": "TechCrunch",
+        "category": "Tech & Innovation",
+        "url": "https://techcrunch.com/feed/",
+    },
+    {
+        "name": "Dev.to",
+        "category": "Deep Reads",
+        "url": "https://dev.to/feed",
+    },
+]
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    )
+}
+
+# Elements that never contain real article body copy.
+STRIP_SELECTORS = [
+    "script", "style", "nav", "footer", "header", "aside", "form",
+    "iframe", "noscript", "svg", "button",
+    ".advertisement", ".ad", ".ads", ".newsletter-signup",
+    ".social-share", ".related-articles", ".comments",
+]
+
+
+def log(msg: str) -> None:
+    stamp = datetime.now(BST).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{stamp} BST] {msg}", flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Scraping
+# ---------------------------------------------------------------------------
+
+def fetch_full_article_text(url: str) -> str:
+    """Download an article page and extract clean body text only."""
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+    except requests.RequestException as exc:
+        log(f"  ! could not fetch article body ({exc})")
+        return ""
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    for selector in STRIP_SELECTORS:
+        for tag in soup.select(selector):
+            tag.decompose()
+
+    # Prefer a real <article> element; fall back to every <p> on the page.
+    scope = soup.find("article") or soup
+    paragraphs = scope.find_all("p")
+
+    cleaned_paragraphs = []
+    for p in paragraphs:
+        para_text = re.sub(r"\s+", " ", p.get_text(" ", strip=True)).strip()
+        if para_text:
+            cleaned_paragraphs.append(para_text)
+
+    # Join with double newlines so the frontend can render real paragraphs.
+    text = "\n\n".join(cleaned_paragraphs)
+
+    return text[:MAX_ARTICLE_CHARS]
+
+
+def extract_image(entry, article_url: str) -> str:
+    """Best-effort attempt to find a representative image for the article."""
+    media_content = entry.get("media_content") or []
+    for m in media_content:
+        if m.get("url"):
+            return m["url"]
+
+    media_thumbnail = entry.get("media_thumbnail") or []
+    for m in media_thumbnail:
+        if m.get("url"):
+            return m["url"]
+
+    for link in entry.get("links", []):
+        if str(link.get("type", "")).startswith("image"):
+            return link.get("href", "")
+
+    # Fall back to the article's Open Graph image.
+    try:
+        resp = requests.get(article_url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        soup = BeautifulSoup(resp.text, "html.parser")
+        og = soup.find("meta", property="og:image")
+        if og and og.get("content"):
+            return og["content"]
+    except requests.RequestException:
+        pass
+
+    return ""
+
+
+# ---------------------------------------------------------------------------
+# AI summarization
+# ---------------------------------------------------------------------------
+
+def generate_ai_summary(title: str, full_text: str) -> str:
+    """Ask DeepSeek for a dynamic, professional English summary."""
+    if not DEEPSEEK_API_KEY:
+        log("  ! DEEPSEEK_API_KEY not set — skipping summary")
+        return ""
+    if not full_text:
+        return ""
+
+    system_prompt = (
+        "You are a professional news editor writing for a premium, minimalist "
+        "reading app. Write a dynamic, highly professional summary of the "
+        "article in clear English prose (3 to 6 sentences). Naturally weave "
+        "together the core event, relevant background, and its broader "
+        "impact or significance. Do not use bullet points, labels, or a "
+        "forced sentence count — let the summary's shape follow the story."
+    )
+
+    payload = {
         "model": DEEPSEEK_MODEL,
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": f"Title: {title}\n\nArticle:\n{full_text}"},
         ],
         "temperature": 0.4,
-        "max_tokens": 1000
+        "max_tokens": 400,
+    }
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json",
     }
 
-    req = urllib.request.Request(
-        DEEPSEEK_API_URL,
-        data=json.dumps(data).encode('utf-8'),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}"
-        }
-    )
-
     try:
-        with urllib.request.urlopen(req) as response:
-            result = json.loads(response.read().decode('utf-8'))
-            return result['choices'][0]['message']['content'].strip()
-    except Exception as e:
-        print(f"    [!] DeepSeek API Error: {e}")
-        return "Summary could not be generated at this time."
+        resp = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"].strip()
+    except (requests.RequestException, KeyError, IndexError) as exc:
+        log(f"  ! DeepSeek summarization failed ({exc})")
+        return ""
 
-def main():
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not api_key: 
-        print("ত্রুটি: DEEPSEEK_API_KEY পাওয়া যায়নি! GitHub Secrets চেক করুন।")
-        return
 
+# ---------------------------------------------------------------------------
+# Pipeline
+# ---------------------------------------------------------------------------
+
+def build_article_id(source: str, link: str) -> str:
+    raw = f"{source}:{link}"
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", raw).strip("-").lower()
+    return slug[:80]
+
+
+def load_existing(path: str) -> dict:
+    """Load previously generated articles so we don't re-scrape/re-summarize them."""
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return {a["id"]: a for a in data.get("articles", [])}
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return {}
+
+
+def main() -> None:
+    existing = load_existing(OUTPUT_FILE)
     articles = []
-    print("সংবাদ সংগ্রহ, স্ক্র্যাপিং ও সামারাইজেশন শুরু হচ্ছে...\n" + "=" * 50)
 
-    for feed_info in RSS_FEEDS:
-        print(f"\n[{feed_info['source']}] স্ক্যান করা হচ্ছে...")
-        try:
-            feed = feedparser.parse(feed_info["url"])
-            for entry in feed.entries[:feed_info["limit"]]:
-                clean_title = clean_text(entry.get("title", "No Title"))
-                link = entry.get("link", "#").strip()
-                image_url = extract_image(entry)
+    for feed in FEEDS:
+        log(f"Fetching feed: {feed['name']}")
+        parsed = feedparser.parse(feed["url"])
 
-                print(f"-> প্রসেসিং: {clean_title[:40]}...")
-                
-                # ১. মূল ওয়েবসাইট থেকে ফুল টেক্সট স্ক্র্যাপ করা
-                full_article_text = fetch_full_article_text(link)
-                
-                # যদি ফুল টেক্সট স্ক্র্যাপ করতে না পারে, তবে আরএসএস এর ডিফল্ট সামারি নেবে
-                if not full_article_text or len(full_article_text) < 100:
-                    full_article_text = clean_text(entry.get("summary", entry.get("description", "")))
-                
-                # ২. DeepSeek দিয়ে সামারি তৈরি করা
-                ai_brief = generate_summary_deepseek(api_key, clean_title, full_article_text)
+        if parsed.bozo and not parsed.entries:
+            log(f"  ! could not parse {feed['name']} ({parsed.bozo_exception})")
+            continue
 
-                articles.append({
-                    "category": feed_info["category"],
-                    "source": feed_info["source"],
-                    "title": clean_title,
-                    "link": link,
-                    "image": image_url,
-                    "full_text": full_article_text, # নতুন ফিল্ড: ফ্রন্টএন্ডে পড়ার জন্য
-                    "summary": ai_brief             # এআই সামারি
-                })
-        except Exception as err:
-            print(f"Error ({feed_info['source']}): {err}")
+        for entry in parsed.entries[:MAX_ARTICLES_PER_SOURCE]:
+            link = entry.get("link", "")
+            title = entry.get("title", "Untitled")
+            if not link:
+                continue
 
-    bd_time = datetime.now(timezone(timedelta(hours=6)))
-    with open("news.json", "w", encoding="utf-8") as f:
-        json.dump({"last_updated": bd_time.strftime("%Y-%m-%d %I:%M %p"), "articles": articles}, f, ensure_ascii=False, indent=2)
-    
-    print("\n" + "=" * 50)
-    print(f"সফলভাবে মোট {len(articles)}টি ফুল আর্টিকেল ও সামারি আপডেট করা হয়েছে!")
+            article_id = build_article_id(feed["name"], link)
+
+            if article_id in existing:
+                articles.append(existing[article_id])
+                continue
+
+            log(f"  -> scraping: {title[:70]}")
+            full_text = fetch_full_article_text(link)
+            image = extract_image(entry, link)
+
+            log("  -> summarizing with DeepSeek")
+            summary = generate_ai_summary(title, full_text)
+
+            articles.append({
+                "id": article_id,
+                "source": feed["name"],
+                "category": feed["category"],
+                "title": title,
+                "link": link,
+                "image": image,
+                "full_text": full_text,
+                "ai_summary": summary,
+                "published_bst": datetime.now(BST).isoformat(),
+            })
+
+            time.sleep(1)  # be polite to source servers
+
+    output = {
+        "generated_at_bst": datetime.now(BST).isoformat(),
+        "articles": articles,
+    }
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+
+    log(f"Done — wrote {len(articles)} articles to {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     main()
