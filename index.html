@@ -24,24 +24,27 @@
         }
 
         header {
-            padding: 40px 20px;
-            text-align: center;
+            padding: 25px 20px;
+            text-align: left; /* Updated: Left aligned */
             border-bottom: 1px solid var(--border-color);
             background-color: var(--bg-dark);
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         header h1 {
             font-family: 'Merriweather', serif;
             color: var(--text-heading);
             margin: 0;
-            font-size: 2rem;
+            font-size: 2.2rem;
             letter-spacing: -0.5px;
         }
 
         .timestamp {
             font-size: 0.85rem;
             color: #71717a;
-            margin-top: 10px;
+            margin-top: 5px;
+            font-weight: 400;
         }
 
         .container {
@@ -61,11 +64,21 @@
             transition: transform 0.2s ease, border-color 0.2s ease;
             text-decoration: none;
             display: block;
+            overflow: hidden;
         }
 
         .news-card:hover {
             transform: translateY(-2px);
             border-color: #3f3f46;
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            filter: brightness(0.9);
         }
 
         .news-category {
@@ -93,6 +106,7 @@
 
         @media (max-width: 600px) {
             .news-title { font-size: 1.2rem; }
+            .card-img { height: 180px; }
         }
     </style>
 </head>
@@ -100,7 +114,7 @@
 
     <header>
         <h1>Just Daily</h1>
-        <div class="timestamp" id="last-updated">Fetching latest updates...</div>
+        <div class="timestamp" id="last-updated">Fetching updates...</div>
     </header>
 
     <div class="container" id="news-container">
@@ -110,11 +124,11 @@
     <script>
         async function fetchNews() {
             try {
-                // Add timestamp to prevent caching
                 const response = await fetch(`news.json?t=${new Date().getTime()}`);
                 const data = await response.json();
                 
-                document.getElementById('last-updated').innerText = `Last Updated: ${data.last_updated}`;
+                // Show ONLY the timestamp (Undefined fix)
+                document.getElementById('last-updated').innerText = data.last_updated;
                 
                 const container = document.getElementById('news-container');
                 container.innerHTML = '';
@@ -123,7 +137,12 @@
                     const card = document.createElement('a');
                     card.href = `article.html?id=${article.id}`;
                     card.className = 'news-card';
+                    
+                    // Inject image if exists
+                    const imgHtml = article.image ? `<img src="${article.image}" class="card-img" alt="Banner">` : '';
+                    
                     card.innerHTML = `
+                        ${imgHtml}
                         <span class="news-category">${article.category}</span>
                         <h2 class="news-title">${article.title}</h2>
                         <span class="news-source">${article.source}</span>
