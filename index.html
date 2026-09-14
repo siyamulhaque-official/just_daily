@@ -1,354 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Just Daily</title>
-<meta name="description" content="A quiet, paper-toned reader for the day's stories.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --paper-bg: #ece9e2;
-    --paper-card: #f9f8f5;
-    --ink-black: #0a0a0a;
-    --ink-subtle: #4a4a4a;
-    --ink-border: #1a1a1a;
-    --ink-faint: #c9c5ba;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Daily - Premium News</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #161618;
+            --surface: #1c1c1f;
+            --text-body: #a1a1aa;
+            --text-heading: #e4e4e7;
+            --border-color: #27272a;
+        }
 
-  * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-body);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+        }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: var(--paper-bg);
-    color: var(--ink-black);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
+        header {
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-dark);
+        }
 
-  a { color: inherit; text-decoration: none; }
+        header h1 {
+            font-family: 'Merriweather', serif;
+            color: var(--text-heading);
+            margin: 0;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+        }
 
-  img {
-    display: block;
-    max-width: 100%;
-    /* "Kaleido"-style e-paper image treatment */
-    filter: saturate(40%) contrast(120%) sepia(20%);
-  }
+        .timestamp {
+            font-size: 0.85rem;
+            color: #71717a;
+            margin-top: 10px;
+        }
 
-  ::selection {
-    background: var(--ink-black);
-    color: var(--paper-card);
-  }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            gap: 30px;
+        }
 
-  /* ---------- Header ---------- */
+        .news-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            text-decoration: none;
+            display: block;
+        }
 
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--paper-bg);
-    border-bottom: 1px solid var(--ink-border);
-    padding: 18px 20px 0;
-  }
+        .news-card:hover {
+            transform: translateY(-2px);
+            border-color: #3f3f46;
+        }
 
-  .header-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    max-width: 920px;
-    margin: 0 auto;
-  }
+        .news-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a1a1aa;
+            margin-bottom: 12px;
+            display: block;
+            font-weight: 600;
+        }
 
-  .wordmark {
-    font-weight: 800;
-    font-size: 1.35rem;
-    letter-spacing: -0.01em;
-  }
+        .news-title {
+            font-family: 'Merriweather', serif;
+            color: var(--text-heading);
+            font-size: 1.4rem;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+        }
 
-  .wordmark::after {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: var(--ink-black);
-    border-radius: 50%;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
+        .news-source {
+            font-size: 0.85rem;
+            color: #71717a;
+        }
 
-  .updated-at {
-    font-size: 0.78rem;
-    color: var(--ink-subtle);
-    white-space: nowrap;
-  }
-
-  nav.filters {
-    max-width: 920px;
-    margin: 14px auto 0;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    scrollbar-width: none;
-  }
-  nav.filters::-webkit-scrollbar { display: none; }
-
-  .filter-pill {
-    flex: 0 0 auto;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 6px 14px;
-    border: 1px solid var(--ink-border);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--ink-black);
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-  }
-
-  .filter-pill.active {
-    background: var(--ink-black);
-    color: var(--paper-card);
-  }
-
-  /* ---------- Feed layout ---------- */
-
-  main {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 28px 20px 60px;
-  }
-
-  .status-line {
-    color: var(--ink-subtle);
-    font-size: 0.9rem;
-    padding: 40px 0;
-    text-align: center;
-  }
-
-  .feed-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  @media (min-width: 720px) {
-    .feed-grid { grid-template-columns: repeat(2, 1fr); }
-    .feed-grid > .card.lead { grid-column: 1 / -1; }
-  }
-
-  .card {
-    background: var(--paper-card);
-    border: 1px solid var(--ink-border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .card .thumb {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    background: var(--ink-faint);
-    border-bottom: 1px solid var(--ink-border);
-  }
-
-  .card.lead .thumb { aspect-ratio: 21 / 9; }
-
-  .card-body {
-    padding: 16px 18px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-  }
-
-  .meta-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.76rem;
-    color: var(--ink-subtle);
-  }
-
-  .meta-row .category {
-    font-weight: 600;
-    color: var(--ink-black);
-  }
-
-  .meta-row .dot {
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: var(--ink-subtle);
-    flex: 0 0 auto;
-  }
-
-  .card h2 {
-    margin: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    line-height: 1.28;
-    font-size: 1.05rem;
-  }
-
-  .card.lead h2 { font-size: 1.55rem; }
-
-  .card p.snippet {
-    margin: 2px 0 0;
-    font-family: 'Merriweather', serif;
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: var(--ink-subtle);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .card.lead p.snippet { -webkit-line-clamp: 2; font-size: 0.95rem; }
-
-  footer {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 20px 20px 50px;
-    color: var(--ink-subtle);
-    font-size: 0.78rem;
-    border-top: 1px solid var(--ink-faint);
-  }
-</style>
+        @media (max-width: 600px) {
+            .news-title { font-size: 1.2rem; }
+        }
+    </style>
 </head>
 <body>
 
-<header>
-  <div class="header-row">
-    <span class="wordmark">Just Daily</span>
-    <span class="updated-at" id="updatedAt"></span>
-  </div>
-  <nav class="filters" id="filters">
-    <button class="filter-pill active" data-category="All">All</button>
-    <button class="filter-pill" data-category="Global Affairs">Global Affairs</button>
-    <button class="filter-pill" data-category="Tech &amp; Innovation">Tech &amp; Innovation</button>
-    <button class="filter-pill" data-category="Deep Reads">Deep Reads</button>
-  </nav>
-</header>
+    <header>
+        <h1>Just Daily</h1>
+        <div class="timestamp" id="last-updated">Fetching latest updates...</div>
+    </header>
 
-<main>
-  <div id="statusLine" class="status-line">Fetching today's stories…</div>
-  <div id="feed" class="feed-grid"></div>
-</main>
+    <div class="container" id="news-container">
+        <!-- News cards will be injected here via JS -->
+    </div>
 
-<footer>
-  Just Daily reads the day's stories in one quiet, paper-toned page.
-</footer>
+    <script>
+        async function fetchNews() {
+            try {
+                // Add timestamp to prevent caching
+                const response = await fetch(`news.json?t=${new Date().getTime()}`);
+                const data = await response.json();
+                
+                document.getElementById('last-updated').innerText = `Last Updated: ${data.last_updated}`;
+                
+                const container = document.getElementById('news-container');
+                container.innerHTML = '';
 
-<script>
-  const state = {
-    articles: [],
-    category: 'All',
-  };
+                data.articles.forEach(article => {
+                    const card = document.createElement('a');
+                    card.href = `article.html?id=${article.id}`;
+                    card.className = 'news-card';
+                    card.innerHTML = `
+                        <span class="news-category">${article.category}</span>
+                        <h2 class="news-title">${article.title}</h2>
+                        <span class="news-source">${article.source}</span>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error loading news:", error);
+                document.getElementById('news-container').innerHTML = '<p>Failed to load news. Please try again later.</p>';
+            }
+        }
 
-  function timeAgo(isoString) {
-    if (!isoString) return '';
-    const then = new Date(isoString).getTime();
-    const now = Date.now();
-    const diffMin = Math.round((now - then) / 60000);
-    if (diffMin < 1) return 'just now';
-    if (diffMin < 60) return `${diffMin}m ago`;
-    const diffHr = Math.round(diffMin / 60);
-    if (diffHr < 24) return `${diffHr}h ago`;
-    const diffDay = Math.round(diffHr / 24);
-    return `${diffDay}d ago`;
-  }
-
-  function cardTemplate(article, isLead) {
-    const img = article.image
-      ? `<img class="thumb" src="${article.image}" alt="" loading="lazy" onerror="this.style.display='none'">`
-      : '';
-    const snippet = article.ai_summary || article.full_text || '';
-
-    return `
-      <a class="card ${isLead ? 'lead' : ''}" href="article.html?id=${encodeURIComponent(article.id)}">
-        ${img}
-        <div class="card-body">
-          <div class="meta-row">
-            <span class="category">${article.category}</span>
-            <span class="dot"></span>
-            <span>${article.source}</span>
-            <span class="dot"></span>
-            <span>${timeAgo(article.published_bst)}</span>
-          </div>
-          <h2>${article.title}</h2>
-          <p class="snippet">${snippet}</p>
-        </div>
-      </a>
-    `;
-  }
-
-  function render() {
-    const feed = document.getElementById('feed');
-    const statusLine = document.getElementById('statusLine');
-
-    const filtered = state.category === 'All'
-      ? state.articles
-      : state.articles.filter(a => a.category === state.category);
-
-    if (filtered.length === 0) {
-      feed.innerHTML = '';
-      statusLine.textContent = 'No stories in this category yet.';
-      statusLine.style.display = 'block';
-      return;
-    }
-
-    statusLine.style.display = 'none';
-    feed.innerHTML = filtered
-      .map((article, i) => cardTemplate(article, i === 0))
-      .join('');
-  }
-
-  async function init() {
-    const statusLine = document.getElementById('statusLine');
-    try {
-      const res = await fetch('news.json', { cache: 'no-store' });
-      if (!res.ok) throw new Error('Bad response');
-      const data = await res.json();
-
-      state.articles = (data.articles || []).slice().sort((a, b) =>
-        new Date(b.published_bst) - new Date(a.published_bst)
-      );
-
-      if (data.generated_at_bst) {
-        document.getElementById('updatedAt').textContent =
-          'Updated ' + timeAgo(data.generated_at_bst);
-      }
-
-      if (state.articles.length === 0) {
-        statusLine.textContent = 'No stories yet — check back soon.';
-        return;
-      }
-
-      render();
-    } catch (err) {
-      statusLine.textContent = "Couldn't load today's stories. Try refreshing.";
-      console.error('Failed to load news.json', err);
-    }
-  }
-
-  document.getElementById('filters').addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-pill');
-    if (!btn) return;
-    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    state.category = btn.dataset.category;
-    render();
-  });
-
-  init();
-</script>
-
+        fetchNews();
+    </script>
 </body>
 </html>
