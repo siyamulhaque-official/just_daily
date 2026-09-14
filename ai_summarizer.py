@@ -11,21 +11,38 @@ from time import mktime
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 API_URL = "https://api.deepseek.com/chat/completions"
 
+# Requirement 1: Only Tech & Innovation Feed (TechCrunch)
 FEEDS = {
-    "Global Affairs": [
-        "http://www.aljazeera.com/xml/rss/all.xml",
-        "http://feeds.bbci.co.uk/news/world/rss.xml"
-    ],
     "Tech & Innovation": [
         "https://techcrunch.com/feed/"
-    ],
-    "Deep Reads": [
-        "https://dev.to/feed"
     ]
 }
 
 def generate_id(url):
     return hashlib.md5(url.encode()).hexdigest()
+
+def clean_element(element):
+    # Requirement 2: Clean junk links and menus, but keep bold/subheadings
+    # Remove all a tags but keep their inner text
+    for a_tag in element.find_all('a'):
+        a_tag.unwrap()
+    
+    # Remove common junk elements
+    for tag in element.find_all(['nav', 'footer', 'aside', 'script', 'style', 'button', 'form']):
+        tag.decompose()
+
+    # Further cleanup: remove elements with common junk classes or ids
+    junk_keywords = ['share', 'social', 'menu', 'sidebar', 'newsletter', 'follow', 'related', 'promo']
+    for tag in element.find_all(True):
+        if tag.has_attr('class'):
+            class_str = ' '.join(tag['class']).lower()
+            if any(keyword in class_str for keyword in junk_keywords):
+                tag.decompose()
+                continue
+        if tag.has_attr('id'):
+            id_str = tag['id'].lower()
+            if any(keyword in id_str for keyword in junk_keywords):
+                tag.decompose()
 
 def scrape_article_html(url):
     try:
@@ -33,14 +50,27 @@ def scrape_article_html(url):
         response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        paragraphs = soup.find_all('p')
+        # Try to find the main article body
+        article_body = soup.find('article')
+        if not article_body:
+            # Fallback if no article tag
+            article_body = soup.find('div', class_=lambda x: x and 'content' in x.lower())
+            if not article_body:
+                article_body = soup
+        
+        clean_element(article_body)
+        
+        # Collect headings and paragraphs
+        elements = article_body.find_all(['p', 'h2', 'h3', 'h4'])
         content = ""
-        # Preserve original paragraph structure <p> tags
-        for p in paragraphs:
-            html_p = str(p)
-            if len(content) + len(html_p) > 5000:
+        for el in elements:
+            html_el = str(el)
+            # Rough length limit
+            if len(content) + len(html_el) > 6000:
                 break
-            content += html_p
+            # Ignore empty or very short junk paragraphs
+            if len(el.get_text(strip=True)) > 10:
+                content += html_el
             
         return content
     except Exception as e:
@@ -60,7 +90,6 @@ def summarize_with_deepseek(text):
     if not text or not DEEPSEEK_API_KEY:
         return "Summary not available."
     
-    # Strip HTML tags just for the AI prompt to save tokens, but save original HTML for frontend
     clean_text = BeautifulSoup(text, "html.parser").get_text()
     
     headers = {
@@ -68,19 +97,20 @@ def summarize_with_deepseek(text):
         "Content-Type": "application/json"
     }
     
+    # Requirement 4: Just Prova summary in bullet points, standard size, pure HTML
     payload = {
         "model": "deepseek-chat",
         "messages": [
             {
                 "role": "system",
-                "content": "You are an expert news editor. Generate a dynamic, highly professional summary in pure ENGLISH based on the provided text. Dynamically highlight key aspects (Core event, background, impact) naturally."
+                "content": "You are 'Just Prova', an expert tech news editor. Analyze the article and provide a standard length summary. FORMAT REQUIREMENT: Start with a brief 1-2 sentence introduction, followed by exactly 3-4 bullet points highlighting the core event, background, and impact. You MUST use valid HTML tags (like <p>, <ul>, <li>, <strong>). NEVER use markdown (no **, #, etc.). The response must be pure, clean HTML ready to be injected into a webpage."
             },
             {
                 "role": "user",
                 "content": clean_text
             }
         ],
-        "max_tokens": 300,
+        "max_tokens": 400,
         "temperature": 0.5
     }
     
@@ -90,7 +120,7 @@ def summarize_with_deepseek(text):
         return response.json()['choices'][0]['message']['content'].strip()
     except Exception as e:
         print(f"API Error: {e}")
-        return "Failed to generate AI summary."
+        return "<p>Failed to generate AI summary.</p>"
 
 def main():
     news_data = []
@@ -98,21 +128,27 @@ def main():
     for category, urls in FEEDS.items():
         for feed_url in urls:
             parsed_feed = feedparser.parse(feed_url)
-            for entry in parsed_feed.entries[:3]:
+            
+            # Requirement 1: Only 1 article per day
+            for entry in parsed_feed.entries:
                 link = entry.link
                 title = entry.title
-                
-                # Fetch Publish Date
                 pub_date = format_date(entry.get('published_parsed', entry.get('updated_parsed')))
                 
-                # Check for image
+                # Image Extraction Logic
                 image = ""
-                if hasattr(entry, 'media_content') and len(entry.media_content) > 0:
+                if 'media_content' in entry and len(entry.media_content) > 0:
                     image = entry.media_content[0].get('url', '')
-                elif hasattr(entry, 'links'):
-                    for item in entry.links:
-                        if 'image' in item.get('type', ''):
-                            image = item.get('href', '')
+                elif 'enclosures' in entry and len(entry.enclosures) > 0:
+                    image = entry.enclosures[0].get('href', '')
+                
+                if not image:
+                    html_content = entry.content[0].value if 'content' in entry else entry.get('description', '')
+                    if html_content:
+                        soup = BeautifulSoup(html_content, 'html.parser')
+                        img_tag = soup.find('img')
+                        if img_tag and img_tag.has_attr('src'):
+                            image = img_tag['src']
                 
                 print(f"Processing: {title}")
                 full_html = scrape_article_html(link)
@@ -122,7 +158,7 @@ def main():
                     
                     news_data.append({
                         "id": generate_id(link),
-                        "source": parsed_feed.feed.get('title', category),
+                        "source": parsed_feed.feed.get('title', 'TechCrunch'),
                         "category": category,
                         "title": title,
                         "date": pub_date,
@@ -131,6 +167,8 @@ def main():
                         "full_text": full_html,
                         "summary": summary
                     })
+                    break # Stop after 1 valid article
+            break # Stop after 1 feed
     
     bst_time = datetime.now(timezone.utc) + timedelta(hours=6)
     
