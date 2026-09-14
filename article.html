@@ -23,8 +23,23 @@
             font-family: 'Merriweather', serif; 
             line-height: 1.8;
             font-size: 18px;
-            /* Disable native popups where possible */
+            
+            /* Requirement 3: Block native popups and search */
             -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Allow selection only within content, but we intercept it */
+        .content {
+            -webkit-user-select: text;
+            -khtml-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .nav {
@@ -88,9 +103,17 @@
             color: var(--text-body);
         }
         
-        /* Preserve paragraph spacing */
+        /* Preserve paragraph spacing and bold headings */
         .content p {
             margin-bottom: 1.5em;
+        }
+        .content h2, .content h3, .content h4 {
+            color: var(--text-heading);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .content strong, .content b {
+            color: var(--text-heading);
         }
 
         .summary-box {
@@ -107,7 +130,14 @@
             margin-top: 0;
             color: var(--text-heading);
             font-size: 1.1rem;
+            margin-bottom: 15px;
         }
+        
+        /* Summary HTML styling */
+        #art-summary p { margin-top: 0; margin-bottom: 10px; }
+        #art-summary ul { padding-left: 20px; margin: 0; }
+        #art-summary li { margin-bottom: 8px; }
+        #art-summary strong { color: var(--text-heading); }
 
         .btn-original {
             display: inline-block;
@@ -125,6 +155,7 @@
         .highlighted-text {
             background-color: var(--highlight-bg);
             border-radius: 2px;
+            cursor: pointer;
         }
 
         #custom-toolbar {
@@ -221,6 +252,7 @@
         
         <div class="summary-box">
             <h3>Summary by Just Prova</h3>
+            <!-- Requirement 4: innerHTML to render HTML summary properly -->
             <div id="art-summary"></div>
         </div>
 
@@ -244,32 +276,31 @@
     </div>
 
     <script>
-        // Replace with your active worker link
         const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
+        let currentArticleId = null;
 
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
-            const articleId = params.get('id');
+            currentArticleId = params.get('id');
 
-            if (!articleId) return;
+            if (!currentArticleId) return;
 
             try {
                 const response = await fetch(`news.json`);
                 const data = await response.json();
-                const article = data.articles.find(a => a.id === articleId);
+                const article = data.articles.find(a => a.id === currentArticleId);
 
                 if (article) {
                     document.getElementById('art-title').innerText = article.title;
                     document.getElementById('art-source').innerText = `${article.source} • ${article.category}`;
                     
-                    // Added Date Injection
                     if (article.date) {
                         document.getElementById('art-date').innerText = article.date;
                     }
                     
-                    // Injecting raw HTML preserving original <p> tags
                     document.getElementById('art-content').innerHTML = article.full_text;
-                    document.getElementById('art-summary').innerText = article.summary;
+                    // Requirement 4: Render HTML directly, not innerText
+                    document.getElementById('art-summary').innerHTML = article.summary;
                     document.getElementById('art-link').href = article.link;
 
                     if (article.image) {
@@ -277,6 +308,9 @@
                         imgEl.src = article.image;
                         imgEl.style.display = 'block';
                     }
+                    
+                    // Requirement 5: Restore Highlights
+                    restoreHighlights();
                 }
             } catch (error) {
                 console.error("Error loading article:", error);
@@ -290,7 +324,7 @@
         let selectedText = "";
         let selectionRange = null;
 
-        // Block Native Context Menu (Right Click/Long Press)
+        // Requirement 3: Block Native Context Menu
         document.addEventListener('contextmenu', event => {
             event.preventDefault();
         });
@@ -300,18 +334,20 @@
             selectedText = selection.toString().trim();
             
             if (selectedText.length > 0 && selectedText.length < 1000) {
-                selectionRange = selection.getRangeAt(0);
-                const rect = selectionRange.getBoundingClientRect();
-                
-                customToolbar.style.top = `${window.scrollY + rect.top - 50}px`;
-                customToolbar.style.left = `${rect.left + (rect.width / 2) - 100}px`;
-                customToolbar.style.display = 'flex';
+                if(selection.rangeCount > 0) {
+                    selectionRange = selection.getRangeAt(0);
+                    const rect = selectionRange.getBoundingClientRect();
+                    
+                    // Position toolbar above selection
+                    customToolbar.style.top = `${window.scrollY + rect.top - 50}px`;
+                    customToolbar.style.left = `${rect.left + (rect.width / 2) - 120}px`;
+                    customToolbar.style.display = 'flex';
+                }
             } else {
                 customToolbar.style.display = 'none';
             }
         });
 
-        // Hide toolbar when clicking elsewhere
         document.addEventListener('mousedown', (e) => {
             if (!customToolbar.contains(e.target) && window.getSelection().toString().length === 0) {
                 customToolbar.style.display = 'none';
@@ -320,12 +356,28 @@
 
         // Button Actions
         document.getElementById('btn-highlight').addEventListener('click', () => {
-            if (selectionRange) {
+            if (selectionRange && currentArticleId) {
                 const span = document.createElement('span');
                 span.className = 'highlighted-text';
                 selectionRange.surroundContents(span);
+                
+                // Requirement 5: Save to localStorage
+                saveHighlights();
+                
                 window.getSelection().removeAllRanges();
                 customToolbar.style.display = 'none';
+            }
+        });
+        
+        // Remove highlight on click
+        document.getElementById('art-content').addEventListener('click', (e) => {
+            if(e.target.classList.contains('highlighted-text')) {
+                const parent = e.target.parentNode;
+                while(e.target.firstChild) {
+                    parent.insertBefore(e.target.firstChild, e.target);
+                }
+                parent.removeChild(e.target);
+                saveHighlights();
             }
         });
 
@@ -364,6 +416,21 @@
 
         function closeSheet() {
             bottomSheet.classList.remove('active');
+        }
+        
+        // Requirement 5: LocalStorage logic for highlights
+        function saveHighlights() {
+            if(!currentArticleId) return;
+            const contentHTML = document.getElementById('art-content').innerHTML;
+            localStorage.setItem(`highlight_${currentArticleId}`, contentHTML);
+        }
+        
+        function restoreHighlights() {
+            if(!currentArticleId) return;
+            const savedContent = localStorage.getItem(`highlight_${currentArticleId}`);
+            if(savedContent) {
+                document.getElementById('art-content').innerHTML = savedContent;
+            }
         }
 
         // Initialize
