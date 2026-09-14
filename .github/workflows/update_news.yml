@@ -2,9 +2,9 @@ name: Update Just Daily News
 
 on:
   schedule:
-    # 0 2,11 * * * in UTC is 8:00 AM and 5:00 PM in BST (UTC+6)
-    - cron: '0 2,11 * * *'
-  workflow_dispatch: # Allows manual trigger
+    # Runs at 02:00 UTC, which is exactly 08:00 AM BD Time (UTC+6)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   update-news:
