@@ -20,14 +20,18 @@
             padding: 0;
             background-color: var(--bg-dark);
             color: var(--text-body);
-            font-family: 'Merriweather', serif; /* Serif for reading */
+            font-family: 'Merriweather', serif; 
             line-height: 1.8;
             font-size: 18px;
+            /* Disable native popups where possible */
+            -webkit-touch-callout: none;
         }
 
         .nav {
             padding: 20px;
             font-family: 'Inter', sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
         }
 
         .nav a {
@@ -49,16 +53,27 @@
             height: auto;
             border-radius: 4px;
             filter: brightness(0.9);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: none;
         }
 
-        .source-caption {
+        .metadata-container {
             font-family: 'Inter', sans-serif;
+            margin-bottom: 30px;
+        }
+
+        .source-caption {
+            font-size: 0.85rem;
+            color: var(--text-heading);
+            font-weight: 600;
+            display: block;
+        }
+        
+        .date-caption {
             font-size: 0.85rem;
             color: #71717a;
-            margin-bottom: 30px;
             display: block;
+            margin-top: 2px;
         }
 
         h1 {
@@ -70,6 +85,12 @@
 
         .content {
             margin-bottom: 50px;
+            color: var(--text-body);
+        }
+        
+        /* Preserve paragraph spacing */
+        .content p {
+            margin-bottom: 1.5em;
         }
 
         .summary-box {
@@ -100,27 +121,45 @@
             font-size: 0.9rem;
         }
 
-        /* Highlight & Translate UI */
+        /* Custom Selection Toolbar */
         .highlighted-text {
             background-color: var(--highlight-bg);
             border-radius: 2px;
         }
 
-        #translate-btn {
+        #custom-toolbar {
             position: absolute;
             background: #27272a;
-            color: #fff;
             border: 1px solid #3f3f46;
-            padding: 6px 12px;
-            border-radius: 6px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+            flex-direction: row;
+        }
+
+        #custom-toolbar button {
+            background: none;
+            color: #fff;
+            border: none;
+            border-right: 1px solid #3f3f46;
+            padding: 10px 15px;
             font-family: 'Inter', sans-serif;
             font-size: 0.85rem;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            display: none;
-            z-index: 1000;
+            outline: none;
+        }
+        
+        #custom-toolbar button:last-child {
+            border-right: none;
+        }
+        
+        #custom-toolbar button:hover {
+            background: #3f3f46;
         }
 
+        /* Bottom Sheet Translator UI */
         .bottom-sheet {
             position: fixed;
             bottom: 0;
@@ -170,30 +209,42 @@
 
     <div class="article-container">
         <img id="art-img" class="hero-img" src="" alt="Article Cover">
-        <span id="art-source" class="source-caption"></span>
+        
+        <div class="metadata-container">
+            <span id="art-source" class="source-caption"></span>
+            <span id="art-date" class="date-caption"></span>
+        </div>
+        
         <h1 id="art-title">Loading...</h1>
         
         <div id="art-content" class="content"></div>
         
         <div class="summary-box">
-            <h3>AI Editor's Note</h3>
+            <h3>Summary by Just Prova</h3>
             <div id="art-summary"></div>
         </div>
 
         <a id="art-link" href="#" target="_blank" class="btn-original">Read Original Article</a>
     </div>
 
-    <!-- Translator UI -->
-    <button id="translate-btn">Translate</button>
+    <!-- Custom Toolbar UI -->
+    <div id="custom-toolbar">
+        <button id="btn-highlight">Highlight</button>
+        <button id="btn-copy">Copy</button>
+        <button id="btn-translate">Translate</button>
+    </div>
+
+    <!-- Translation Bottom Sheet -->
     <div id="bottom-sheet" class="bottom-sheet">
         <div class="sheet-header">
-            <span>Translation / Analysis</span>
+            <span>✨ Just Prova Analysis</span>
             <button class="close-sheet" onclick="closeSheet()">✕</button>
         </div>
         <div id="sheet-content"></div>
     </div>
 
     <script>
+        // Replace with your active worker link
         const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
 
         async function loadArticle() {
@@ -210,7 +261,14 @@
                 if (article) {
                     document.getElementById('art-title').innerText = article.title;
                     document.getElementById('art-source').innerText = `${article.source} • ${article.category}`;
-                    document.getElementById('art-content').innerHTML = `<p>${article.full_text}</p>`;
+                    
+                    // Added Date Injection
+                    if (article.date) {
+                        document.getElementById('art-date').innerText = article.date;
+                    }
+                    
+                    // Injecting raw HTML preserving original <p> tags
+                    document.getElementById('art-content').innerHTML = article.full_text;
                     document.getElementById('art-summary').innerText = article.summary;
                     document.getElementById('art-link').href = article.link;
 
@@ -225,43 +283,66 @@
             }
         }
 
-        // Highlight & Translate Logic
-        const translateBtn = document.getElementById('translate-btn');
+        // Custom Toolbar & Block Native Context Menu
+        const customToolbar = document.getElementById('custom-toolbar');
         const bottomSheet = document.getElementById('bottom-sheet');
         const sheetContent = document.getElementById('sheet-content');
         let selectedText = "";
         let selectionRange = null;
 
+        // Block Native Context Menu (Right Click/Long Press)
+        document.addEventListener('contextmenu', event => {
+            event.preventDefault();
+        });
+
         document.addEventListener('selectionchange', () => {
             const selection = window.getSelection();
             selectedText = selection.toString().trim();
             
-            if (selectedText.length > 0 && selectedText.length < 500) {
+            if (selectedText.length > 0 && selectedText.length < 1000) {
                 selectionRange = selection.getRangeAt(0);
                 const rect = selectionRange.getBoundingClientRect();
                 
-                translateBtn.style.top = `${window.scrollY + rect.top - 40}px`;
-                translateBtn.style.left = `${rect.left + (rect.width / 2) - 40}px`;
-                translateBtn.style.display = 'block';
+                customToolbar.style.top = `${window.scrollY + rect.top - 50}px`;
+                customToolbar.style.left = `${rect.left + (rect.width / 2) - 100}px`;
+                customToolbar.style.display = 'flex';
             } else {
-                translateBtn.style.display = 'none';
+                customToolbar.style.display = 'none';
             }
         });
 
-        translateBtn.addEventListener('click', async () => {
-            if (!selectedText) return;
+        // Hide toolbar when clicking elsewhere
+        document.addEventListener('mousedown', (e) => {
+            if (!customToolbar.contains(e.target) && window.getSelection().toString().length === 0) {
+                customToolbar.style.display = 'none';
+            }
+        });
 
-            // Apply highlight styling
+        // Button Actions
+        document.getElementById('btn-highlight').addEventListener('click', () => {
             if (selectionRange) {
                 const span = document.createElement('span');
                 span.className = 'highlighted-text';
                 selectionRange.surroundContents(span);
                 window.getSelection().removeAllRanges();
+                customToolbar.style.display = 'none';
             }
+        });
 
-            translateBtn.style.display = 'none';
+        document.getElementById('btn-copy').addEventListener('click', () => {
+            if (selectedText) {
+                navigator.clipboard.writeText(selectedText);
+                window.getSelection().removeAllRanges();
+                customToolbar.style.display = 'none';
+            }
+        });
+
+        document.getElementById('btn-translate').addEventListener('click', async () => {
+            if (!selectedText) return;
+
+            customToolbar.style.display = 'none';
             bottomSheet.classList.add('active');
-            sheetContent.innerHTML = '<span class="loader">Analyzing with DeepSeek...</span>';
+            sheetContent.innerHTML = '<span class="loader">Analyzing with Just Prova...</span>';
 
             try {
                 const res = await fetch(WORKER_URL, {
@@ -285,7 +366,7 @@
             bottomSheet.classList.remove('active');
         }
 
-        // Load data on start
+        // Initialize
         loadArticle();
     </script>
 </body>
