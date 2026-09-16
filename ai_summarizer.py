@@ -21,61 +21,60 @@ FEEDS = {
 def generate_id(url):
     return hashlib.md5(url.encode()).hexdigest()
 
-def clean_element(element):
-    # Requirement 2: Clean junk links and menus, but keep bold/subheadings
-    # Remove all a tags but keep their inner text
-    for a_tag in element.find_all('a'):
-        a_tag.unwrap()
-    
-    # Remove common junk elements
-    for tag in element.find_all(['nav', 'footer', 'aside', 'script', 'style', 'button', 'form']):
-        tag.decompose()
+def extract_clean_content(entry, link):
+    raw_html = ""
+    # 1. Try grabbing full content directly from feed (Fastest & ad-free)
+    if 'content' in entry and len(entry.content) > 0:
+        raw_html = entry.content[0].value
+    elif 'description' in entry:
+        raw_html = entry.description
+        
+    # 2. If feed text is too short, fallback to web scraping
+    if len(raw_html) < 500:
+        try:
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+            response = requests.get(link, headers=headers, timeout=10)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            main_body = soup.find('div', class_='entry-content') or soup.find('article') or soup
+            raw_html = str(main_body)
+        except Exception as e:
+            print(f"Scraping error: {e}")
+            return ""
 
-    # Further cleanup: remove elements with common junk classes or ids
-    junk_keywords = ['share', 'social', 'menu', 'sidebar', 'newsletter', 'follow', 'related', 'promo']
-    for tag in element.find_all(True):
+    soup = BeautifulSoup(raw_html, 'html.parser')
+    
+    # Remove Links but keep text
+    for a in soup.find_all('a'):
+        a.unwrap()
+        
+    # Destroy unwanted structural tags
+    for tag in soup.find_all(['nav', 'footer', 'aside', 'script', 'style', 'button', 'form', 'figure']):
+        try:
+            tag.decompose()
+        except:
+            pass
+            
+    # Destroy junk classes (Social, share, related) safely
+    junk_keywords = ['share', 'social', 'newsletter', 'related', 'promo', 'jp-relatedposts']
+    for tag in soup.find_all(True):
         if tag.has_attr('class'):
             class_str = ' '.join(tag['class']).lower()
             if any(keyword in class_str for keyword in junk_keywords):
-                tag.decompose()
-                continue
-        if tag.has_attr('id'):
-            id_str = tag['id'].lower()
-            if any(keyword in id_str for keyword in junk_keywords):
-                tag.decompose()
+                try:
+                    tag.decompose()
+                except:
+                    pass
 
-def scrape_article_html(url):
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers, timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Try to find the main article body
-        article_body = soup.find('article')
-        if not article_body:
-            # Fallback if no article tag
-            article_body = soup.find('div', class_=lambda x: x and 'content' in x.lower())
-            if not article_body:
-                article_body = soup
-        
-        clean_element(article_body)
-        
-        # Collect headings and paragraphs
-        elements = article_body.find_all(['p', 'h2', 'h3', 'h4'])
-        content = ""
-        for el in elements:
-            html_el = str(el)
-            # Rough length limit
-            if len(content) + len(html_el) > 6000:
+    # Extract ONLY pure paragraphs and headers
+    final_content = ""
+    for el in soup.find_all(['p', 'h2', 'h3', 'h4']):
+        text = el.get_text(strip=True)
+        if len(text) > 30:  # Skip tiny meaningless text blocks
+            final_content += str(el)
+            if len(final_content) > 6000:
                 break
-            # Ignore empty or very short junk paragraphs
-            if len(el.get_text(strip=True)) > 10:
-                content += html_el
-            
-        return content
-    except Exception as e:
-        print(f"Error scraping {url}: {e}")
-        return ""
+                
+    return final_content
 
 def format_date(parsed_time):
     if parsed_time:
@@ -91,13 +90,11 @@ def summarize_with_deepseek(text):
         return "Summary not available."
     
     clean_text = BeautifulSoup(text, "html.parser").get_text()
-    
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
         "Content-Type": "application/json"
     }
     
-    # Requirement 4: Just Prova summary in bullet points, standard size, pure HTML
     payload = {
         "model": "deepseek-chat",
         "messages": [
@@ -129,13 +126,11 @@ def main():
         for feed_url in urls:
             parsed_feed = feedparser.parse(feed_url)
             
-            # Requirement 1: Only 1 article per day
             for entry in parsed_feed.entries:
                 link = entry.link
                 title = entry.title
                 pub_date = format_date(entry.get('published_parsed', entry.get('updated_parsed')))
                 
-                # Image Extraction Logic
                 image = ""
                 if 'media_content' in entry and len(entry.media_content) > 0:
                     image = entry.media_content[0].get('url', '')
@@ -151,9 +146,10 @@ def main():
                             image = img_tag['src']
                 
                 print(f"Processing: {title}")
-                full_html = scrape_article_html(link)
+                full_html = extract_clean_content(entry, link)
                 
-                if len(full_html) > 200:
+                # If valid content found, save and break
+                if len(full_html) > 150:
                     summary = summarize_with_deepseek(full_html)
                     
                     news_data.append({
@@ -167,8 +163,8 @@ def main():
                         "full_text": full_html,
                         "summary": summary
                     })
-                    break # Stop after 1 valid article
-            break # Stop after 1 feed
+                    break
+            break
     
     bst_time = datetime.now(timezone.utc) + timedelta(hours=6)
     
