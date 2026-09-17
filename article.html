@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport constraint added to prevent zoom/overflow bugs -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Just Daily - Article</title>
     
@@ -100,7 +99,7 @@
         }
 
         .article-content {
-            font-family: 'Merriweather', serif; /* Premium reading font */
+            font-family: 'Merriweather', serif; 
             font-size: 1.15rem;
             color: #d4d4d8;
             line-height: 1.8;
@@ -122,7 +121,6 @@
 
     <header class="app-header">
         <a href="/" class="back-link">← Back to Feed</a>
-        <!-- Authentication UI has been completely removed from here -->
     </header>
 
     <main class="article-container" id="article-view">
@@ -140,6 +138,9 @@
                 const article = data.articles.find(a => a.id == articleId);
                 
                 if(article) {
+                    // JSON এর description, content, body বা text যেকোনো একটি থেকে ডেটা নিবে
+                    const articleBody = article.content || article.description || article.body || article.text || '';
+                    
                     document.getElementById('article-view').innerHTML = `
                         <div class="article-meta">
                             ${article.source} • ${article.category}
@@ -150,8 +151,7 @@
                             <button class="action-btn">🔖 Save Article</button>
                         </div>
                         <div class="article-content">
-                            <!-- In a real app, article.content or full HTML goes here -->
-                            <p>${article.content || "Full detailed article content goes here. If you have paragraphs in your JSON, map them accordingly."}</p>
+                            <p>${articleBody}</p>
                         </div>
                     `;
                 } else {
