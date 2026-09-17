@@ -25,11 +25,25 @@
 
         header {
             padding: 25px 20px;
-            text-align: left; /* Updated: Left aligned */
             border-bottom: 1px solid var(--border-color);
             background-color: var(--bg-dark);
             max-width: 900px;
             margin: 0 auto;
+        }
+
+        /* লোগো এবং টাইটেলের জন্য নতুন স্টাইল */
+        .brand-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+
+        .header-logo {
+            width: 45px;
+            height: 45px;
+            border-radius: 6px;
+            object-fit: cover;
         }
 
         header h1 {
@@ -43,7 +57,7 @@
         .timestamp {
             font-size: 0.85rem;
             color: #71717a;
-            margin-top: 5px;
+            margin-top: 10px;
             font-weight: 400;
         }
 
@@ -107,13 +121,19 @@
         @media (max-width: 600px) {
             .news-title { font-size: 1.2rem; }
             .card-img { height: 180px; }
+            .header-logo { width: 35px; height: 35px; }
+            header h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Just Daily</h1>
+        <!-- ক্লিন ইউআরএল এবং লোগো যুক্ত করা হয়েছে -->
+        <a href="/" class="brand-link">
+            <img src="logo.png" alt="Just Daily Logo" class="header-logo">
+            <h1>Just Daily</h1>
+        </a>
         <div class="timestamp" id="last-updated">Fetching updates...</div>
     </header>
 
