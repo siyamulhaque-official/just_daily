@@ -89,15 +89,16 @@
 
         .highlighted-text { background-color: var(--highlight-bg); border-radius: 2px; cursor: pointer; }
 
-        /* TTS Word Highlight Box (Premium Feature) */
+        /* FIXED: TTS Word Highlight Box */
         #tts-highlighter {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.25);
+            background-color: rgba(255, 255, 255, 0.15); /* Soft White */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Visibility Boost */
             border-radius: 4px;
             pointer-events: none;
-            transition: all 0.15s ease-out; /* Makes the box glide smoothly */
-            display: none;
-            z-index: 5;
+            transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s;
+            opacity: 0; /* Hidden by default */
+            z-index: 10;
         }
 
         #custom-toolbar {
@@ -190,6 +191,9 @@
         const synth = window.speechSynthesis;
         let isArticlePlaying = false;
 
+        // FIXED: Global array to prevent Android Garbage Collection bug
+        window.speechUtterances = []; 
+
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
             currentArticleId = params.get('id');
@@ -278,8 +282,12 @@
                 if(selection.rangeCount > 0) {
                     selectionRange = selection.getRangeAt(0);
                     const rect = selectionRange.getBoundingClientRect();
-                    customToolbar.style.top = `${window.scrollY + rect.top - 50}px`;
-                    customToolbar.style.left = `${rect.left + (rect.width / 2) - 120}px`;
+                    
+                    let scrollY = window.scrollY || document.documentElement.scrollTop;
+                    let scrollX = window.scrollX || document.documentElement.scrollLeft;
+
+                    customToolbar.style.top = `${scrollY + rect.top - 50}px`;
+                    customToolbar.style.left = `${scrollX + rect.left + (rect.width / 2) - 120}px`;
                     customToolbar.style.display = 'flex';
                 }
             } else { customToolbar.style.display = 'none'; }
@@ -343,18 +351,17 @@
         let ttsMapping = [];
         let ttsText = "";
 
-        // Function to create a mapped string of the HTML exactly as it sounds
         function prepareTTS() {
             ttsMapping = [];
             ttsText = "";
             const contentDiv = document.getElementById('art-content');
             
             function traverse(node) {
-                if (node.nodeType === 3) { // Text Node
+                if (node.nodeType === 3) { 
                     let text = node.nodeValue;
                     ttsMapping.push({ node: node, start: ttsText.length, text: text });
                     ttsText += text;
-                } else if (node.nodeType === 1) { // Element Node
+                } else if (node.nodeType === 1) { 
                     const tag = node.tagName.toLowerCase();
                     const isBlock = ['p', 'h1', 'h2', 'h3', 'h4', 'div', 'li', 'ul', 'br'].includes(tag);
                     
@@ -397,18 +404,20 @@
                         let rect = rects[0];
                         let highlighter = document.getElementById('tts-highlighter');
                         
-                        // Set the transparent white box over the word smoothly
-                        highlighter.style.top = (rect.top + window.scrollY - 2) + 'px';
-                        highlighter.style.left = (rect.left + window.scrollX - 2) + 'px';
+                        let scrollY = window.scrollY || document.documentElement.scrollTop;
+                        let scrollX = window.scrollX || document.documentElement.scrollLeft;
+
+                        highlighter.style.top = (rect.top + scrollY - 2) + 'px';
+                        highlighter.style.left = (rect.left + scrollX - 2) + 'px';
                         highlighter.style.width = (rect.width + 4) + 'px';
                         highlighter.style.height = (rect.height + 4) + 'px';
-                        highlighter.style.display = 'block';
+                        highlighter.style.opacity = '1'; 
                         
-                        // Auto-scroll logic: If the word is going out of view, scroll smoothly!
+                        // Auto-scroll logic
                         const safeTop = 150;
                         const safeBottom = window.innerHeight - 150;
                         if (rect.top < safeTop || rect.bottom > safeBottom) {
-                            window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 2, behavior: 'smooth' });
+                            window.scrollTo({ top: scrollY + rect.top - window.innerHeight / 2, behavior: 'smooth' });
                         }
                     }
                 } catch(err) { console.log("Range error:", err); }
@@ -423,12 +432,17 @@
                 synth.cancel(); 
                 btn.innerHTML = '🔊 Listen to Article';
                 isArticlePlaying = false;
-                highlighter.style.display = 'none';
+                highlighter.style.opacity = '0';
             } else {
+                synth.cancel(); // Clear any stuck speech
+                
                 const articleTextToRead = prepareTTS();
                 const utterance = new SpeechSynthesisUtterance(articleTextToRead);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.95; 
+                
+                // Save to global array to prevent GC bug on Android
+                window.speechUtterances.push(utterance);
                 
                 utterance.onboundary = (e) => {
                     if (e.name === 'word') {
@@ -441,8 +455,18 @@
                     }
                 };
                 
-                utterance.onend = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.display = 'none'; };
-                utterance.onerror = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.display = 'none'; };
+                utterance.onend = () => { 
+                    btn.innerHTML = '🔊 Listen to Article'; 
+                    isArticlePlaying = false; 
+                    highlighter.style.opacity = '0'; 
+                };
+                
+                utterance.onerror = (e) => { 
+                    console.log("TTS Error: ", e);
+                    btn.innerHTML = '🔊 Listen to Article'; 
+                    isArticlePlaying = false; 
+                    highlighter.style.opacity = '0'; 
+                };
 
                 synth.speak(utterance);
                 btn.innerHTML = '⏹ Stop Listening';
@@ -456,11 +480,11 @@
                 const utterance = new SpeechSynthesisUtterance(selectedText);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.9;
+                window.speechUtterances.push(utterance);
                 synth.speak(utterance);
             }
         });
 
-        // Cancel speech if user switches page
         window.addEventListener('beforeunload', () => synth.cancel());
 
         function closeSheet() { bottomSheet.classList.remove('active'); synth.cancel(); }
@@ -471,6 +495,8 @@
             if(savedContent) document.getElementById('art-content').innerHTML = savedContent;
         }
 
+        // Run cancel on page load just in case speech is stuck
+        window.speechSynthesis.cancel();
         loadArticle();
     </script>
 </body>
