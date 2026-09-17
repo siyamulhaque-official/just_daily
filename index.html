@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Just Daily</title>
+    
+    <!-- অ্যাপ আইকন ও ব্রাউজার ট্যাবের জন্য লোগো সেটআপ -->
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,19 +36,9 @@
             margin: 0 auto;
         }
 
-        /* লোগো এবং টাইটেলের জন্য নতুন স্টাইল */
         .brand-link {
-            display: flex;
-            align-items: center;
-            gap: 15px;
             text-decoration: none;
-        }
-
-        .header-logo {
-            width: 45px;
-            height: 45px;
-            border-radius: 6px;
-            object-fit: cover;
+            display: inline-block;
         }
 
         header h1 {
@@ -121,7 +116,6 @@
         @media (max-width: 600px) {
             .news-title { font-size: 1.2rem; }
             .card-img { height: 180px; }
-            .header-logo { width: 35px; height: 35px; }
             header h1 { font-size: 1.8rem; }
         }
     </style>
@@ -129,9 +123,8 @@
 <body>
 
     <header>
-        <!-- ক্লিন ইউআরএল এবং লোগো যুক্ত করা হয়েছে -->
+        <!-- ক্লিন URL এবং শুধু টেক্সট লোগো -->
         <a href="/" class="brand-link">
-            <img src="logo.jpg" alt="Just Daily Logo" class="header-logo">
             <h1>Just Daily</h1>
         </a>
         <div class="timestamp" id="last-updated">Fetching updates...</div>
