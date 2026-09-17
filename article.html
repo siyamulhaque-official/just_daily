@@ -23,7 +23,6 @@
             font-family: 'Merriweather', serif; 
             line-height: 1.8;
             font-size: 18px;
-            /* Blocks native long-press context menu (Copy/Share) */
             -webkit-touch-callout: none;
             user-select: none;
         }
@@ -64,9 +63,26 @@
         .source-caption { font-size: 0.85rem; color: var(--text-heading); font-weight: 600; display: block; }
         .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
 
-        h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 30px; }
+        h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 20px; }
 
-        /* Re-enabled native selection for these elements so teardrops appear */
+        /* Voice Listen Button Styles */
+        .btn-listen {
+            background-color: var(--surface);
+            color: var(--text-heading);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-bottom: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-listen:hover { background-color: #27272a; }
+
         .content, #art-title, .summary-box {
             color: var(--text-body);
             user-select: text;
@@ -157,7 +173,21 @@
         }
         .bottom-sheet.active { transform: translateY(0); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--text-heading); font-weight: 600; }
-        .close-sheet { background: none; border: none; color: var(--text-body); font-size: 1.2rem; cursor: pointer; }
+        
+        .sheet-header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-body);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .btn-icon:hover { color: var(--text-heading); }
+        
         .loader { color: #71717a; font-size: 0.9rem; }
     </style>
 </head>
@@ -167,7 +197,6 @@
         <a href="index.html">← Back to Feed</a>
     </div>
 
-    <!-- Added role="textbox" to subtly discourage native Touch to Search while keeping drag handles -->
     <div class="article-container" role="textbox" aria-readonly="true">
         <img id="art-img" class="hero-img" src="" alt="Article Cover">
         
@@ -177,6 +206,9 @@
         </div>
         
         <h1 id="art-title">Loading...</h1>
+        
+        <!-- Voice Listen Button -->
+        <button id="btn-listen" class="btn-listen">🔊 Listen to Article</button>
         
         <div id="art-content" class="content"></div>
         
@@ -197,7 +229,11 @@
     <div id="bottom-sheet" class="bottom-sheet">
         <div class="sheet-header">
             <span>✨ Just Prova Analysis</span>
-            <button class="close-sheet" onclick="closeSheet()">✕</button>
+            <div class="sheet-header-actions">
+                <!-- Pronounce Button -->
+                <button id="btn-pronounce" class="btn-icon" title="Pronounce word">🔊</button>
+                <button class="close-sheet btn-icon" onclick="closeSheet()">✕</button>
+            </div>
         </div>
         <div id="sheet-content"></div>
     </div>
@@ -205,6 +241,10 @@
     <script>
         const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
         let currentArticleId = null;
+
+        // TTS Setup
+        const synth = window.speechSynthesis;
+        let isArticlePlaying = false;
 
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
@@ -243,23 +283,19 @@
         let selectedText = "";
         let selectionRange = null;
 
-        // Block native Right-Click / Long-Press native menu
+        // Block native menu
         document.addEventListener('contextmenu', event => {
             event.preventDefault();
         });
 
-        // Single Tap to Select Word Logic
+        // Smart Word Selection
         document.querySelector('.article-container').addEventListener('click', function(e) {
-            // Ignore if clicking on toolbars, links, or already highlighted text
-            if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text')) return;
+            if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text') || e.target.closest('#btn-listen')) return;
 
             const sel = window.getSelection();
-            // If user is trying to select multiple words manually, don't interfere
             if (!sel.isCollapsed && sel.toString().trim().includes(" ")) return;
 
-            let x = e.clientX;
-            let y = e.clientY;
-            let textNode, offset;
+            let x = e.clientX, y = e.clientY, textNode, offset;
 
             if (document.caretPositionFromPoint) {
                 let pos = document.caretPositionFromPoint(x, y);
@@ -274,17 +310,12 @@
             }
 
             if (textNode && textNode.nodeType === 3) { 
-                let text = textNode.nodeValue;
-                let start = offset;
-                let end = offset;
-                
+                let text = textNode.nodeValue, start = offset, end = offset;
                 const isWordChar = (char) => /[^\s\.,;:!?\(\)\[\]"'\-—]/.test(char);
 
                 if (start < text.length && !isWordChar(text[start])) {
-                   if (start > 0 && isWordChar(text[start-1])) {
-                       start--;
-                       end--;
-                   } else { return; } 
+                   if (start > 0 && isWordChar(text[start-1])) { start--; end--; } 
+                   else { return; } 
                 }
 
                 while (start > 0 && isWordChar(text[start - 1])) start--;
@@ -296,7 +327,6 @@
                     newRange.setEnd(textNode, end);
                     sel.removeAllRanges();
                     sel.addRange(newRange);
-                    
                     setTimeout(() => document.dispatchEvent(new Event('selectionchange')), 10);
                 }
             }
@@ -341,9 +371,7 @@
         document.getElementById('art-content').addEventListener('click', (e) => {
             if(e.target.classList.contains('highlighted-text')) {
                 const parent = e.target.parentNode;
-                while(e.target.firstChild) {
-                    parent.insertBefore(e.target.firstChild, e.target);
-                }
+                while(e.target.firstChild) { parent.insertBefore(e.target.firstChild, e.target); }
                 parent.removeChild(e.target);
                 saveHighlights();
             }
@@ -372,34 +400,68 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: selectedText })
                 });
-                
                 const data = await res.json();
-                if(data.result) {
-                    sheetContent.innerHTML = data.result;
-                } else {
-                    sheetContent.innerHTML = 'Translation failed.';
-                }
+                sheetContent.innerHTML = data.result ? data.result : 'Translation failed.';
             } catch (err) {
                 sheetContent.innerHTML = 'Error communicating with server.';
             }
         });
 
+        // ------------------------------------------
+        // TEXT TO SPEECH LOGIC
+        // ------------------------------------------
+        
+        // 1. Play Full Article
+        document.getElementById('btn-listen').addEventListener('click', () => {
+            const btn = document.getElementById('btn-listen');
+            if (isArticlePlaying) {
+                synth.cancel(); // Stop playing
+                btn.innerHTML = '🔊 Listen to Article';
+                isArticlePlaying = false;
+            } else {
+                // Get clear text for reading
+                const articleText = document.getElementById('art-content').innerText;
+                const utterance = new SpeechSynthesisUtterance(articleText);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.95; // Slightly slower for better clarity
+                
+                utterance.onend = () => {
+                    btn.innerHTML = '🔊 Listen to Article';
+                    isArticlePlaying = false;
+                };
+
+                synth.speak(utterance);
+                btn.innerHTML = '⏹ Stop Listening';
+                isArticlePlaying = true;
+            }
+        });
+
+        // 2. Pronounce Translated Word
+        document.getElementById('btn-pronounce').addEventListener('click', () => {
+            if (selectedText) {
+                synth.cancel(); // Stop any current speech
+                const utterance = new SpeechSynthesisUtterance(selectedText);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                synth.speak(utterance);
+            }
+        });
+
+        // Stop TTS when closing the bottom sheet
         function closeSheet() {
             bottomSheet.classList.remove('active');
+            synth.cancel(); // Mutes the pronunciation if playing
         }
         
         function saveHighlights() {
             if(!currentArticleId) return;
-            const contentHTML = document.getElementById('art-content').innerHTML;
-            localStorage.setItem(`highlight_${currentArticleId}`, contentHTML);
+            localStorage.setItem(`highlight_${currentArticleId}`, document.getElementById('art-content').innerHTML);
         }
         
         function restoreHighlights() {
             if(!currentArticleId) return;
             const savedContent = localStorage.getItem(`highlight_${currentArticleId}`);
-            if(savedContent) {
-                document.getElementById('art-content').innerHTML = savedContent;
-            }
+            if(savedContent) document.getElementById('art-content').innerHTML = savedContent;
         }
 
         loadArticle();
