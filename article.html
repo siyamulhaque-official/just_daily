@@ -16,19 +16,20 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-body);
-            font-family: 'Merriweather', serif; 
-            line-height: 1.8;
-            font-size: 18px;
-            -webkit-touch-callout: none;
-            user-select: none;
+            margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-body);
+            font-family: 'Merriweather', serif; line-height: 1.8; font-size: 18px;
+            -webkit-touch-callout: none; user-select: none;
         }
 
-        .nav { padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; }
+        .nav { padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .nav a { color: var(--text-body); text-decoration: none; font-size: 0.9rem; }
+        
+        /* Auth Styles */
+        .auth-container { display: flex; gap: 10px; align-items: center; }
+        .btn-auth { background: var(--text-heading); color: var(--bg-dark); border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; }
+        .btn-auth.logout { background: #3f3f46; color: var(--text-heading); }
+        .user-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); }
+
         .article-container { max-width: 700px; margin: 0 auto 60px auto; padding: 0 20px; }
         .hero-img { width: 100%; height: auto; border-radius: 4px; filter: brightness(0.9); margin-bottom: 15px; display: none; }
         .metadata-container { font-family: 'Inter', sans-serif; margin-bottom: 30px; }
@@ -36,22 +37,14 @@
         .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
         h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 20px; }
 
-        .btn-listen {
-            background-color: var(--surface);
-            color: var(--text-heading);
-            border: 1px solid var(--border-color);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-bottom: 30px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
+        .action-buttons { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
+        .btn-action {
+            background-color: var(--surface); color: var(--text-heading); border: 1px solid var(--border-color);
+            padding: 8px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.85rem;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;
         }
-        .btn-listen:hover { background-color: #27272a; }
+        .btn-action:hover { background-color: #27272a; }
+        .btn-action.saved { background-color: #059669; color: white; border-color: #059669; }
 
         .content, #art-title, .summary-box { color: var(--text-body); user-select: text; -webkit-user-select: text; }
         #art-title { color: var(--text-heading); }
@@ -60,77 +53,24 @@
         .content h2, .content h3, .content h4 { color: var(--text-heading); margin-top: 1.5em; margin-bottom: 0.5em; }
         .content strong, .content b { color: var(--text-heading); }
 
-        .summary-box {
-            background-color: var(--surface);
-            border-left: 4px solid #52525b;
-            padding: 25px;
-            border-radius: 0 8px 8px 0;
-            margin-bottom: 40px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-        }
+        .summary-box { background-color: var(--surface); border-left: 4px solid #52525b; padding: 25px; border-radius: 0 8px 8px 0; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
         .summary-box h3 { margin-top: 0; color: var(--text-heading); font-size: 1.1rem; margin-bottom: 15px; }
         #art-summary p { margin-top: 0; margin-bottom: 10px; }
         #art-summary ul { padding-left: 20px; margin: 0; }
         #art-summary li { margin-bottom: 8px; }
         #art-summary strong { color: var(--text-heading); }
 
-        .btn-original {
-            display: inline-block;
-            background-color: var(--text-heading);
-            color: var(--bg-dark);
-            padding: 12px 24px;
-            text-decoration: none;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
+        .btn-original { display: inline-block; background-color: var(--text-heading); color: var(--bg-dark); padding: 12px 24px; text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 600; border-radius: 4px; font-size: 0.9rem; }
         .highlighted-text { background-color: var(--highlight-bg); border-radius: 2px; cursor: pointer; }
 
-        /* FIXED: TTS Word Highlight Box */
-        #tts-highlighter {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.15); /* Soft White */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Visibility Boost */
-            border-radius: 4px;
-            pointer-events: none;
-            transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s;
-            opacity: 0; /* Hidden by default */
-            z-index: 10;
-        }
+        #tts-highlighter { position: absolute; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; pointer-events: none; transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s; opacity: 0; z-index: 10; }
 
-        #custom-toolbar {
-            position: absolute;
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-            display: none;
-            z-index: 1000;
-            overflow: hidden;
-            flex-direction: row;
-        }
+        #custom-toolbar { position: absolute; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: none; z-index: 1000; overflow: hidden; flex-direction: row; }
         #custom-toolbar button { background: none; color: #fff; border: none; border-right: 1px solid #3f3f46; padding: 10px 15px; font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; outline: none; }
         #custom-toolbar button:last-child { border-right: none; }
         #custom-toolbar button:hover { background: #3f3f46; }
 
-        .bottom-sheet {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: var(--surface);
-            border-top: 1px solid var(--border-color);
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1001;
-            padding: 20px;
-            box-sizing: border-box;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-            font-family: 'Inter', sans-serif;
-        }
+        .bottom-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--surface); border-top: 1px solid var(--border-color); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px; box-sizing: border-box; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif; }
         .bottom-sheet.active { transform: translateY(0); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--text-heading); font-weight: 600; }
         .sheet-header-actions { display: flex; gap: 15px; align-items: center; }
@@ -141,10 +81,14 @@
 </head>
 <body>
 
-    <!-- TTS Floating Highlighter Box -->
     <div id="tts-highlighter"></div>
 
-    <div class="nav"><a href="index.html">← Back to Feed</a></div>
+    <div class="nav">
+        <a href="index.html">← Back to Feed</a>
+        <div class="auth-container" id="auth-container">
+            <button id="btn-login" class="btn-auth">Sign In</button>
+        </div>
+    </div>
 
     <div class="article-container" role="textbox" aria-readonly="true">
         <img id="art-img" class="hero-img" src="" alt="Article Cover">
@@ -156,7 +100,10 @@
         
         <h1 id="art-title">Loading...</h1>
         
-        <button id="btn-listen" class="btn-listen">🔊 Listen to Article</button>
+        <div class="action-buttons">
+            <button id="btn-listen" class="btn-action">🔊 Listen to Article</button>
+            <button id="btn-save" class="btn-action" style="display: none;">🔖 Save Article</button>
+        </div>
         
         <div id="art-content" class="content"></div>
         
@@ -185,15 +132,93 @@
         <div id="sheet-content"></div>
     </div>
 
-    <script>
+    <!-- Firebase App (the core Firebase SDK) & Auth/Firestore -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Firebase Configuration (from your exact snippet)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVvKKMF56vXQpqExWfeFq7xvFLDIcNxc8",
+            authDomain: "just-daily.firebaseapp.com",
+            projectId: "just-daily",
+            storageBucket: "just-daily.firebasestorage.app",
+            messagingSenderId: "634875817986",
+            appId: "1:634875817986:web:224f4af4e021e3c5f5b71b",
+            measurementId: "G-6SV0953YZN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
         const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
         let currentArticleId = null;
+        let currentUser = null;
+        
         const synth = window.speechSynthesis;
         let isArticlePlaying = false;
-
-        // FIXED: Global array to prevent Android Garbage Collection bug
         window.speechUtterances = []; 
 
+        // Authentication Observer
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const authContainer = document.getElementById('auth-container');
+            const btnSave = document.getElementById('btn-save');
+            
+            if (user) {
+                authContainer.innerHTML = `
+                    <img src="${user.photoURL}" class="user-pic" alt="User" referrerpolicy="no-referrer">
+                    <button id="btn-logout" class="btn-auth logout">Logout</button>
+                `;
+                document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+                btnSave.style.display = 'inline-flex';
+                checkIfSaved();
+            } else {
+                authContainer.innerHTML = `<button id="btn-login" class="btn-auth">Sign In</button>`;
+                document.getElementById('btn-login').addEventListener('click', () => signInWithPopup(auth, provider));
+                btnSave.style.display = 'none';
+            }
+        });
+
+        async function checkIfSaved() {
+            if(!currentUser || !currentArticleId) return;
+            const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
+            const docSnap = await getDoc(docRef);
+            const btnSave = document.getElementById('btn-save');
+            if (docSnap.exists()) {
+                btnSave.innerHTML = '✅ Saved';
+                btnSave.classList.add('saved');
+            } else {
+                btnSave.innerHTML = '🔖 Save Article';
+                btnSave.classList.remove('saved');
+            }
+        }
+
+        // Save Article to Firebase Logic
+        document.getElementById('btn-save').addEventListener('click', async () => {
+            if(!currentUser || !currentArticleId) return;
+            const btnSave = document.getElementById('btn-save');
+            const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
+
+            if (btnSave.classList.contains('saved')) {
+                await deleteDoc(docRef);
+                btnSave.innerHTML = '🔖 Save Article';
+                btnSave.classList.remove('saved');
+            } else {
+                await setDoc(docRef, {
+                    id: currentArticleId,
+                    title: document.getElementById('art-title').innerText,
+                    date: new Date().toISOString()
+                });
+                btnSave.innerHTML = '✅ Saved';
+                btnSave.classList.add('saved');
+            }
+        });
+
+        // Load Article Logic
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
             currentArticleId = params.get('id');
@@ -219,6 +244,7 @@
                         imgEl.style.display = 'block';
                     }
                     restoreHighlights();
+                    checkIfSaved(); // Check state on load
                 }
             } catch (error) { console.error("Error loading article:", error); }
         }
@@ -231,9 +257,9 @@
 
         document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // Single Tap Selection Logic
+        // Word Selection & Interactions
         document.querySelector('.article-container').addEventListener('click', function(e) {
-            if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text') || e.target.closest('#btn-listen')) return;
+            if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text') || e.target.closest('.action-buttons')) return;
 
             const sel = window.getSelection();
             if (!sel.isCollapsed && sel.toString().trim().includes(" ")) return;
@@ -344,10 +370,7 @@
             } catch (err) { sheetContent.innerHTML = 'Error communicating with server.'; }
         });
 
-        // ------------------------------------------
-        // TEXT TO SPEECH & HIGHLIGHT TRACKING
-        // ------------------------------------------
-        
+        // TTS Logics
         let ttsMapping = [];
         let ttsText = "";
 
@@ -383,9 +406,7 @@
                 }
             }
             let last = ttsMapping[ttsMapping.length - 1];
-            if (last && offset >= last.start + last.text.length) {
-                return { node: last.node, localOffset: last.text.length };
-            }
+            if (last && offset >= last.start + last.text.length) { return { node: last.node, localOffset: last.text.length }; }
             return null;
         }
 
@@ -413,7 +434,6 @@
                         highlighter.style.height = (rect.height + 4) + 'px';
                         highlighter.style.opacity = '1'; 
                         
-                        // Auto-scroll logic
                         const safeTop = 150;
                         const safeBottom = window.innerHeight - 150;
                         if (rect.top < safeTop || rect.bottom > safeBottom) {
@@ -434,14 +454,13 @@
                 isArticlePlaying = false;
                 highlighter.style.opacity = '0';
             } else {
-                synth.cancel(); // Clear any stuck speech
+                synth.cancel(); 
                 
                 const articleTextToRead = prepareTTS();
                 const utterance = new SpeechSynthesisUtterance(articleTextToRead);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.95; 
                 
-                // Save to global array to prevent GC bug on Android
                 window.speechUtterances.push(utterance);
                 
                 utterance.onboundary = (e) => {
@@ -455,18 +474,8 @@
                     }
                 };
                 
-                utterance.onend = () => { 
-                    btn.innerHTML = '🔊 Listen to Article'; 
-                    isArticlePlaying = false; 
-                    highlighter.style.opacity = '0'; 
-                };
-                
-                utterance.onerror = (e) => { 
-                    console.log("TTS Error: ", e);
-                    btn.innerHTML = '🔊 Listen to Article'; 
-                    isArticlePlaying = false; 
-                    highlighter.style.opacity = '0'; 
-                };
+                utterance.onend = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.opacity = '0'; };
+                utterance.onerror = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.opacity = '0'; };
 
                 synth.speak(utterance);
                 btn.innerHTML = '⏹ Stop Listening';
@@ -487,7 +496,9 @@
 
         window.addEventListener('beforeunload', () => synth.cancel());
 
-        function closeSheet() { bottomSheet.classList.remove('active'); synth.cancel(); }
+        // Attach closeSheet to window for HTML inline access
+        window.closeSheet = function() { bottomSheet.classList.remove('active'); synth.cancel(); };
+
         function saveHighlights() { if(currentArticleId) localStorage.setItem(`highlight_${currentArticleId}`, document.getElementById('art-content').innerHTML); }
         function restoreHighlights() {
             if(!currentArticleId) return;
@@ -495,7 +506,6 @@
             if(savedContent) document.getElementById('art-content').innerHTML = savedContent;
         }
 
-        // Run cancel on page load just in case speech is stuck
         window.speechSynthesis.cancel();
         loadArticle();
     </script>
