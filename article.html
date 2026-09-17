@@ -23,6 +23,7 @@
             font-family: 'Merriweather', serif; 
             line-height: 1.8;
             font-size: 18px;
+            /* Blocks native long-press context menu (Copy/Share) */
             -webkit-touch-callout: none;
             user-select: none;
         }
@@ -63,15 +64,13 @@
         .source-caption { font-size: 0.85rem; color: var(--text-heading); font-weight: 600; display: block; }
         .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
 
-        /* Modified: Added hack to Title and Summary for selection */
         h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 30px; }
 
-        /* The Ultimate Hack for Google Touch to Search & Selection */
+        /* Re-enabled native selection for these elements so teardrops appear */
         .content, #art-title, .summary-box {
             color: var(--text-body);
             user-select: text;
-            outline: none; 
-            caret-color: transparent; 
+            -webkit-user-select: text;
         }
         
         #art-title { color: var(--text-heading); }
@@ -168,7 +167,8 @@
         <a href="index.html">← Back to Feed</a>
     </div>
 
-    <div class="article-container">
+    <!-- Added role="textbox" to subtly discourage native Touch to Search while keeping drag handles -->
+    <div class="article-container" role="textbox" aria-readonly="true">
         <img id="art-img" class="hero-img" src="" alt="Article Cover">
         
         <div class="metadata-container">
@@ -176,13 +176,11 @@
             <span id="art-date" class="date-caption"></span>
         </div>
         
-        <!-- Editable attribute added to title to block Google Popup -->
-        <h1 id="art-title" contenteditable="true" inputmode="none" spellcheck="false" lang="en">Loading...</h1>
+        <h1 id="art-title">Loading...</h1>
         
-        <div id="art-content" class="content" contenteditable="true" inputmode="none" spellcheck="false" lang="en"></div>
+        <div id="art-content" class="content"></div>
         
-        <!-- Editable attribute added to summary -->
-        <div class="summary-box" contenteditable="true" inputmode="none" spellcheck="false" lang="en">
+        <div class="summary-box">
             <h3>Summary by Just Prova</h3>
             <div id="art-summary"></div>
         </div>
@@ -207,13 +205,6 @@
     <script>
         const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
         let currentArticleId = null;
-
-        // Prevent typing or pasting inside the editable areas (To keep the UI clean)
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-            el.addEventListener('keydown', e => e.preventDefault());
-            el.addEventListener('paste', e => e.preventDefault());
-            el.addEventListener('cut', e => e.preventDefault());
-        });
 
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
@@ -252,26 +243,24 @@
         let selectedText = "";
         let selectionRange = null;
 
+        // Block native Right-Click / Long-Press native menu
         document.addEventListener('contextmenu', event => {
             event.preventDefault();
         });
 
-        // ==========================================
-        // SINGLE TAP / CLICK TO SELECT A WORD LOGIC
-        // ==========================================
+        // Single Tap to Select Word Logic
         document.querySelector('.article-container').addEventListener('click', function(e) {
-            // Ignore if clicking on buttons or links
+            // Ignore if clicking on toolbars, links, or already highlighted text
             if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text')) return;
 
-            // Only act if user hasn't manually dragged to select multiple words
             const sel = window.getSelection();
+            // If user is trying to select multiple words manually, don't interfere
             if (!sel.isCollapsed && sel.toString().trim().includes(" ")) return;
 
             let x = e.clientX;
             let y = e.clientY;
             let textNode, offset;
 
-            // Get exact text point clicked
             if (document.caretPositionFromPoint) {
                 let pos = document.caretPositionFromPoint(x, y);
                 if (!pos) return;
@@ -284,22 +273,20 @@
                 offset = range.startOffset;
             }
 
-            if (textNode && textNode.nodeType === 3) { // 3 = TEXT_NODE
+            if (textNode && textNode.nodeType === 3) { 
                 let text = textNode.nodeValue;
                 let start = offset;
                 let end = offset;
                 
-                // Define what characters make up a "Word" (Excluding punctuation & spaces)
                 const isWordChar = (char) => /[^\s\.,;:!?\(\)\[\]"'\-—]/.test(char);
 
                 if (start < text.length && !isWordChar(text[start])) {
                    if (start > 0 && isWordChar(text[start-1])) {
                        start--;
                        end--;
-                   } else { return; } // Clicked on empty space
+                   } else { return; } 
                 }
 
-                // Expand selection to left and right until space/punctuation is hit
                 while (start > 0 && isWordChar(text[start - 1])) start--;
                 while (end < text.length && isWordChar(text[end])) end++;
 
@@ -310,7 +297,6 @@
                     sel.removeAllRanges();
                     sel.addRange(newRange);
                     
-                    // Manually trigger the toolbar update
                     setTimeout(() => document.dispatchEvent(new Event('selectionchange')), 10);
                 }
             }
