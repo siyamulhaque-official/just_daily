@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Just Daily</title>
     
-    <!-- অ্যাপ আইকন ও ব্রাউজার ট্যাবের জন্য লোগো সেটআপ -->
-    <link rel="icon" type="image/jpeg" href="logo.jpg">
-    <link rel="apple-touch-icon" href="logo.jpg">
+    <!-- অ্যাপ আইকন ও ফ্যাভিকন সেটআপ (আপনার transparent.png লোগো ব্যবহার করে) -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        /* Modern CSS Architecture */
         :root {
             --bg-dark: #161618;
             --surface: #1c1c1f;
@@ -28,12 +29,22 @@
             line-height: 1.7;
         }
 
-        header {
+        /* Premium Header Layout */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 25px 20px;
             border-bottom: 1px solid var(--border-color);
             background-color: var(--bg-dark);
             max-width: 900px;
             margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .brand-link {
@@ -52,8 +63,56 @@
         .timestamp {
             font-size: 0.85rem;
             color: #71717a;
-            margin-top: 10px;
+            margin-top: 5px;
             font-weight: 400;
+        }
+
+        /* Dynamic Auth UI Container */
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Premium Login Button */
+        .premium-login-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #e4e4e7; /* Text Heading Color */
+            color: #161618; /* Dark BG Color */
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px; /* Rounded pill shape */
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .premium-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Logged-in User Profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .user-profile:hover {
+            transform: scale(1.05);
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid #27272a;
+            object-fit: cover;
         }
 
         .container {
@@ -117,42 +176,107 @@
             .news-title { font-size: 1.2rem; }
             .card-img { height: 180px; }
             header h1 { font-size: 1.8rem; }
+            .premium-login-btn { padding: 6px 14px; font-size: 0.8rem; }
+            .user-avatar { width: 35px; height: 35px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <!-- ক্লিন URL এবং শুধু টেক্সট লোগো -->
-        <a href="/" class="brand-link">
-            <h1>Just Daily</h1>
-        </a>
-        <div class="timestamp" id="last-updated">Fetching updates...</div>
+    <header class="app-header">
+        <div class="header-left">
+            <a href="/" class="brand-link">
+                <h1>Just Daily</h1>
+            </a>
+            <div class="timestamp" id="last-updated">Fetching updates...</div>
+        </div>
+        
+        <!-- Dynamic Auth UI Container -->
+        <div class="header-right" id="auth-container">
+            <!-- JS dynamically loads either Sign In or Profile picture here -->
+        </div>
     </header>
 
     <div class="container" id="news-container">
         <!-- News cards will be injected here via JS -->
     </div>
 
-    <script>
+    <!-- Integrated Firebase Script (Using your real keys) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // ⚠️ আপনার আসল ফায়ারবেস কনফিগারেশন বসানো হয়েছে ⚠️
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVvKKMF56vXQpqExWfeFq7xvFLDIcNxc8",
+            authDomain: "just-daily.firebaseapp.com",
+            projectId: "just-daily",
+            storageBucket: "just-daily.firebasestorage.app",
+            messagingSenderId: "634875817986",
+            appId: "1:634875817986:web:224f4af4e021e3c5f5b71b",
+            measurementId: "G-6SV0953YZN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const authContainer = document.getElementById('auth-container');
+        const newsContainer = document.getElementById('news-container');
+
+        // Dynamic Auth Listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in -> Show Circular Profile Avatar
+                authContainer.innerHTML = `
+                    <div class="user-profile" id="userProfile" title="Click to Sign Out">
+                        <img src="${user.photoURL}" alt="Profile" class="user-avatar" referrerpolicy="no-referrer">
+                    </div>
+                `;
+                
+                // Add Sign Out Logic to the Avatar
+                document.getElementById('userProfile').addEventListener('click', () => {
+                    const confirmLogout = confirm("Are you sure you want to sign out?");
+                    if(confirmLogout) {
+                        signOut(auth);
+                    }
+                });
+            } else {
+                // User is signed out -> Show Premium One-Tap Button
+                authContainer.innerHTML = `
+                    <button class="premium-login-btn" id="loginBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                        Sign In
+                    </button>
+                `;
+                
+                // Attach One-Tap login logic
+                document.getElementById('loginBtn').addEventListener('click', () => {
+                    signInWithPopup(auth, provider).catch(error => {
+                        console.error("Login Failed:", error);
+                    });
+                });
+            }
+        });
+
+        // Function to Fetch News (JSON integration)
         async function fetchNews() {
             try {
-                const response = await fetch(`news.json?t=${new Date().getTime()}`);
+                // simulated fetching from news.json
+                const response = await fetch(\`news.json?t=${new Date().getTime()}\`);
                 const data = await response.json();
                 
-                // Show ONLY the timestamp (Undefined fix)
+                // Update the Header Timestamp
                 document.getElementById('last-updated').innerText = data.last_updated;
                 
-                const container = document.getElementById('news-container');
-                container.innerHTML = '';
+                newsContainer.innerHTML = '';
 
                 data.articles.forEach(article => {
                     const card = document.createElement('a');
-                    card.href = `article.html?id=${article.id}`;
+                    card.href = \`article.html?id=${article.id}\`;
                     card.className = 'news-card';
                     
-                    // Inject image if exists
-                    const imgHtml = article.image ? `<img src="${article.image}" class="card-img" alt="Banner">` : '';
+                    const imgHtml = article.image ? \`<img src="${article.image}" class="card-img" alt="Banner">\` : '';
                     
                     card.innerHTML = `
                         ${imgHtml}
@@ -160,11 +284,11 @@
                         <h2 class="news-title">${article.title}</h2>
                         <span class="news-source">${article.source}</span>
                     `;
-                    container.appendChild(card);
+                    newsContainer.appendChild(card);
                 });
             } catch (error) {
                 console.error("Error loading news:", error);
-                document.getElementById('news-container').innerHTML = '<p>Failed to load news. Please try again later.</p>';
+                newsContainer.innerHTML = '<p>Failed to load news. Please try again later.</p>';
             }
         }
 
