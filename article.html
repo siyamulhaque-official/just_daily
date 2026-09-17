@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Article - Just Daily</title>
+    <!-- Viewport constraint added to prevent zoom/overflow bugs -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Just Daily - Article</title>
+    
+    <!-- App Icon Setup -->
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,501 +18,151 @@
             --text-body: #a1a1aa;
             --text-heading: #e4e4e7;
             --border-color: #27272a;
-            --highlight-bg: rgba(250, 204, 21, 0.2);
         }
 
-        body {
-            margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-body);
-            font-family: 'Merriweather', serif; line-height: 1.8; font-size: 18px;
-            -webkit-touch-callout: none; user-select: none;
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-body);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.8;
+            overflow-x: hidden; /* Prevents screen edge clipping */
         }
 
-        .nav { padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .nav a { color: var(--text-body); text-decoration: none; font-size: 0.9rem; }
+        .app-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-color);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            color: var(--text-body);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            color: var(--text-heading);
+        }
+
+        .article-container {
+            max-width: 800px;
+            margin: 0 auto;
+            /* Increased padding (26px) keeps text safely away from the exact screen edge */
+            padding: 30px 26px; 
+        }
+
+        .article-meta {
+            font-size: 0.85rem;
+            color: var(--text-body);
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .article-title {
+            font-family: 'Merriweather', serif;
+            color: var(--text-heading);
+            font-size: 2.2rem;
+            margin: 0 0 25px 0;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            background-color: var(--surface);
+            color: var(--text-heading);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         
-        /* Auth Styles */
-        .auth-container { display: flex; gap: 10px; align-items: center; }
-        .btn-auth { background: var(--text-heading); color: var(--bg-dark); border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; }
-        .btn-auth.logout { background: #3f3f46; color: var(--text-heading); }
-        .user-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); }
-
-        .article-container { max-width: 700px; margin: 0 auto 60px auto; padding: 0 20px; }
-        .hero-img { width: 100%; height: auto; border-radius: 4px; filter: brightness(0.9); margin-bottom: 15px; display: none; }
-        .metadata-container { font-family: 'Inter', sans-serif; margin-bottom: 30px; }
-        .source-caption { font-size: 0.85rem; color: var(--text-heading); font-weight: 600; display: block; }
-        .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
-        h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 20px; }
-
-        .action-buttons { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
-        .btn-action {
-            background-color: var(--surface); color: var(--text-heading); border: 1px solid var(--border-color);
-            padding: 8px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.85rem;
-            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;
+        .action-btn:hover {
+            background-color: #27272a;
         }
-        .btn-action:hover { background-color: #27272a; }
-        .btn-action.saved { background-color: #059669; color: white; border-color: #059669; }
 
-        .content, #art-title, .summary-box { color: var(--text-body); user-select: text; -webkit-user-select: text; }
-        #art-title { color: var(--text-heading); }
-        .content { margin-bottom: 50px; }
-        .content p { margin-bottom: 1.5em; }
-        .content h2, .content h3, .content h4 { color: var(--text-heading); margin-top: 1.5em; margin-bottom: 0.5em; }
-        .content strong, .content b { color: var(--text-heading); }
+        .article-content {
+            font-family: 'Merriweather', serif; /* Premium reading font */
+            font-size: 1.15rem;
+            color: #d4d4d8;
+            line-height: 1.8;
+            word-wrap: break-word;
+        }
 
-        .summary-box { background-color: var(--surface); border-left: 4px solid #52525b; padding: 25px; border-radius: 0 8px 8px 0; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
-        .summary-box h3 { margin-top: 0; color: var(--text-heading); font-size: 1.1rem; margin-bottom: 15px; }
-        #art-summary p { margin-top: 0; margin-bottom: 10px; }
-        #art-summary ul { padding-left: 20px; margin: 0; }
-        #art-summary li { margin-bottom: 8px; }
-        #art-summary strong { color: var(--text-heading); }
+        .article-content p {
+            margin-bottom: 20px;
+        }
 
-        .btn-original { display: inline-block; background-color: var(--text-heading); color: var(--bg-dark); padding: 12px 24px; text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 600; border-radius: 4px; font-size: 0.9rem; }
-        .highlighted-text { background-color: var(--highlight-bg); border-radius: 2px; cursor: pointer; }
-
-        #tts-highlighter { position: absolute; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; pointer-events: none; transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s; opacity: 0; z-index: 10; }
-
-        #custom-toolbar { position: absolute; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: none; z-index: 1000; overflow: hidden; flex-direction: row; }
-        #custom-toolbar button { background: none; color: #fff; border: none; border-right: 1px solid #3f3f46; padding: 10px 15px; font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; outline: none; }
-        #custom-toolbar button:last-child { border-right: none; }
-        #custom-toolbar button:hover { background: #3f3f46; }
-
-        .bottom-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--surface); border-top: 1px solid var(--border-color); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px; box-sizing: border-box; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif; }
-        .bottom-sheet.active { transform: translateY(0); }
-        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--text-heading); font-weight: 600; }
-        .sheet-header-actions { display: flex; gap: 15px; align-items: center; }
-        .btn-icon { background: none; border: none; color: var(--text-body); font-size: 1.2rem; cursor: pointer; }
-        .btn-icon:hover { color: var(--text-heading); }
-        .loader { color: #71717a; font-size: 0.9rem; }
+        @media (max-width: 600px) {
+            .article-title { font-size: 1.8rem; }
+            .article-container { padding: 25px 24px; }
+            .article-content { font-size: 1.1rem; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="tts-highlighter"></div>
+    <header class="app-header">
+        <a href="/" class="back-link">← Back to Feed</a>
+        <!-- Authentication UI has been completely removed from here -->
+    </header>
 
-    <div class="nav">
-        <a href="index.html">← Back to Feed</a>
-        <div class="auth-container" id="auth-container">
-            <button id="btn-login" class="btn-auth">Sign In</button>
-        </div>
-    </div>
+    <main class="article-container" id="article-view">
+        <p>Loading article details...</p>
+    </main>
 
-    <div class="article-container" role="textbox" aria-readonly="true">
-        <img id="art-img" class="hero-img" src="" alt="Article Cover">
-        
-        <div class="metadata-container">
-            <span id="art-source" class="source-caption"></span>
-            <span id="art-date" class="date-caption"></span>
-        </div>
-        
-        <h1 id="art-title">Loading...</h1>
-        
-        <div class="action-buttons">
-            <button id="btn-listen" class="btn-action">🔊 Listen to Article</button>
-            <button id="btn-save" class="btn-action" style="display: none;">🔖 Save Article</button>
-        </div>
-        
-        <div id="art-content" class="content"></div>
-        
-        <div class="summary-box">
-            <h3>Summary by Just Prova</h3>
-            <div id="art-summary"></div>
-        </div>
-
-        <a id="art-link" href="#" target="_blank" class="btn-original">Read Original Article</a>
-    </div>
-
-    <div id="custom-toolbar">
-        <button id="btn-highlight">Highlight</button>
-        <button id="btn-copy">Copy</button>
-        <button id="btn-translate">Translate</button>
-    </div>
-
-    <div id="bottom-sheet" class="bottom-sheet">
-        <div class="sheet-header">
-            <span>✨ Just Prova Analysis</span>
-            <div class="sheet-header-actions">
-                <button id="btn-pronounce" class="btn-icon" title="Pronounce word">🔊</button>
-                <button class="close-sheet btn-icon" onclick="closeSheet()">✕</button>
-            </div>
-        </div>
-        <div id="sheet-content"></div>
-    </div>
-
-    <!-- Firebase App (the core Firebase SDK) & Auth/Firestore -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-        // Firebase Configuration (from your exact snippet)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCVvKKMF56vXQpqExWfeFq7xvFLDIcNxc8",
-            authDomain: "just-daily.firebaseapp.com",
-            projectId: "just-daily",
-            storageBucket: "just-daily.firebasestorage.app",
-            messagingSenderId: "634875817986",
-            appId: "1:634875817986:web:224f4af4e021e3c5f5b71b",
-            measurementId: "G-6SV0953YZN"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
-        let currentArticleId = null;
-        let currentUser = null;
-        
-        const synth = window.speechSynthesis;
-        let isArticlePlaying = false;
-        window.speechUtterances = []; 
-
-        // Authentication Observer
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            const authContainer = document.getElementById('auth-container');
-            const btnSave = document.getElementById('btn-save');
-            
-            if (user) {
-                authContainer.innerHTML = `
-                    <img src="${user.photoURL}" class="user-pic" alt="User" referrerpolicy="no-referrer">
-                    <button id="btn-logout" class="btn-auth logout">Logout</button>
-                `;
-                document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
-                btnSave.style.display = 'inline-flex';
-                checkIfSaved();
-            } else {
-                authContainer.innerHTML = `<button id="btn-login" class="btn-auth">Sign In</button>`;
-                document.getElementById('btn-login').addEventListener('click', () => signInWithPopup(auth, provider));
-                btnSave.style.display = 'none';
-            }
-        });
-
-        async function checkIfSaved() {
-            if(!currentUser || !currentArticleId) return;
-            const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
-            const docSnap = await getDoc(docRef);
-            const btnSave = document.getElementById('btn-save');
-            if (docSnap.exists()) {
-                btnSave.innerHTML = '✅ Saved';
-                btnSave.classList.add('saved');
-            } else {
-                btnSave.innerHTML = '🔖 Save Article';
-                btnSave.classList.remove('saved');
-            }
-        }
-
-        // Save Article to Firebase Logic
-        document.getElementById('btn-save').addEventListener('click', async () => {
-            if(!currentUser || !currentArticleId) return;
-            const btnSave = document.getElementById('btn-save');
-            const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
-
-            if (btnSave.classList.contains('saved')) {
-                await deleteDoc(docRef);
-                btnSave.innerHTML = '🔖 Save Article';
-                btnSave.classList.remove('saved');
-            } else {
-                await setDoc(docRef, {
-                    id: currentArticleId,
-                    title: document.getElementById('art-title').innerText,
-                    date: new Date().toISOString()
-                });
-                btnSave.innerHTML = '✅ Saved';
-                btnSave.classList.add('saved');
-            }
-        });
-
-        // Load Article Logic
+    <script>
         async function loadArticle() {
-            const params = new URLSearchParams(window.location.search);
-            currentArticleId = params.get('id');
-            if (!currentArticleId) return;
-
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+            
             try {
-                const response = await fetch(`news.json`);
+                const response = await fetch(`news.json?t=${new Date().getTime()}`);
                 const data = await response.json();
-                const article = data.articles.find(a => a.id === currentArticleId);
-
-                if (article) {
-                    document.getElementById('art-title').innerText = article.title;
-                    document.getElementById('art-source').innerText = `${article.source} • ${article.category}`;
-                    if (article.date) document.getElementById('art-date').innerText = article.date;
-                    
-                    document.getElementById('art-content').innerHTML = article.full_text;
-                    document.getElementById('art-summary').innerHTML = article.summary;
-                    document.getElementById('art-link').href = article.link;
-
-                    if (article.image) {
-                        const imgEl = document.getElementById('art-img');
-                        imgEl.src = article.image;
-                        imgEl.style.display = 'block';
-                    }
-                    restoreHighlights();
-                    checkIfSaved(); // Check state on load
+                const article = data.articles.find(a => a.id == articleId);
+                
+                if(article) {
+                    document.getElementById('article-view').innerHTML = `
+                        <div class="article-meta">
+                            ${article.source} • ${article.category}
+                        </div>
+                        <h1 class="article-title">${article.title}</h1>
+                        <div class="action-buttons">
+                            <button class="action-btn">🔊 Listen to Article</button>
+                            <button class="action-btn">🔖 Save Article</button>
+                        </div>
+                        <div class="article-content">
+                            <!-- In a real app, article.content or full HTML goes here -->
+                            <p>${article.content || "Full detailed article content goes here. If you have paragraphs in your JSON, map them accordingly."}</p>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('article-view').innerHTML = '<p>Article not found.</p>';
                 }
-            } catch (error) { console.error("Error loading article:", error); }
+            } catch (error) {
+                console.error("Error fetching article:", error);
+                document.getElementById('article-view').innerHTML = '<p>Error loading content.</p>';
+            }
         }
-
-        const customToolbar = document.getElementById('custom-toolbar');
-        const bottomSheet = document.getElementById('bottom-sheet');
-        const sheetContent = document.getElementById('sheet-content');
-        let selectedText = "";
-        let selectionRange = null;
-
-        document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // Word Selection & Interactions
-        document.querySelector('.article-container').addEventListener('click', function(e) {
-            if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text') || e.target.closest('.action-buttons')) return;
-
-            const sel = window.getSelection();
-            if (!sel.isCollapsed && sel.toString().trim().includes(" ")) return;
-
-            let x = e.clientX, y = e.clientY, textNode, offset;
-
-            if (document.caretPositionFromPoint) {
-                let pos = document.caretPositionFromPoint(x, y);
-                if (!pos) return;
-                textNode = pos.offsetNode;
-                offset = pos.offset;
-            } else if (document.caretRangeFromPoint) {
-                let range = document.caretRangeFromPoint(x, y);
-                if (!range) return;
-                textNode = range.startContainer;
-                offset = range.startOffset;
-            }
-
-            if (textNode && textNode.nodeType === 3) { 
-                let text = textNode.nodeValue, start = offset, end = offset;
-                const isWordChar = (char) => /[^\s\.,;:!?\(\)\[\]"'\-—]/.test(char);
-
-                if (start < text.length && !isWordChar(text[start])) {
-                   if (start > 0 && isWordChar(text[start-1])) { start--; end--; } 
-                   else { return; } 
-                }
-                while (start > 0 && isWordChar(text[start - 1])) start--;
-                while (end < text.length && isWordChar(text[end])) end++;
-
-                if (start !== end) {
-                    let newRange = document.createRange();
-                    newRange.setStart(textNode, start);
-                    newRange.setEnd(textNode, end);
-                    sel.removeAllRanges();
-                    sel.addRange(newRange);
-                    setTimeout(() => document.dispatchEvent(new Event('selectionchange')), 10);
-                }
-            }
-        });
-
-        document.addEventListener('selectionchange', () => {
-            const selection = window.getSelection();
-            selectedText = selection.toString().trim();
-            
-            if (selectedText.length > 0 && selectedText.length < 1000) {
-                if(selection.rangeCount > 0) {
-                    selectionRange = selection.getRangeAt(0);
-                    const rect = selectionRange.getBoundingClientRect();
-                    
-                    let scrollY = window.scrollY || document.documentElement.scrollTop;
-                    let scrollX = window.scrollX || document.documentElement.scrollLeft;
-
-                    customToolbar.style.top = `${scrollY + rect.top - 50}px`;
-                    customToolbar.style.left = `${scrollX + rect.left + (rect.width / 2) - 120}px`;
-                    customToolbar.style.display = 'flex';
-                }
-            } else { customToolbar.style.display = 'none'; }
-        });
-
-        document.addEventListener('mousedown', (e) => {
-            if (!customToolbar.contains(e.target) && window.getSelection().toString().length === 0) { customToolbar.style.display = 'none'; }
-        });
-
-        document.getElementById('btn-highlight').addEventListener('mousedown', (e) => {
-            e.preventDefault(); 
-            if (selectionRange && currentArticleId) {
-                const span = document.createElement('span');
-                span.className = 'highlighted-text';
-                selectionRange.surroundContents(span);
-                saveHighlights();
-                window.getSelection().removeAllRanges();
-                customToolbar.style.display = 'none';
-            }
-        });
         
-        document.getElementById('art-content').addEventListener('click', (e) => {
-            if(e.target.classList.contains('highlighted-text')) {
-                const parent = e.target.parentNode;
-                while(e.target.firstChild) { parent.insertBefore(e.target.firstChild, e.target); }
-                parent.removeChild(e.target);
-                saveHighlights();
-            }
-        });
-
-        document.getElementById('btn-copy').addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            if (selectedText) {
-                navigator.clipboard.writeText(selectedText);
-                window.getSelection().removeAllRanges();
-                customToolbar.style.display = 'none';
-            }
-        });
-
-        document.getElementById('btn-translate').addEventListener('mousedown', async (e) => {
-            e.preventDefault();
-            if (!selectedText) return;
-            customToolbar.style.display = 'none';
-            bottomSheet.classList.add('active');
-            sheetContent.innerHTML = '<span class="loader">Analyzing with Just Prova...</span>';
-            try {
-                const res = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: selectedText })
-                });
-                const data = await res.json();
-                sheetContent.innerHTML = data.result ? data.result : 'Translation failed.';
-            } catch (err) { sheetContent.innerHTML = 'Error communicating with server.'; }
-        });
-
-        // TTS Logics
-        let ttsMapping = [];
-        let ttsText = "";
-
-        function prepareTTS() {
-            ttsMapping = [];
-            ttsText = "";
-            const contentDiv = document.getElementById('art-content');
-            
-            function traverse(node) {
-                if (node.nodeType === 3) { 
-                    let text = node.nodeValue;
-                    ttsMapping.push({ node: node, start: ttsText.length, text: text });
-                    ttsText += text;
-                } else if (node.nodeType === 1) { 
-                    const tag = node.tagName.toLowerCase();
-                    const isBlock = ['p', 'h1', 'h2', 'h3', 'h4', 'div', 'li', 'ul', 'br'].includes(tag);
-                    
-                    if (isBlock && ttsText.length > 0 && !ttsText.endsWith(" ")) { ttsText += " "; }
-                    for (let child of node.childNodes) { traverse(child); }
-                    if (isBlock && !ttsText.endsWith(" ")) { ttsText += " "; }
-                }
-            }
-            traverse(contentDiv);
-            return ttsText;
-        }
-
-        function getPosByOffset(offset) {
-            for (let i = 0; i < ttsMapping.length; i++) {
-                let map = ttsMapping[i];
-                let nodeEnd = map.start + map.text.length;
-                if (offset >= map.start && offset < nodeEnd) {
-                    return { node: map.node, localOffset: offset - map.start };
-                }
-            }
-            let last = ttsMapping[ttsMapping.length - 1];
-            if (last && offset >= last.start + last.text.length) { return { node: last.node, localOffset: last.text.length }; }
-            return null;
-        }
-
-        function highlightTTSWord(startOffset, length) {
-            let startPos = getPosByOffset(startOffset);
-            let endPos = getPosByOffset(startOffset + length);
-            
-            if (startPos && endPos) {
-                let range = document.createRange();
-                try {
-                    range.setStart(startPos.node, startPos.localOffset);
-                    range.setEnd(endPos.node, endPos.localOffset);
-                    
-                    let rects = range.getClientRects();
-                    if (rects.length > 0) {
-                        let rect = rects[0];
-                        let highlighter = document.getElementById('tts-highlighter');
-                        
-                        let scrollY = window.scrollY || document.documentElement.scrollTop;
-                        let scrollX = window.scrollX || document.documentElement.scrollLeft;
-
-                        highlighter.style.top = (rect.top + scrollY - 2) + 'px';
-                        highlighter.style.left = (rect.left + scrollX - 2) + 'px';
-                        highlighter.style.width = (rect.width + 4) + 'px';
-                        highlighter.style.height = (rect.height + 4) + 'px';
-                        highlighter.style.opacity = '1'; 
-                        
-                        const safeTop = 150;
-                        const safeBottom = window.innerHeight - 150;
-                        if (rect.top < safeTop || rect.bottom > safeBottom) {
-                            window.scrollTo({ top: scrollY + rect.top - window.innerHeight / 2, behavior: 'smooth' });
-                        }
-                    }
-                } catch(err) { console.log("Range error:", err); }
-            }
-        }
-
-        document.getElementById('btn-listen').addEventListener('click', () => {
-            const btn = document.getElementById('btn-listen');
-            const highlighter = document.getElementById('tts-highlighter');
-            
-            if (isArticlePlaying) {
-                synth.cancel(); 
-                btn.innerHTML = '🔊 Listen to Article';
-                isArticlePlaying = false;
-                highlighter.style.opacity = '0';
-            } else {
-                synth.cancel(); 
-                
-                const articleTextToRead = prepareTTS();
-                const utterance = new SpeechSynthesisUtterance(articleTextToRead);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.95; 
-                
-                window.speechUtterances.push(utterance);
-                
-                utterance.onboundary = (e) => {
-                    if (e.name === 'word') {
-                        let wordLength = e.charLength || 0;
-                        if (!wordLength) {
-                            let match = articleTextToRead.substring(e.charIndex).match(/^[^\s\.,;:!?\(\)\[\]"'\-—]+/);
-                            wordLength = match ? match[0].length : 1;
-                        }
-                        highlightTTSWord(e.charIndex, wordLength);
-                    }
-                };
-                
-                utterance.onend = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.opacity = '0'; };
-                utterance.onerror = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.opacity = '0'; };
-
-                synth.speak(utterance);
-                btn.innerHTML = '⏹ Stop Listening';
-                isArticlePlaying = true;
-            }
-        });
-
-        document.getElementById('btn-pronounce').addEventListener('click', () => {
-            if (selectedText) {
-                synth.cancel(); 
-                const utterance = new SpeechSynthesisUtterance(selectedText);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                window.speechUtterances.push(utterance);
-                synth.speak(utterance);
-            }
-        });
-
-        window.addEventListener('beforeunload', () => synth.cancel());
-
-        // Attach closeSheet to window for HTML inline access
-        window.closeSheet = function() { bottomSheet.classList.remove('active'); synth.cancel(); };
-
-        function saveHighlights() { if(currentArticleId) localStorage.setItem(`highlight_${currentArticleId}`, document.getElementById('art-content').innerHTML); }
-        function restoreHighlights() {
-            if(!currentArticleId) return;
-            const savedContent = localStorage.getItem(`highlight_${currentArticleId}`);
-            if(savedContent) document.getElementById('art-content').innerHTML = savedContent;
-        }
-
-        window.speechSynthesis.cancel();
         loadArticle();
     </script>
 </body>
