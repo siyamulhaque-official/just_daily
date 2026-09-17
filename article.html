@@ -23,23 +23,8 @@
             font-family: 'Merriweather', serif; 
             line-height: 1.8;
             font-size: 18px;
-            
-            /* Requirement 3: Block native popups and search */
             -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
-        }
-
-        /* Allow selection only within content, but we intercept it */
-        .content {
-            -webkit-user-select: text;
-            -khtml-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
         }
 
         .nav {
@@ -54,8 +39,6 @@
             text-decoration: none;
             font-size: 0.9rem;
         }
-
-        .nav a:hover { color: var(--text-heading); }
 
         .article-container {
             max-width: 700px;
@@ -77,44 +60,23 @@
             margin-bottom: 30px;
         }
 
-        .source-caption {
-            font-size: 0.85rem;
-            color: var(--text-heading);
-            font-weight: 600;
-            display: block;
-        }
-        
-        .date-caption {
-            font-size: 0.85rem;
-            color: #71717a;
-            display: block;
-            margin-top: 2px;
-        }
+        .source-caption { font-size: 0.85rem; color: var(--text-heading); font-weight: 600; display: block; }
+        .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
 
-        h1 {
-            color: var(--text-heading);
-            font-size: 2.2rem;
-            line-height: 1.3;
-            margin-bottom: 30px;
-        }
+        h1 { color: var(--text-heading); font-size: 2.2rem; line-height: 1.3; margin-bottom: 30px; }
 
+        /* The Ultimate Hack for Google Touch to Search */
         .content {
             margin-bottom: 50px;
             color: var(--text-body);
+            user-select: text;
+            outline: none; /* Removes textbox border */
+            caret-color: transparent; /* Hides blinking cursor */
         }
         
-        /* Preserve paragraph spacing and bold headings */
-        .content p {
-            margin-bottom: 1.5em;
-        }
-        .content h2, .content h3, .content h4 {
-            color: var(--text-heading);
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-        }
-        .content strong, .content b {
-            color: var(--text-heading);
-        }
+        .content p { margin-bottom: 1.5em; }
+        .content h2, .content h3, .content h4 { color: var(--text-heading); margin-top: 1.5em; margin-bottom: 0.5em; }
+        .content strong, .content b { color: var(--text-heading); }
 
         .summary-box {
             background-color: var(--surface);
@@ -126,14 +88,7 @@
             font-size: 0.95rem;
         }
 
-        .summary-box h3 {
-            margin-top: 0;
-            color: var(--text-heading);
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-        }
-        
-        /* Summary HTML styling */
+        .summary-box h3 { margin-top: 0; color: var(--text-heading); font-size: 1.1rem; margin-bottom: 15px; }
         #art-summary p { margin-top: 0; margin-bottom: 10px; }
         #art-summary ul { padding-left: 20px; margin: 0; }
         #art-summary li { margin-bottom: 8px; }
@@ -151,7 +106,6 @@
             font-size: 0.9rem;
         }
 
-        /* Custom Selection Toolbar */
         .highlighted-text {
             background-color: var(--highlight-bg);
             border-radius: 2px;
@@ -181,16 +135,9 @@
             cursor: pointer;
             outline: none;
         }
-        
-        #custom-toolbar button:last-child {
-            border-right: none;
-        }
-        
-        #custom-toolbar button:hover {
-            background: #3f3f46;
-        }
+        #custom-toolbar button:last-child { border-right: none; }
+        #custom-toolbar button:hover { background: #3f3f46; }
 
-        /* Bottom Sheet Translator UI */
         .bottom-sheet {
             position: fixed;
             bottom: 0;
@@ -206,30 +153,10 @@
             box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
             font-family: 'Inter', sans-serif;
         }
-
         .bottom-sheet.active { transform: translateY(0); }
-
-        .sheet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            color: var(--text-heading);
-            font-weight: 600;
-        }
-
-        .close-sheet {
-            background: none;
-            border: none;
-            color: var(--text-body);
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-        
-        .loader {
-            color: #71717a;
-            font-size: 0.9rem;
-        }
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--text-heading); font-weight: 600; }
+        .close-sheet { background: none; border: none; color: var(--text-body); font-size: 1.2rem; cursor: pointer; }
+        .loader { color: #71717a; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -248,25 +175,23 @@
         
         <h1 id="art-title">Loading...</h1>
         
-        <div id="art-content" class="content"></div>
+        <!-- HACK: contenteditable tricks Android into hiding Touch to Search -->
+        <div id="art-content" class="content" contenteditable="true" inputmode="none" spellcheck="false" lang="en"></div>
         
         <div class="summary-box">
             <h3>Summary by Just Prova</h3>
-            <!-- Requirement 4: innerHTML to render HTML summary properly -->
             <div id="art-summary"></div>
         </div>
 
         <a id="art-link" href="#" target="_blank" class="btn-original">Read Original Article</a>
     </div>
 
-    <!-- Custom Toolbar UI -->
     <div id="custom-toolbar">
         <button id="btn-highlight">Highlight</button>
         <button id="btn-copy">Copy</button>
         <button id="btn-translate">Translate</button>
     </div>
 
-    <!-- Translation Bottom Sheet -->
     <div id="bottom-sheet" class="bottom-sheet">
         <div class="sheet-header">
             <span>✨ Just Prova Analysis</span>
@@ -279,10 +204,15 @@
         const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
         let currentArticleId = null;
 
+        // Prevent modifying the contenteditable div
+        const artContent = document.getElementById('art-content');
+        artContent.addEventListener('keydown', e => e.preventDefault());
+        artContent.addEventListener('paste', e => e.preventDefault());
+        artContent.addEventListener('cut', e => e.preventDefault());
+
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
             currentArticleId = params.get('id');
-
             if (!currentArticleId) return;
 
             try {
@@ -293,13 +223,9 @@
                 if (article) {
                     document.getElementById('art-title').innerText = article.title;
                     document.getElementById('art-source').innerText = `${article.source} • ${article.category}`;
+                    if (article.date) document.getElementById('art-date').innerText = article.date;
                     
-                    if (article.date) {
-                        document.getElementById('art-date').innerText = article.date;
-                    }
-                    
-                    document.getElementById('art-content').innerHTML = article.full_text;
-                    // Requirement 4: Render HTML directly, not innerText
+                    artContent.innerHTML = article.full_text;
                     document.getElementById('art-summary').innerHTML = article.summary;
                     document.getElementById('art-link').href = article.link;
 
@@ -308,8 +234,6 @@
                         imgEl.src = article.image;
                         imgEl.style.display = 'block';
                     }
-                    
-                    // Requirement 5: Restore Highlights
                     restoreHighlights();
                 }
             } catch (error) {
@@ -317,14 +241,12 @@
             }
         }
 
-        // Custom Toolbar & Block Native Context Menu
         const customToolbar = document.getElementById('custom-toolbar');
         const bottomSheet = document.getElementById('bottom-sheet');
         const sheetContent = document.getElementById('sheet-content');
         let selectedText = "";
         let selectionRange = null;
 
-        // Requirement 3: Block Native Context Menu
         document.addEventListener('contextmenu', event => {
             event.preventDefault();
         });
@@ -338,7 +260,6 @@
                     selectionRange = selection.getRangeAt(0);
                     const rect = selectionRange.getBoundingClientRect();
                     
-                    // Position toolbar above selection
                     customToolbar.style.top = `${window.scrollY + rect.top - 50}px`;
                     customToolbar.style.left = `${rect.left + (rect.width / 2) - 120}px`;
                     customToolbar.style.display = 'flex';
@@ -354,23 +275,19 @@
             }
         });
 
-        // Button Actions
-        document.getElementById('btn-highlight').addEventListener('click', () => {
+        document.getElementById('btn-highlight').addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection from clearing before highlight
             if (selectionRange && currentArticleId) {
                 const span = document.createElement('span');
                 span.className = 'highlighted-text';
                 selectionRange.surroundContents(span);
-                
-                // Requirement 5: Save to localStorage
                 saveHighlights();
-                
                 window.getSelection().removeAllRanges();
                 customToolbar.style.display = 'none';
             }
         });
         
-        // Remove highlight on click
-        document.getElementById('art-content').addEventListener('click', (e) => {
+        artContent.addEventListener('click', (e) => {
             if(e.target.classList.contains('highlighted-text')) {
                 const parent = e.target.parentNode;
                 while(e.target.firstChild) {
@@ -381,7 +298,8 @@
             }
         });
 
-        document.getElementById('btn-copy').addEventListener('click', () => {
+        document.getElementById('btn-copy').addEventListener('mousedown', (e) => {
+            e.preventDefault();
             if (selectedText) {
                 navigator.clipboard.writeText(selectedText);
                 window.getSelection().removeAllRanges();
@@ -389,7 +307,8 @@
             }
         });
 
-        document.getElementById('btn-translate').addEventListener('click', async () => {
+        document.getElementById('btn-translate').addEventListener('mousedown', async (e) => {
+            e.preventDefault();
             if (!selectedText) return;
 
             customToolbar.style.display = 'none';
@@ -418,10 +337,9 @@
             bottomSheet.classList.remove('active');
         }
         
-        // Requirement 5: LocalStorage logic for highlights
         function saveHighlights() {
             if(!currentArticleId) return;
-            const contentHTML = document.getElementById('art-content').innerHTML;
+            const contentHTML = artContent.innerHTML;
             localStorage.setItem(`highlight_${currentArticleId}`, contentHTML);
         }
         
@@ -429,11 +347,10 @@
             if(!currentArticleId) return;
             const savedContent = localStorage.getItem(`highlight_${currentArticleId}`);
             if(savedContent) {
-                document.getElementById('art-content').innerHTML = savedContent;
+                artContent.innerHTML = savedContent;
             }
         }
 
-        // Initialize
         loadArticle();
     </script>
 </body>
