@@ -27,45 +27,15 @@
             user-select: none;
         }
 
-        .nav {
-            padding: 20px;
-            font-family: 'Inter', sans-serif;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .nav a {
-            color: var(--text-body);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .article-container {
-            max-width: 700px;
-            margin: 0 auto 60px auto;
-            padding: 0 20px;
-        }
-
-        .hero-img {
-            width: 100%;
-            height: auto;
-            border-radius: 4px;
-            filter: brightness(0.9);
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .metadata-container {
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 30px;
-        }
-
+        .nav { padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; }
+        .nav a { color: var(--text-body); text-decoration: none; font-size: 0.9rem; }
+        .article-container { max-width: 700px; margin: 0 auto 60px auto; padding: 0 20px; }
+        .hero-img { width: 100%; height: auto; border-radius: 4px; filter: brightness(0.9); margin-bottom: 15px; display: none; }
+        .metadata-container { font-family: 'Inter', sans-serif; margin-bottom: 30px; }
         .source-caption { font-size: 0.85rem; color: var(--text-heading); font-weight: 600; display: block; }
         .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
-
         h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 20px; }
 
-        /* Voice Listen Button Styles */
         .btn-listen {
             background-color: var(--surface);
             color: var(--text-heading);
@@ -83,14 +53,8 @@
         }
         .btn-listen:hover { background-color: #27272a; }
 
-        .content, #art-title, .summary-box {
-            color: var(--text-body);
-            user-select: text;
-            -webkit-user-select: text;
-        }
-        
+        .content, #art-title, .summary-box { color: var(--text-body); user-select: text; -webkit-user-select: text; }
         #art-title { color: var(--text-heading); }
-
         .content { margin-bottom: 50px; }
         .content p { margin-bottom: 1.5em; }
         .content h2, .content h3, .content h4 { color: var(--text-heading); margin-top: 1.5em; margin-bottom: 0.5em; }
@@ -105,7 +69,6 @@
             font-family: 'Inter', sans-serif;
             font-size: 0.95rem;
         }
-
         .summary-box h3 { margin-top: 0; color: var(--text-heading); font-size: 1.1rem; margin-bottom: 15px; }
         #art-summary p { margin-top: 0; margin-bottom: 10px; }
         #art-summary ul { padding-left: 20px; margin: 0; }
@@ -124,10 +87,17 @@
             font-size: 0.9rem;
         }
 
-        .highlighted-text {
-            background-color: var(--highlight-bg);
-            border-radius: 2px;
-            cursor: pointer;
+        .highlighted-text { background-color: var(--highlight-bg); border-radius: 2px; cursor: pointer; }
+
+        /* TTS Word Highlight Box (Premium Feature) */
+        #tts-highlighter {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+            pointer-events: none;
+            transition: all 0.15s ease-out; /* Makes the box glide smoothly */
+            display: none;
+            z-index: 5;
         }
 
         #custom-toolbar {
@@ -141,18 +111,7 @@
             overflow: hidden;
             flex-direction: row;
         }
-
-        #custom-toolbar button {
-            background: none;
-            color: #fff;
-            border: none;
-            border-right: 1px solid #3f3f46;
-            padding: 10px 15px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            cursor: pointer;
-            outline: none;
-        }
+        #custom-toolbar button { background: none; color: #fff; border: none; border-right: 1px solid #3f3f46; padding: 10px 15px; font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; outline: none; }
         #custom-toolbar button:last-child { border-right: none; }
         #custom-toolbar button:hover { background: #3f3f46; }
 
@@ -173,29 +132,18 @@
         }
         .bottom-sheet.active { transform: translateY(0); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--text-heading); font-weight: 600; }
-        
-        .sheet-header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        .btn-icon {
-            background: none;
-            border: none;
-            color: var(--text-body);
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
+        .sheet-header-actions { display: flex; gap: 15px; align-items: center; }
+        .btn-icon { background: none; border: none; color: var(--text-body); font-size: 1.2rem; cursor: pointer; }
         .btn-icon:hover { color: var(--text-heading); }
-        
         .loader { color: #71717a; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <div class="nav">
-        <a href="index.html">← Back to Feed</a>
-    </div>
+    <!-- TTS Floating Highlighter Box -->
+    <div id="tts-highlighter"></div>
+
+    <div class="nav"><a href="index.html">← Back to Feed</a></div>
 
     <div class="article-container" role="textbox" aria-readonly="true">
         <img id="art-img" class="hero-img" src="" alt="Article Cover">
@@ -207,7 +155,6 @@
         
         <h1 id="art-title">Loading...</h1>
         
-        <!-- Voice Listen Button -->
         <button id="btn-listen" class="btn-listen">🔊 Listen to Article</button>
         
         <div id="art-content" class="content"></div>
@@ -230,7 +177,6 @@
         <div class="sheet-header">
             <span>✨ Just Prova Analysis</span>
             <div class="sheet-header-actions">
-                <!-- Pronounce Button -->
                 <button id="btn-pronounce" class="btn-icon" title="Pronounce word">🔊</button>
                 <button class="close-sheet btn-icon" onclick="closeSheet()">✕</button>
             </div>
@@ -241,8 +187,6 @@
     <script>
         const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
         let currentArticleId = null;
-
-        // TTS Setup
         const synth = window.speechSynthesis;
         let isArticlePlaying = false;
 
@@ -272,9 +216,7 @@
                     }
                     restoreHighlights();
                 }
-            } catch (error) {
-                console.error("Error loading article:", error);
-            }
+            } catch (error) { console.error("Error loading article:", error); }
         }
 
         const customToolbar = document.getElementById('custom-toolbar');
@@ -283,12 +225,9 @@
         let selectedText = "";
         let selectionRange = null;
 
-        // Block native menu
-        document.addEventListener('contextmenu', event => {
-            event.preventDefault();
-        });
+        document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // Smart Word Selection
+        // Single Tap Selection Logic
         document.querySelector('.article-container').addEventListener('click', function(e) {
             if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text') || e.target.closest('#btn-listen')) return;
 
@@ -317,7 +256,6 @@
                    if (start > 0 && isWordChar(text[start-1])) { start--; end--; } 
                    else { return; } 
                 }
-
                 while (start > 0 && isWordChar(text[start - 1])) start--;
                 while (end < text.length && isWordChar(text[end])) end++;
 
@@ -340,20 +278,15 @@
                 if(selection.rangeCount > 0) {
                     selectionRange = selection.getRangeAt(0);
                     const rect = selectionRange.getBoundingClientRect();
-                    
                     customToolbar.style.top = `${window.scrollY + rect.top - 50}px`;
                     customToolbar.style.left = `${rect.left + (rect.width / 2) - 120}px`;
                     customToolbar.style.display = 'flex';
                 }
-            } else {
-                customToolbar.style.display = 'none';
-            }
+            } else { customToolbar.style.display = 'none'; }
         });
 
         document.addEventListener('mousedown', (e) => {
-            if (!customToolbar.contains(e.target) && window.getSelection().toString().length === 0) {
-                customToolbar.style.display = 'none';
-            }
+            if (!customToolbar.contains(e.target) && window.getSelection().toString().length === 0) { customToolbar.style.display = 'none'; }
         });
 
         document.getElementById('btn-highlight').addEventListener('mousedown', (e) => {
@@ -389,11 +322,9 @@
         document.getElementById('btn-translate').addEventListener('mousedown', async (e) => {
             e.preventDefault();
             if (!selectedText) return;
-
             customToolbar.style.display = 'none';
             bottomSheet.classList.add('active');
             sheetContent.innerHTML = '<span class="loader">Analyzing with Just Prova...</span>';
-
             try {
                 const res = await fetch(WORKER_URL, {
                     method: 'POST',
@@ -402,33 +333,116 @@
                 });
                 const data = await res.json();
                 sheetContent.innerHTML = data.result ? data.result : 'Translation failed.';
-            } catch (err) {
-                sheetContent.innerHTML = 'Error communicating with server.';
-            }
+            } catch (err) { sheetContent.innerHTML = 'Error communicating with server.'; }
         });
 
         // ------------------------------------------
-        // TEXT TO SPEECH LOGIC
+        // TEXT TO SPEECH & HIGHLIGHT TRACKING
         // ------------------------------------------
         
-        // 1. Play Full Article
+        let ttsMapping = [];
+        let ttsText = "";
+
+        // Function to create a mapped string of the HTML exactly as it sounds
+        function prepareTTS() {
+            ttsMapping = [];
+            ttsText = "";
+            const contentDiv = document.getElementById('art-content');
+            
+            function traverse(node) {
+                if (node.nodeType === 3) { // Text Node
+                    let text = node.nodeValue;
+                    ttsMapping.push({ node: node, start: ttsText.length, text: text });
+                    ttsText += text;
+                } else if (node.nodeType === 1) { // Element Node
+                    const tag = node.tagName.toLowerCase();
+                    const isBlock = ['p', 'h1', 'h2', 'h3', 'h4', 'div', 'li', 'ul', 'br'].includes(tag);
+                    
+                    if (isBlock && ttsText.length > 0 && !ttsText.endsWith(" ")) { ttsText += " "; }
+                    for (let child of node.childNodes) { traverse(child); }
+                    if (isBlock && !ttsText.endsWith(" ")) { ttsText += " "; }
+                }
+            }
+            traverse(contentDiv);
+            return ttsText;
+        }
+
+        function getPosByOffset(offset) {
+            for (let i = 0; i < ttsMapping.length; i++) {
+                let map = ttsMapping[i];
+                let nodeEnd = map.start + map.text.length;
+                if (offset >= map.start && offset < nodeEnd) {
+                    return { node: map.node, localOffset: offset - map.start };
+                }
+            }
+            let last = ttsMapping[ttsMapping.length - 1];
+            if (last && offset >= last.start + last.text.length) {
+                return { node: last.node, localOffset: last.text.length };
+            }
+            return null;
+        }
+
+        function highlightTTSWord(startOffset, length) {
+            let startPos = getPosByOffset(startOffset);
+            let endPos = getPosByOffset(startOffset + length);
+            
+            if (startPos && endPos) {
+                let range = document.createRange();
+                try {
+                    range.setStart(startPos.node, startPos.localOffset);
+                    range.setEnd(endPos.node, endPos.localOffset);
+                    
+                    let rects = range.getClientRects();
+                    if (rects.length > 0) {
+                        let rect = rects[0];
+                        let highlighter = document.getElementById('tts-highlighter');
+                        
+                        // Set the transparent white box over the word smoothly
+                        highlighter.style.top = (rect.top + window.scrollY - 2) + 'px';
+                        highlighter.style.left = (rect.left + window.scrollX - 2) + 'px';
+                        highlighter.style.width = (rect.width + 4) + 'px';
+                        highlighter.style.height = (rect.height + 4) + 'px';
+                        highlighter.style.display = 'block';
+                        
+                        // Auto-scroll logic: If the word is going out of view, scroll smoothly!
+                        const safeTop = 150;
+                        const safeBottom = window.innerHeight - 150;
+                        if (rect.top < safeTop || rect.bottom > safeBottom) {
+                            window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 2, behavior: 'smooth' });
+                        }
+                    }
+                } catch(err) { console.log("Range error:", err); }
+            }
+        }
+
         document.getElementById('btn-listen').addEventListener('click', () => {
             const btn = document.getElementById('btn-listen');
+            const highlighter = document.getElementById('tts-highlighter');
+            
             if (isArticlePlaying) {
-                synth.cancel(); // Stop playing
+                synth.cancel(); 
                 btn.innerHTML = '🔊 Listen to Article';
                 isArticlePlaying = false;
+                highlighter.style.display = 'none';
             } else {
-                // Get clear text for reading
-                const articleText = document.getElementById('art-content').innerText;
-                const utterance = new SpeechSynthesisUtterance(articleText);
+                const articleTextToRead = prepareTTS();
+                const utterance = new SpeechSynthesisUtterance(articleTextToRead);
                 utterance.lang = 'en-US';
-                utterance.rate = 0.95; // Slightly slower for better clarity
+                utterance.rate = 0.95; 
                 
-                utterance.onend = () => {
-                    btn.innerHTML = '🔊 Listen to Article';
-                    isArticlePlaying = false;
+                utterance.onboundary = (e) => {
+                    if (e.name === 'word') {
+                        let wordLength = e.charLength || 0;
+                        if (!wordLength) {
+                            let match = articleTextToRead.substring(e.charIndex).match(/^[^\s\.,;:!?\(\)\[\]"'\-—]+/);
+                            wordLength = match ? match[0].length : 1;
+                        }
+                        highlightTTSWord(e.charIndex, wordLength);
+                    }
                 };
+                
+                utterance.onend = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.display = 'none'; };
+                utterance.onerror = () => { btn.innerHTML = '🔊 Listen to Article'; isArticlePlaying = false; highlighter.style.display = 'none'; };
 
                 synth.speak(utterance);
                 btn.innerHTML = '⏹ Stop Listening';
@@ -436,10 +450,9 @@
             }
         });
 
-        // 2. Pronounce Translated Word
         document.getElementById('btn-pronounce').addEventListener('click', () => {
             if (selectedText) {
-                synth.cancel(); // Stop any current speech
+                synth.cancel(); 
                 const utterance = new SpeechSynthesisUtterance(selectedText);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.9;
@@ -447,17 +460,11 @@
             }
         });
 
-        // Stop TTS when closing the bottom sheet
-        function closeSheet() {
-            bottomSheet.classList.remove('active');
-            synth.cancel(); // Mutes the pronunciation if playing
-        }
-        
-        function saveHighlights() {
-            if(!currentArticleId) return;
-            localStorage.setItem(`highlight_${currentArticleId}`, document.getElementById('art-content').innerHTML);
-        }
-        
+        // Cancel speech if user switches page
+        window.addEventListener('beforeunload', () => synth.cancel());
+
+        function closeSheet() { bottomSheet.classList.remove('active'); synth.cancel(); }
+        function saveHighlights() { if(currentArticleId) localStorage.setItem(`highlight_${currentArticleId}`, document.getElementById('art-content').innerHTML); }
         function restoreHighlights() {
             if(!currentArticleId) return;
             const savedContent = localStorage.getItem(`highlight_${currentArticleId}`);
