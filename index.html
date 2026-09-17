@@ -3,159 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Just Daily - Premium News</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>Just Daily</title>
+    <!-- Custom CSS Styling -->
     <style>
-        :root {
-            --bg-dark: #161618;
-            --surface: #1c1c1f;
-            --text-body: #a1a1aa;
-            --text-heading: #e4e4e7;
-            --border-color: #27272a;
-        }
-
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-body);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.7;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        /* Header & Brand Design */
         header {
-            padding: 25px 20px;
-            text-align: left; /* Updated: Left aligned */
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--bg-dark);
-            max-width: 900px;
-            margin: 0 auto;
+            background: #ffffff;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-
-        header h1 {
-            font-family: 'Merriweather', serif;
-            color: var(--text-heading);
-            margin: 0;
-            font-size: 2.2rem;
-            letter-spacing: -0.5px;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #222;
         }
-
-        .timestamp {
-            font-size: 0.85rem;
-            color: #71717a;
-            margin-top: 5px;
-            font-weight: 400;
+        .brand img {
+            height: 40px;
+            width: 40px;
+            object-fit: contain;
         }
-
+        .brand h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        /* Navigation Menu */
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #007bff;
+        }
+        .auth-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .auth-btn:hover {
+            background: #0056b3;
+        }
+        /* Main Container */
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
-            display: grid;
-            gap: 30px;
         }
-
-        .news-card {
-            background-color: var(--surface);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 25px;
-            cursor: pointer;
-            transition: transform 0.2s ease, border-color 0.2s ease;
-            text-decoration: none;
-            display: block;
-            overflow: hidden;
-        }
-
-        .news-card:hover {
-            transform: translateY(-2px);
-            border-color: #3f3f46;
-        }
-        
-        .card-img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            filter: brightness(0.9);
-        }
-
-        .news-category {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #a1a1aa;
-            margin-bottom: 12px;
-            display: block;
+        .section-title {
+            font-size: 24px;
             font-weight: 600;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+            padding-left: 10px;
         }
-
-        .news-title {
-            font-family: 'Merriweather', serif;
-            color: var(--text-heading);
-            font-size: 1.4rem;
-            margin: 0 0 15px 0;
-            line-height: 1.4;
+        /* News Grid Layout */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
         }
-
-        .news-source {
-            font-size: 0.85rem;
-            color: #71717a;
+        .news-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            border: 1px solid #eaeaea;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-
-        @media (max-width: 600px) {
-            .news-title { font-size: 1.2rem; }
-            .card-img { height: 180px; }
+        .news-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #222;
+        }
+        .news-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .save-btn {
+            background: #e9ecef;
+            color: #333;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            align-self: flex-start;
+            transition: background 0.2s;
+        }
+        .save-btn:hover {
+            background: #007bff;
+            color: #fff;
         }
     </style>
 </head>
 <body>
 
+    <!-- Header Section -->
     <header>
-        <h1>Just Daily</h1>
-        <div class="timestamp" id="last-updated">Fetching updates...</div>
+        <!-- Clean Root Link to prevent /index.html in URL -->
+        <a href="./" class="brand">
+            <img src="logo.png" alt="Just Daily Logo">
+            <h1>Just Daily</h1>
+        </a>
+        <nav>
+            <a href="./">Home</a>
+            <button class="auth-btn" id="loginBtn">Sign In</button>
+        </nav>
     </header>
 
-    <div class="container" id="news-container">
-        <!-- News cards will be injected here via JS -->
-    </div>
+    <!-- Main Content Section -->
+    <main class="container">
+        <h2 class="section-title">Latest Breaking News</h2>
+        <div class="news-grid">
+            <div class="news-card">
+                <div>
+                    <h3>Sample News Headline One</h3>
+                    <p>This is a placeholder description for the news portal article. Fully optimized for cloud integration.</p>
+                </div>
+                <button class="save-btn">Save Article</button>
+            </div>
+            <div class="news-card">
+                <div>
+                    <h3>Sample News Headline Two</h3>
+                    <p>This is another sample article showcasing responsive design and Firebase storage readiness.</p>
+                </div>
+                <button class="save-btn">Save Article</button>
+            </div>
+        </div>
+    </main>
 
-    <script>
-        async function fetchNews() {
-            try {
-                const response = await fetch(`news.json?t=${new Date().getTime()}`);
-                const data = await response.json();
-                
-                // Show ONLY the timestamp (Undefined fix)
-                document.getElementById('last-updated').innerText = data.last_updated;
-                
-                const container = document.getElementById('news-container');
-                container.innerHTML = '';
-
-                data.articles.forEach(article => {
-                    const card = document.createElement('a');
-                    card.href = `article.html?id=${article.id}`;
-                    card.className = 'news-card';
-                    
-                    // Inject image if exists
-                    const imgHtml = article.image ? `<img src="${article.image}" class="card-img" alt="Banner">` : '';
-                    
-                    card.innerHTML = `
-                        ${imgHtml}
-                        <span class="news-category">${article.category}</span>
-                        <h2 class="news-title">${article.title}</h2>
-                        <span class="news-source">${article.source}</span>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error loading news:", error);
-                document.getElementById('news-container').innerHTML = '<p>Failed to load news. Please try again later.</p>';
-            }
-        }
-
-        fetchNews();
-    </script>
 </body>
 </html>
