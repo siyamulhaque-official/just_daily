@@ -70,18 +70,108 @@
             align-items: center;
         }
 
+        /* Unique Menu Button Styles */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-heading);
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .menu-btn:hover {
+            color: #fff;
+        }
+
+        /* Side Menu Styles */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--bg-dark);
+            z-index: 2000;
+            transition: left 0.3s ease;
+            border-right: 1px solid var(--border-color);
+            padding: 25px 20px;
+            box-sizing: border-box;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+        }
+
+        .side-menu.active {
+            left: 0;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            color: var(--text-heading);
+            font-family: 'Merriweather', serif;
+            font-size: 1.2rem;
+        }
+
+        .close-menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-body);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+        }
+
+        .close-menu-btn:hover {
+            color: var(--text-heading);
+        }
+
+        #auth-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            align-items: flex-start;
+        }
+
         .premium-login-btn {
             display: flex;
             align-items: center;
+            justify-content: center;
+            width: 100%;
             gap: 8px;
             background-color: #e4e4e7;
             color: #161618;
             border: none;
-            padding: 8px 18px;
+            padding: 10px 18px;
             border-radius: 20px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -94,12 +184,16 @@
         .user-profile {
             display: flex;
             align-items: center;
+            gap: 12px;
             cursor: pointer;
             transition: transform 0.2s ease;
+            color: var(--text-heading);
+            font-weight: 600;
         }
 
         .user-profile:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
+            color: #fff;
         }
 
         .user-avatar {
@@ -171,12 +265,24 @@
             .news-title { font-size: 1.2rem; }
             .card-img { height: 180px; }
             header h1 { font-size: 1.8rem; }
-            .premium-login-btn { padding: 6px 14px; font-size: 0.8rem; }
+            .premium-login-btn { padding: 8px 14px; font-size: 0.85rem; }
             .user-avatar { width: 35px; height: 35px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- Menu Overlay & Side Menu Window -->
+    <div id="menuOverlay" class="menu-overlay"></div>
+    <div id="sideMenu" class="side-menu">
+        <div class="menu-header">
+            <span>Menu</span>
+            <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+        </div>
+        <div id="auth-container">
+            <!-- JS dynamically loads either Sign In or Profile picture here -->
+        </div>
+    </div>
 
     <header class="app-header">
         <div class="header-left">
@@ -186,8 +292,15 @@
             <div class="timestamp" id="last-updated">Fetching updates...</div>
         </div>
         
-        <div class="header-right" id="auth-container">
-            <!-- JS dynamically loads either Sign In or Profile picture here -->
+        <div class="header-right">
+            <!-- Unique Menu Button (Staggered Lines) -->
+            <button id="menuBtn" class="menu-btn" aria-label="Open Menu">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="15" y2="18"></line>
+                </svg>
+            </button>
         </div>
     </header>
 
@@ -217,12 +330,28 @@
         const authContainer = document.getElementById('auth-container');
         const newsContainer = document.getElementById('news-container');
 
+        // Menu Toggle Logic
+        const menuBtn = document.getElementById('menuBtn');
+        const sideMenu = document.getElementById('sideMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+        function toggleMenu() {
+            sideMenu.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        closeMenuBtn.addEventListener('click', toggleMenu);
+        menuOverlay.addEventListener('click', toggleMenu);
+
         // Dynamic Auth Listener
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 authContainer.innerHTML = `
                     <div class="user-profile" id="userProfile" title="Click to Sign Out">
                         <img src="${user.photoURL}" alt="Profile" class="user-avatar" referrerpolicy="no-referrer">
+                        <span>Sign Out</span>
                     </div>
                 `;
                 
@@ -230,6 +359,7 @@
                     const confirmLogout = confirm("Are you sure you want to sign out?");
                     if(confirmLogout) {
                         signOut(auth);
+                        toggleMenu(); // Close menu after action
                     }
                 });
             } else {
@@ -241,7 +371,9 @@
                 `;
                 
                 document.getElementById('loginBtn').addEventListener('click', () => {
-                    signInWithPopup(auth, provider).catch(error => {
+                    signInWithPopup(auth, provider).then(() => {
+                        toggleMenu(); // Close menu after login
+                    }).catch(error => {
                         console.error("Login Failed:", error);
                     });
                 });
