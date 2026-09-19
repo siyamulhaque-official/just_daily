@@ -24,11 +24,33 @@
         .nav { padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .nav a { color: var(--text-body); text-decoration: none; font-size: 0.9rem; }
         
-        /* Auth Styles */
-        .auth-container { display: flex; gap: 10px; align-items: center; }
-        .btn-auth { background: var(--text-heading); color: var(--bg-dark); border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; }
+        /* Unique Menu Button Styles */
+        .menu-btn {
+            background: none; border: none; color: var(--text-heading); cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: color 0.2s;
+        }
+        .menu-btn:hover { color: #fff; }
+
+        /* Side Menu Styles */
+        .menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .menu-overlay.active { opacity: 1; pointer-events: all; }
+        .side-menu {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background-color: var(--bg-dark); z-index: 2000; transition: left 0.3s ease; border-right: 1px solid var(--border-color); padding: 25px 20px; box-sizing: border-box; font-family: 'Inter', sans-serif; box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+        }
+        .side-menu.active { left: 0; }
+        .menu-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem;
+        }
+        .close-menu-btn { background: none; border: none; color: var(--text-body); font-size: 1.5rem; cursor: pointer; padding: 0; display: flex; }
+        .close-menu-btn:hover { color: var(--text-heading); }
+
+        /* Auth Styles modified for Side Menu */
+        .auth-container { display: flex; flex-direction: column; gap: 15px; align-items: flex-start; width: 100%; }
+        .btn-auth { width: 100%; background: var(--text-heading); color: var(--bg-dark); border: none; padding: 10px 14px; border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; text-align: center; }
         .btn-auth.logout { background: #3f3f46; color: var(--text-heading); }
-        .user-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); }
+        .user-pic { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); }
+        .user-info { display: flex; align-items: center; gap: 12px; color: var(--text-heading); font-weight: 600; width: 100%; margin-bottom: 5px; }
 
         .article-container { max-width: 700px; margin: 0 auto 60px auto; padding: 0 20px; }
         .hero-img { width: 100%; height: auto; border-radius: 4px; filter: brightness(0.9); margin-bottom: 15px; display: none; }
@@ -83,11 +105,28 @@
 
     <div id="tts-highlighter"></div>
 
+    <!-- Menu Overlay & Side Menu Window -->
+    <div id="menuOverlay" class="menu-overlay"></div>
+    <div id="sideMenu" class="side-menu">
+        <div class="menu-header">
+            <span>Menu</span>
+            <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+        </div>
+        <div class="auth-container" id="auth-container">
+            <!-- JS dynamically loads Auth options here -->
+        </div>
+    </div>
+
     <div class="nav">
         <a href="index.html">← Back to Feed</a>
-        <div class="auth-container" id="auth-container">
-            <button id="btn-login" class="btn-auth">Sign In</button>
-        </div>
+        <!-- Unique Menu Button -->
+        <button id="menuBtn" class="menu-btn" aria-label="Open Menu">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="15" y2="18"></line>
+            </svg>
+        </button>
     </div>
 
     <div class="article-container" role="textbox" aria-readonly="true">
@@ -138,7 +177,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-        // Firebase Configuration (from your exact snippet)
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCVvKKMF56vXQpqExWfeFq7xvFLDIcNxc8",
             authDomain: "just-daily.firebaseapp.com",
@@ -162,6 +201,21 @@
         let isArticlePlaying = false;
         window.speechUtterances = []; 
 
+        // Menu Toggle Logic
+        const menuBtn = document.getElementById('menuBtn');
+        const sideMenu = document.getElementById('sideMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+        function toggleMenu() {
+            sideMenu.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        closeMenuBtn.addEventListener('click', toggleMenu);
+        menuOverlay.addEventListener('click', toggleMenu);
+
         // Authentication Observer
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
@@ -170,15 +224,25 @@
             
             if (user) {
                 authContainer.innerHTML = `
-                    <img src="${user.photoURL}" class="user-pic" alt="User" referrerpolicy="no-referrer">
-                    <button id="btn-logout" class="btn-auth logout">Logout</button>
+                    <div class="user-info">
+                        <img src="${user.photoURL}" class="user-pic" alt="User" referrerpolicy="no-referrer">
+                        <span>${user.displayName || 'User'}</span>
+                    </div>
+                    <button id="btn-logout" class="btn-auth logout">Sign Out</button>
                 `;
-                document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+                document.getElementById('btn-logout').addEventListener('click', () => {
+                    signOut(auth);
+                    toggleMenu(); // Close menu after logout
+                });
                 btnSave.style.display = 'inline-flex';
                 checkIfSaved();
             } else {
                 authContainer.innerHTML = `<button id="btn-login" class="btn-auth">Sign In</button>`;
-                document.getElementById('btn-login').addEventListener('click', () => signInWithPopup(auth, provider));
+                document.getElementById('btn-login').addEventListener('click', () => {
+                    signInWithPopup(auth, provider).then(() => {
+                        toggleMenu(); // Close menu after login
+                    });
+                });
                 btnSave.style.display = 'none';
             }
         });
