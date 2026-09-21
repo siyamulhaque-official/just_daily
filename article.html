@@ -191,6 +191,16 @@
         closeMenuBtn.addEventListener('click', toggleMenu);
         menuOverlay.addEventListener('click', toggleMenu);
 
+        // Date format helper: DD-MM-YYYY
+        function formatDMY(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
         async function fetchSavedArticles() {
             const container = document.getElementById('saved-articles-container');
             container.innerHTML = '<div style="padding:20px 15px; color:#a1a1aa; font-size:0.85rem; text-align:center;">Loading articles...</div>';
@@ -207,7 +217,7 @@
                 let html = '';
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    const dateStr = data.date ? new Date(data.date).toLocaleDateString() : '';
+                    const dateStr = formatDMY(data.date);
                     html += `
                         <a href="article.html?id=${data.id}" class="saved-article-item">
                             <span class="saved-article-title">${data.title}</span>
@@ -284,7 +294,6 @@
                     btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Saved';
                     btnSave.classList.add('saved');
                     
-                    // Restore Cloud Highlights if they exist
                     const data = docSnap.data();
                     if(data.contentHtml) {
                         document.getElementById('art-content').innerHTML = data.contentHtml;
@@ -293,9 +302,7 @@
                     btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Save Article';
                     btnSave.classList.remove('saved');
                 }
-            } catch (error) {
-                console.error("Error checking saved state:", error);
-            }
+            } catch (error) {}
         }
 
         document.getElementById('btn-save').addEventListener('click', async () => {
@@ -308,7 +315,6 @@
                 btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Save Article';
                 btnSave.classList.remove('saved');
             } else {
-                // Save article & its current highlighted content to Cloud
                 await setDoc(docRef, {
                     id: currentArticleId,
                     title: document.getElementById('art-title').innerText,
@@ -348,8 +354,8 @@
                         imgEl.style.display = 'block';
                     }
                     
-                    restoreHighlights(); // First check LocalStorage
-                    checkIfSaved(); // Then check Cloud and override if needed
+                    restoreHighlights(); 
+                    checkIfSaved(); 
                 }
             } catch (error) {}
         }
@@ -423,9 +429,38 @@
             } else { customToolbar.style.display = 'none'; }
         });
 
-        document.addEventListener('mousedown', (e) => {
-            if (!customToolbar.contains(e.target) && window.getSelection().toString().length === 0) { customToolbar.style.display = 'none'; }
-        });
+        // Improved Selection Dismissal Logic
+        const handleDismiss = (e) => {
+            if (customToolbar.contains(e.target)) return;
+            const sel = window.getSelection();
+            if (!sel.isCollapsed) {
+                let clientX = e.clientX;
+                let clientY = e.clientY;
+                if (e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                }
+                
+                let clickedInside = false;
+                if (sel.rangeCount > 0 && clientX !== undefined) {
+                    const rects = sel.getRangeAt(0).getClientRects();
+                    for (let r of rects) {
+                        if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+                            clickedInside = true; break;
+                        }
+                    }
+                }
+                if (!clickedInside) {
+                    sel.removeAllRanges();
+                    customToolbar.style.display = 'none';
+                }
+            } else {
+                customToolbar.style.display = 'none';
+            }
+        };
+
+        document.addEventListener('mousedown', handleDismiss);
+        document.addEventListener('touchstart', handleDismiss, {passive: true});
 
         document.getElementById('btn-highlight').addEventListener('mousedown', (e) => {
             e.preventDefault(); 
@@ -439,11 +474,15 @@
             }
         });
         
+        // Fixed Unhighlight on click
         document.getElementById('art-content').addEventListener('click', (e) => {
             if(e.target.classList.contains('highlighted-text')) {
                 const parent = e.target.parentNode;
                 while(e.target.firstChild) { parent.insertBefore(e.target.firstChild, e.target); }
                 parent.removeChild(e.target);
+                
+                window.getSelection().removeAllRanges();
+                document.getElementById('custom-toolbar').style.display = 'none';
                 saveHighlights();
             }
         });
@@ -595,7 +634,6 @@
         window.addEventListener('beforeunload', () => synth.cancel());
         window.closeSheet = function() { bottomSheet.classList.remove('active'); synth.cancel(); };
 
-        // Save highlights to LocalStorage AND Sync to Cloud Firestore if article is saved
         async function saveHighlights() { 
             if(!currentArticleId) return;
             const contentHtml = document.getElementById('art-content').innerHTML;
@@ -606,7 +644,7 @@
                 try {
                     const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
                     await setDoc(docRef, { contentHtml: contentHtml }, { merge: true });
-                } catch(e) { console.error("Cloud Save Error:", e); }
+                } catch(e) {}
             }
         }
         
