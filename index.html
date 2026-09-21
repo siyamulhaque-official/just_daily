@@ -56,7 +56,6 @@
         .user-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #27272a; object-fit: cover; }
         .user-name { color: var(--text-heading); font-weight: 600; font-size: 1.05rem; }
 
-        /* Updated Modern Icons & Buttons */
         .btn-menu-item { background: none; border: none; color: var(--text-heading); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; text-align: left; padding: 12px 0; width: 100%; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
         .btn-menu-item:hover { color: #fff; }
         
@@ -154,6 +153,16 @@
         closeMenuBtn.addEventListener('click', toggleMenu);
         menuOverlay.addEventListener('click', toggleMenu);
 
+        // Date format helper: DD-MM-YYYY
+        function formatDMY(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
         async function fetchSavedArticles() {
             const container = document.getElementById('saved-articles-container');
             container.innerHTML = '<div style="padding:20px 15px; color:#a1a1aa; font-size:0.85rem; text-align:center;">Loading articles...</div>';
@@ -170,7 +179,7 @@
                 let html = '';
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    const dateStr = data.date ? new Date(data.date).toLocaleDateString() : '';
+                    const dateStr = formatDMY(data.date);
                     html += `
                         <a href="article.html?id=${data.id}" class="saved-article-item">
                             <span class="saved-article-title">${data.title}</span>
