@@ -6,51 +6,42 @@
     <title>Article - Just Daily</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #161618;
-            --surface: #1c1c1f;
-            --text-body: #a1a1aa;
-            --text-heading: #e4e4e7;
-            --border-color: #27272a;
-            --highlight-bg: rgba(250, 204, 21, 0.2);
-        }
-
-        body {
-            margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-body);
-            font-family: 'Merriweather', serif; line-height: 1.8; font-size: 18px;
-            -webkit-touch-callout: none; user-select: none;
-        }
-
+        :root { --bg-dark: #161618; --surface: #1c1c1f; --text-body: #a1a1aa; --text-heading: #e4e4e7; --border-color: #27272a; --highlight-bg: rgba(250, 204, 21, 0.2); }
+        body { margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-body); font-family: 'Merriweather', serif; line-height: 1.8; font-size: 18px; -webkit-touch-callout: none; user-select: none; }
+        
         .nav { padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .nav a { color: var(--text-body); text-decoration: none; font-size: 0.9rem; }
         
-        /* Unique Menu Button Styles */
-        .menu-btn {
-            background: none; border: none; color: var(--text-heading); cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: color 0.2s;
-        }
+        .menu-btn { background: none; border: none; color: var(--text-heading); cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
         .menu-btn:hover { color: #fff; }
 
-        /* Side Menu Styles */
-        .menu-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
+        .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .menu-overlay.active { opacity: 1; pointer-events: all; }
-        .side-menu {
-            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background-color: var(--bg-dark); z-index: 2000; transition: left 0.3s ease; border-right: 1px solid var(--border-color); padding: 25px 20px; box-sizing: border-box; font-family: 'Inter', sans-serif; box-shadow: 4px 0 15px rgba(0,0,0,0.5);
-        }
+        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background-color: var(--bg-dark); z-index: 2000; transition: left 0.3s ease; border-right: 1px solid var(--border-color); padding: 25px 20px; box-sizing: border-box; font-family: 'Inter', sans-serif; box-shadow: 4px 0 15px rgba(0,0,0,0.5); }
         .side-menu.active { left: 0; }
-        .menu-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem;
-        }
+        .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem; }
         .close-menu-btn { background: none; border: none; color: var(--text-body); font-size: 1.5rem; cursor: pointer; padding: 0; display: flex; }
-        .close-menu-btn:hover { color: var(--text-heading); }
-
-        /* Auth Styles modified for Side Menu */
-        .auth-container { display: flex; flex-direction: column; gap: 15px; align-items: flex-start; width: 100%; }
+        
+        #auth-container { display: flex; flex-direction: column; width: 100%; align-items: flex-start; }
         .btn-auth { width: 100%; background: var(--text-heading); color: var(--bg-dark); border: none; padding: 10px 14px; border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; text-align: center; }
-        .btn-auth.logout { background: #3f3f46; color: var(--text-heading); }
-        .user-pic { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); }
-        .user-info { display: flex; align-items: center; gap: 12px; color: var(--text-heading); font-weight: 600; width: 100%; margin-bottom: 5px; }
+        
+        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; width: 100%; }
+        .user-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #27272a; object-fit: cover; }
+        .user-name { color: var(--text-heading); font-weight: 600; font-size: 1.05rem; }
+
+        .btn-menu-item { background: none; border: none; color: var(--text-heading); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 1rem; text-align: left; padding: 12px 0; width: 100%; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
+        .btn-menu-item:hover { color: #fff; }
+        .btn-logout { background: #3f3f46; color: var(--text-heading); border: none; padding: 10px; border-radius: 20px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 25px; transition: background 0.2s; }
+        
+        .saved-articles-container { display: none; max-height: 250px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface); width: 100%; }
+        .saved-articles-container::-webkit-scrollbar { width: 6px; }
+        .saved-articles-container::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        
+        .saved-article-item { display: block; padding: 12px; border-bottom: 1px solid var(--border-color); text-decoration: none; transition: background 0.2s; }
+        .saved-article-item:last-child { border-bottom: none; }
+        .saved-article-item:hover { background: #27272a; }
+        .saved-article-title { color: var(--text-heading); font-size: 0.85rem; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .saved-article-date { color: #71717a; font-size: 0.75rem; margin-top: 4px; display: block; }
 
         .article-container { max-width: 700px; margin: 0 auto 60px auto; padding: 0 20px; }
         .hero-img { width: 100%; height: auto; border-radius: 4px; filter: brightness(0.9); margin-bottom: 15px; display: none; }
@@ -58,46 +49,26 @@
         .source-caption { font-size: 0.85rem; color: var(--text-heading); font-weight: 600; display: block; }
         .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
         h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 20px; }
-
         .action-buttons { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
-        .btn-action {
-            background-color: var(--surface); color: var(--text-heading); border: 1px solid var(--border-color);
-            padding: 8px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.85rem;
-            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;
-        }
-        .btn-action:hover { background-color: #27272a; }
+        .btn-action { background-color: var(--surface); color: var(--text-heading); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
         .btn-action.saved { background-color: #059669; color: white; border-color: #059669; }
-
         .content, #art-title, .summary-box { color: var(--text-body); user-select: text; -webkit-user-select: text; }
         #art-title { color: var(--text-heading); }
         .content { margin-bottom: 50px; }
         .content p { margin-bottom: 1.5em; }
-        .content h2, .content h3, .content h4 { color: var(--text-heading); margin-top: 1.5em; margin-bottom: 0.5em; }
-        .content strong, .content b { color: var(--text-heading); }
-
+        .content h2, .content h3, .content h4, .content strong, .content b { color: var(--text-heading); }
         .summary-box { background-color: var(--surface); border-left: 4px solid #52525b; padding: 25px; border-radius: 0 8px 8px 0; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
         .summary-box h3 { margin-top: 0; color: var(--text-heading); font-size: 1.1rem; margin-bottom: 15px; }
-        #art-summary p { margin-top: 0; margin-bottom: 10px; }
-        #art-summary ul { padding-left: 20px; margin: 0; }
-        #art-summary li { margin-bottom: 8px; }
-        #art-summary strong { color: var(--text-heading); }
-
         .btn-original { display: inline-block; background-color: var(--text-heading); color: var(--bg-dark); padding: 12px 24px; text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 600; border-radius: 4px; font-size: 0.9rem; }
         .highlighted-text { background-color: var(--highlight-bg); border-radius: 2px; cursor: pointer; }
-
         #tts-highlighter { position: absolute; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; pointer-events: none; transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s; opacity: 0; z-index: 10; }
-
         #custom-toolbar { position: absolute; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: none; z-index: 1000; overflow: hidden; flex-direction: row; }
         #custom-toolbar button { background: none; color: #fff; border: none; border-right: 1px solid #3f3f46; padding: 10px 15px; font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; outline: none; }
-        #custom-toolbar button:last-child { border-right: none; }
-        #custom-toolbar button:hover { background: #3f3f46; }
-
         .bottom-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--surface); border-top: 1px solid var(--border-color); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px; box-sizing: border-box; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif; }
         .bottom-sheet.active { transform: translateY(0); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--text-heading); font-weight: 600; }
         .sheet-header-actions { display: flex; gap: 15px; align-items: center; }
         .btn-icon { background: none; border: none; color: var(--text-body); font-size: 1.2rem; cursor: pointer; }
-        .btn-icon:hover { color: var(--text-heading); }
         .loader { color: #71717a; font-size: 0.9rem; }
     </style>
 </head>
@@ -105,21 +76,17 @@
 
     <div id="tts-highlighter"></div>
 
-    <!-- Menu Overlay & Side Menu Window -->
     <div id="menuOverlay" class="menu-overlay"></div>
     <div id="sideMenu" class="side-menu">
         <div class="menu-header">
             <span>Menu</span>
             <button id="closeMenuBtn" class="close-menu-btn">✕</button>
         </div>
-        <div class="auth-container" id="auth-container">
-            <!-- JS dynamically loads Auth options here -->
-        </div>
+        <div class="auth-container" id="auth-container"></div>
     </div>
 
     <div class="nav">
         <a href="index.html">← Back to Feed</a>
-        <!-- Unique Menu Button -->
         <button id="menuBtn" class="menu-btn" aria-label="Open Menu">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -131,26 +98,20 @@
 
     <div class="article-container" role="textbox" aria-readonly="true">
         <img id="art-img" class="hero-img" src="" alt="Article Cover">
-        
         <div class="metadata-container">
             <span id="art-source" class="source-caption"></span>
             <span id="art-date" class="date-caption"></span>
         </div>
-        
         <h1 id="art-title">Loading...</h1>
-        
         <div class="action-buttons">
             <button id="btn-listen" class="btn-action">🔊 Listen to Article</button>
             <button id="btn-save" class="btn-action" style="display: none;">🔖 Save Article</button>
         </div>
-        
         <div id="art-content" class="content"></div>
-        
         <div class="summary-box">
             <h3>Summary by Just Prova</h3>
             <div id="art-summary"></div>
         </div>
-
         <a id="art-link" href="#" target="_blank" class="btn-original">Read Original Article</a>
     </div>
 
@@ -171,13 +132,11 @@
         <div id="sheet-content"></div>
     </div>
 
-    <!-- Firebase App (the core Firebase SDK) & Auth/Firestore -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, deleteDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCVvKKMF56vXQpqExWfeFq7xvFLDIcNxc8",
             authDomain: "just-daily.firebaseapp.com",
@@ -201,7 +160,6 @@
         let isArticlePlaying = false;
         window.speechUtterances = []; 
 
-        // Menu Toggle Logic
         const menuBtn = document.getElementById('menuBtn');
         const sideMenu = document.getElementById('sideMenu');
         const menuOverlay = document.getElementById('menuOverlay');
@@ -216,7 +174,38 @@
         closeMenuBtn.addEventListener('click', toggleMenu);
         menuOverlay.addEventListener('click', toggleMenu);
 
-        // Authentication Observer
+        async function fetchSavedArticles() {
+            const container = document.getElementById('saved-articles-container');
+            container.innerHTML = '<div style="padding:15px; color:#a1a1aa; font-size:0.85rem; text-align:center;">Loading...</div>';
+            
+            try {
+                const q = collection(db, "users", currentUser.uid, "saved_articles");
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<div style="padding:15px; color:#71717a; font-size:0.85rem; text-align:center;">No saved articles yet.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const dateStr = data.date ? new Date(data.date).toLocaleDateString() : '';
+                    
+                    const a = document.createElement('a');
+                    a.href = `article.html?id=${data.id}`;
+                    a.className = 'saved-article-item';
+                    a.innerHTML = `
+                        <span class="saved-article-title">${data.title}</span>
+                        ${dateStr ? `<span class="saved-article-date">Saved on: ${dateStr}</span>` : ''}
+                    `;
+                    container.appendChild(a);
+                });
+            } catch (error) {
+                container.innerHTML = '<div style="padding:15px; color:#ef4444; font-size:0.85rem; text-align:center;">Error loading articles.</div>';
+            }
+        }
+
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             const authContainer = document.getElementById('auth-container');
@@ -225,14 +214,32 @@
             if (user) {
                 authContainer.innerHTML = `
                     <div class="user-info">
-                        <img src="${user.photoURL}" class="user-pic" alt="User" referrerpolicy="no-referrer">
-                        <span>${user.displayName || 'User'}</span>
+                        <img src="${user.photoURL}" class="user-avatar" alt="User" referrerpolicy="no-referrer">
+                        <span class="user-name">${user.displayName || 'User'}</span>
                     </div>
-                    <button id="btn-logout" class="btn-auth logout">Sign Out</button>
+                    
+                    <button id="btn-saved-toggle" class="btn-menu-item">
+                        <span>🔖 Saved Articles</span>
+                        <span style="font-size: 0.8rem;">▼</span>
+                    </button>
+                    <div id="saved-articles-container" class="saved-articles-container"></div>
+                    
+                    <button id="btn-logout" class="btn-logout">Sign Out</button>
                 `;
+                
+                document.getElementById('btn-saved-toggle').addEventListener('click', () => {
+                    const container = document.getElementById('saved-articles-container');
+                    if (container.style.display === 'block') {
+                        container.style.display = 'none';
+                    } else {
+                        container.style.display = 'block';
+                        fetchSavedArticles();
+                    }
+                });
+
                 document.getElementById('btn-logout').addEventListener('click', () => {
                     signOut(auth);
-                    toggleMenu(); // Close menu after logout
+                    toggleMenu();
                 });
                 btnSave.style.display = 'inline-flex';
                 checkIfSaved();
@@ -240,7 +247,7 @@
                 authContainer.innerHTML = `<button id="btn-login" class="btn-auth">Sign In</button>`;
                 document.getElementById('btn-login').addEventListener('click', () => {
                     signInWithPopup(auth, provider).then(() => {
-                        toggleMenu(); // Close menu after login
+                        toggleMenu();
                     });
                 });
                 btnSave.style.display = 'none';
@@ -261,7 +268,6 @@
             }
         }
 
-        // Save Article to Firebase Logic
         document.getElementById('btn-save').addEventListener('click', async () => {
             if(!currentUser || !currentArticleId) return;
             const btnSave = document.getElementById('btn-save');
@@ -280,9 +286,11 @@
                 btnSave.innerHTML = '✅ Saved';
                 btnSave.classList.add('saved');
             }
+            
+            const container = document.getElementById('saved-articles-container');
+            if(container && container.style.display === 'block') { fetchSavedArticles(); }
         });
 
-        // Load Article Logic
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
             currentArticleId = params.get('id');
@@ -308,9 +316,9 @@
                         imgEl.style.display = 'block';
                     }
                     restoreHighlights();
-                    checkIfSaved(); // Check state on load
+                    checkIfSaved();
                 }
-            } catch (error) { console.error("Error loading article:", error); }
+            } catch (error) {}
         }
 
         const customToolbar = document.getElementById('custom-toolbar');
@@ -321,7 +329,6 @@
 
         document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // Word Selection & Interactions
         document.querySelector('.article-container').addEventListener('click', function(e) {
             if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text') || e.target.closest('.action-buttons')) return;
 
@@ -434,7 +441,6 @@
             } catch (err) { sheetContent.innerHTML = 'Error communicating with server.'; }
         });
 
-        // TTS Logics
         let ttsMapping = [];
         let ttsText = "";
 
@@ -465,9 +471,7 @@
             for (let i = 0; i < ttsMapping.length; i++) {
                 let map = ttsMapping[i];
                 let nodeEnd = map.start + map.text.length;
-                if (offset >= map.start && offset < nodeEnd) {
-                    return { node: map.node, localOffset: offset - map.start };
-                }
+                if (offset >= map.start && offset < nodeEnd) { return { node: map.node, localOffset: offset - map.start }; }
             }
             let last = ttsMapping[ttsMapping.length - 1];
             if (last && offset >= last.start + last.text.length) { return { node: last.node, localOffset: last.text.length }; }
@@ -488,7 +492,6 @@
                     if (rects.length > 0) {
                         let rect = rects[0];
                         let highlighter = document.getElementById('tts-highlighter');
-                        
                         let scrollY = window.scrollY || document.documentElement.scrollTop;
                         let scrollX = window.scrollX || document.documentElement.scrollLeft;
 
@@ -504,7 +507,7 @@
                             window.scrollTo({ top: scrollY + rect.top - window.innerHeight / 2, behavior: 'smooth' });
                         }
                     }
-                } catch(err) { console.log("Range error:", err); }
+                } catch(err) {}
             }
         }
 
@@ -519,12 +522,10 @@
                 highlighter.style.opacity = '0';
             } else {
                 synth.cancel(); 
-                
                 const articleTextToRead = prepareTTS();
                 const utterance = new SpeechSynthesisUtterance(articleTextToRead);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.95; 
-                
                 window.speechUtterances.push(utterance);
                 
                 utterance.onboundary = (e) => {
@@ -559,8 +560,6 @@
         });
 
         window.addEventListener('beforeunload', () => synth.cancel());
-
-        // Attach closeSheet to window for HTML inline access
         window.closeSheet = function() { bottomSheet.classList.remove('active'); synth.cancel(); };
 
         function saveHighlights() { if(currentArticleId) localStorage.setItem(`highlight_${currentArticleId}`, document.getElementById('art-content').innerHTML); }
