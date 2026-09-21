@@ -17,8 +17,10 @@
 
         .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .menu-overlay.active { opacity: 1; pointer-events: all; }
-        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background-color: var(--bg-dark); z-index: 2000; transition: left 0.3s ease; border-right: 1px solid var(--border-color); padding: 25px 20px; box-sizing: border-box; font-family: 'Inter', sans-serif; box-shadow: 4px 0 15px rgba(0,0,0,0.5); }
+        
+        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background-color: var(--bg-dark); z-index: 2000; transition: left 0.3s ease; border-right: 1px solid var(--border-color); padding: 25px 20px; box-sizing: border-box; font-family: 'Inter', sans-serif; box-shadow: 4px 0 15px rgba(0,0,0,0.5); overflow-y: auto; }
         .side-menu.active { left: 0; }
+        
         .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem; }
         .close-menu-btn { background: none; border: none; color: var(--text-body); font-size: 1.5rem; cursor: pointer; padding: 0; display: flex; }
         
@@ -36,7 +38,6 @@
         .saved-articles-container { display: none; max-height: 250px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface); width: 100%; }
         .saved-articles-container::-webkit-scrollbar { width: 6px; }
         .saved-articles-container::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-        
         .saved-article-item { display: block; padding: 12px; border-bottom: 1px solid var(--border-color); text-decoration: none; transition: background 0.2s; }
         .saved-article-item:last-child { border-bottom: none; }
         .saved-article-item:hover { background: #27272a; }
@@ -59,6 +60,9 @@
         .content h2, .content h3, .content h4, .content strong, .content b { color: var(--text-heading); }
         .summary-box { background-color: var(--surface); border-left: 4px solid #52525b; padding: 25px; border-radius: 0 8px 8px 0; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
         .summary-box h3 { margin-top: 0; color: var(--text-heading); font-size: 1.1rem; margin-bottom: 15px; }
+        #art-summary p { margin-top: 0; margin-bottom: 10px; }
+        #art-summary ul { padding-left: 20px; margin: 0; }
+        #art-summary li { margin-bottom: 8px; }
         .btn-original { display: inline-block; background-color: var(--text-heading); color: var(--bg-dark); padding: 12px 24px; text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 600; border-radius: 4px; font-size: 0.9rem; }
         .highlighted-text { background-color: var(--highlight-bg); border-radius: 2px; cursor: pointer; }
         #tts-highlighter { position: absolute; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; pointer-events: none; transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s; opacity: 0; z-index: 10; }
@@ -187,20 +191,18 @@
                     return;
                 }
 
-                container.innerHTML = '';
+                let html = '';
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const dateStr = data.date ? new Date(data.date).toLocaleDateString() : '';
-                    
-                    const a = document.createElement('a');
-                    a.href = `article.html?id=${data.id}`;
-                    a.className = 'saved-article-item';
-                    a.innerHTML = `
-                        <span class="saved-article-title">${data.title}</span>
-                        ${dateStr ? `<span class="saved-article-date">Saved on: ${dateStr}</span>` : ''}
+                    html += `
+                        <a href="article.html?id=${data.id}" class="saved-article-item">
+                            <span class="saved-article-title">${data.title}</span>
+                            ${dateStr ? `<span class="saved-article-date">Saved on: ${dateStr}</span>` : ''}
+                        </a>
                     `;
-                    container.appendChild(a);
                 });
+                container.innerHTML = html;
             } catch (error) {
                 container.innerHTML = '<div style="padding:15px; color:#ef4444; font-size:0.85rem; text-align:center;">Error loading articles.</div>';
             }
@@ -246,9 +248,7 @@
             } else {
                 authContainer.innerHTML = `<button id="btn-login" class="btn-auth">Sign In</button>`;
                 document.getElementById('btn-login').addEventListener('click', () => {
-                    signInWithPopup(auth, provider).then(() => {
-                        toggleMenu();
-                    });
+                    signInWithPopup(auth, provider).then(() => { toggleMenu(); });
                 });
                 btnSave.style.display = 'none';
             }
