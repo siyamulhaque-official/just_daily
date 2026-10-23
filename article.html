@@ -4,99 +4,264 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Article - Just Daily</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-dark: #161618; --surface: #1c1c1f; --text-body: #a1a1aa; --text-heading: #e4e4e7; --border-color: #27272a; --highlight-bg: rgba(250, 204, 21, 0.2); }
-        body { margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-body); font-family: 'Merriweather', serif; line-height: 1.8; font-size: 18px; -webkit-touch-callout: none; user-select: none; }
-        
-        .nav { padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .nav a { color: var(--text-body); text-decoration: none; font-size: 0.9rem; }
-        
-        .menu-btn { background: none; border: none; color: var(--text-heading); cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
-        .menu-btn:hover { color: #fff; }
+        :root {
+            --bg-dark: #161618;
+            --surface: #1c1c1f;
+            --text-body: #a1a1aa;
+            --text-heading: #e4e4e7;
+            --border-color: #27272a;
+            --highlight-bg: rgba(250, 204, 21, 0.22);
+            --accent-blue: #3b82f6;
+        }
 
-        .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        body {
+            margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-body);
+            font-family: 'Merriweather', serif; line-height: 1.8; font-size: 18px;
+            -webkit-touch-callout: none; user-select: none; overflow-x: hidden;
+        }
+
+        .nav {
+            padding: 20px; font-family: 'Inter', sans-serif; max-width: 700px;
+            margin: 0 auto; display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav a { color: var(--text-body); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .nav a:hover { color: var(--text-heading); }
+
+        .menu-btn {
+            background: none; border: none; color: var(--text-heading); cursor: pointer;
+            padding: 5px; display: flex; align-items: center; justify-content: center;
+        }
+
+        .menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0;
+            pointer-events: none; transition: opacity 0.25s ease;
+        }
         .menu-overlay.active { opacity: 1; pointer-events: all; }
-        
-        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background-color: var(--bg-dark); z-index: 2000; transition: left 0.3s ease; border-right: 1px solid var(--border-color); padding: 25px 20px; box-sizing: border-box; font-family: 'Inter', sans-serif; box-shadow: 4px 0 15px rgba(0,0,0,0.5); overflow-y: auto; }
-        .side-menu.active { left: 0; }
-        
-        .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem; }
-        .close-menu-btn { background: none; border: none; color: var(--text-body); font-size: 1.5rem; cursor: pointer; padding: 0; display: flex; }
-        
-        #auth-container { display: flex; flex-direction: column; width: 100%; align-items: flex-start; }
-        .btn-auth { width: 100%; background: var(--text-heading); color: var(--bg-dark); border: none; padding: 10px 14px; border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; text-align: center; }
-        
-        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; width: 100%; }
-        .user-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #27272a; object-fit: cover; }
-        .user-name { color: var(--text-heading); font-weight: 600; font-size: 1.05rem; }
 
-        .btn-menu-item { background: none; border: none; color: var(--text-heading); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; text-align: left; padding: 12px 0; width: 100%; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
-        .btn-menu-item:hover { color: #fff; }
-        .btn-logout { background: #3f3f46; color: var(--text-heading); border: none; padding: 12px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem; width: 100%; margin-top: 25px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        
-        .saved-articles-container { display: none; max-height: 250px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface); width: 100%; }
-        .saved-articles-container::-webkit-scrollbar { width: 6px; }
-        .saved-articles-container::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-        .saved-article-item { display: block; padding: 12px; border-bottom: 1px solid var(--border-color); text-decoration: none; transition: background 0.2s; }
+        .side-menu {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+            background-color: var(--bg-dark); z-index: 2000; transition: left 0.25s ease;
+            border-right: 1px solid var(--border-color); padding: 25px 20px;
+            box-sizing: border-box; font-family: 'Inter', sans-serif;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+        }
+        .side-menu.active { left: 0; }
+
+        .menu-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px; border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem;
+        }
+        .close-menu-btn {
+            background: none; border: none; color: var(--text-body); cursor: pointer;
+            padding: 4px; display: flex; align-items: center; justify-content: center;
+        }
+
+        #auth-container { display: flex; flex-direction: column; width: 100%; flex: 1; overflow-y: auto; }
+        .btn-auth {
+            width: 100%; background: var(--text-heading); color: var(--bg-dark);
+            border: none; padding: 10px 14px; border-radius: 20px; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; width: 100%; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color); object-fit: cover; }
+        .user-name { color: var(--text-heading); font-weight: 600; font-size: 1rem; }
+
+        .btn-menu-item {
+            background: none; border: none; color: var(--text-heading); cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 0.92rem; text-align: left;
+            padding: 12px 0; width: 100%; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .dropdown-box {
+            display: none; max-height: 230px; overflow-y: auto; margin-top: 8px; margin-bottom: 8px;
+            border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface); width: 100%;
+        }
+        .dropdown-box::-webkit-scrollbar { width: 5px; }
+        .dropdown-box::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+
+        .interest-item {
+            padding: 10px 12px; font-size: 0.85rem; color: var(--text-body); cursor: pointer;
+            border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;
+        }
+        .interest-item:last-child { border-bottom: none; }
+        .interest-item:hover { background: #27272a; color: var(--text-heading); }
+        .interest-item.selected { color: var(--text-heading); font-weight: 600; background: rgba(255,255,255,0.04); }
+
+        .saved-article-item {
+            display: block; padding: 10px 12px; border-bottom: 1px solid var(--border-color);
+            text-decoration: none; transition: background 0.2s;
+        }
         .saved-article-item:last-child { border-bottom: none; }
         .saved-article-item:hover { background: #27272a; }
-        .saved-article-title { color: var(--text-heading); font-size: 0.85rem; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
-        .saved-article-date { color: #71717a; font-size: 0.75rem; margin-top: 4px; display: block; }
+        .saved-article-title {
+            color: var(--text-heading); font-size: 0.84rem; font-weight: 500;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;
+        }
+        .saved-article-date { color: #71717a; font-size: 0.72rem; margin-top: 4px; display: block; }
+
+        .btn-logout {
+            background: none; color: #71717a; border: none; padding: 12px 0; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.85rem;
+            width: 100%; margin-top: auto; border-top: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+        }
+        .btn-logout:hover { color: #ef4444; }
 
         .article-container { max-width: 700px; margin: 0 auto 60px auto; padding: 0 20px; }
-        .hero-img { width: 100%; height: auto; border-radius: 4px; filter: brightness(0.9); margin-bottom: 15px; display: none; }
-        .metadata-container { font-family: 'Inter', sans-serif; margin-bottom: 30px; }
+        .hero-img {
+            width: 100%; max-height: 400px; object-fit: cover; border-radius: 6px;
+            filter: brightness(0.92); margin-bottom: 18px; display: none; border: 1px solid var(--border-color);
+        }
+        .metadata-container { font-family: 'Inter', sans-serif; margin-bottom: 24px; }
         .source-caption { font-size: 0.85rem; color: var(--text-heading); font-weight: 600; display: block; }
-        .date-caption { font-size: 0.85rem; color: #71717a; display: block; margin-top: 2px; }
-        h1 { font-size: 2.2rem; line-height: 1.3; margin-bottom: 20px; }
-        
+        .date-caption { font-size: 0.82rem; color: #71717a; display: block; margin-top: 2px; }
+        h1 { font-size: 2.1rem; line-height: 1.3; margin-bottom: 20px; color: var(--text-heading); }
+
         .action-buttons { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
-        .btn-action { background-color: var(--surface); color: var(--text-heading); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
-        .btn-action.saved { background-color: #059669; color: white; border-color: #059669; }
-        
-        .content, #art-title, .summary-box { color: var(--text-body); user-select: text; -webkit-user-select: text; }
-        #art-title { color: var(--text-heading); }
-        .content { margin-bottom: 50px; }
+        .btn-action {
+            background-color: var(--surface); color: var(--text-heading); border: 1px solid var(--border-color);
+            padding: 8px 16px; border-radius: 20px; font-family: 'Inter', sans-serif;
+            font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-action:hover { border-color: #52525b; }
+        .btn-action.saved { background-color: #059669; color: #fff; border-color: #059669; }
+
+        .content, #art-title, .summary-box { user-select: text; -webkit-user-select: text; }
+        .content { margin-bottom: 40px; }
         .content p { margin-bottom: 1.5em; }
         .content h2, .content h3, .content h4, .content strong, .content b { color: var(--text-heading); }
-        .summary-box { background-color: var(--surface); border-left: 4px solid #52525b; padding: 25px; border-radius: 0 8px 8px 0; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
-        .summary-box h3 { margin-top: 0; color: var(--text-heading); font-size: 1.1rem; margin-bottom: 15px; }
-        #art-summary p { margin-top: 0; margin-bottom: 10px; }
+        .highlighted-text { background-color: var(--highlight-bg); border-radius: 3px; cursor: pointer; padding: 1px 0; }
+
+        /* On-Demand Summary Section */
+        .summary-wrapper { margin-bottom: 40px; font-family: 'Inter', sans-serif; }
+        .btn-summary-trigger {
+            width: 100%; background-color: var(--surface); color: var(--text-heading);
+            border: 1px solid var(--border-color); padding: 16px 20px; border-radius: 8px;
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            gap: 10px; transition: border-color 0.2s, background 0.2s;
+        }
+        .btn-summary-trigger:hover { border-color: #52525b; background-color: #222225; }
+        .btn-summary-trigger:disabled { opacity: 0.6; cursor: wait; }
+
+        .summary-box {
+            display: none; background-color: var(--surface); border-left: 4px solid #52525b;
+            padding: 25px; border-radius: 0 8px 8px 0; font-size: 0.95rem; line-height: 1.7;
+        }
+        .summary-box h3 {
+            margin-top: 0; color: var(--text-heading); font-size: 1.05rem;
+            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+        #art-summary p { margin-top: 0; margin-bottom: 12px; }
         #art-summary ul { padding-left: 20px; margin: 0; }
         #art-summary li { margin-bottom: 8px; }
-        
-        .btn-original { display: inline-block; background-color: var(--text-heading); color: var(--bg-dark); padding: 12px 24px; text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 600; border-radius: 4px; font-size: 0.9rem; }
-        .highlighted-text { background-color: var(--highlight-bg); border-radius: 2px; cursor: pointer; }
-        
-        #tts-highlighter { position: absolute; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; pointer-events: none; transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s; opacity: 0; z-index: 10; }
-        #custom-toolbar { position: absolute; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: none; z-index: 1000; overflow: hidden; flex-direction: row; }
-        #custom-toolbar button { background: none; color: #fff; border: none; border-right: 1px solid #3f3f46; padding: 10px 15px; font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; outline: none; }
-        .bottom-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--surface); border-top: 1px solid var(--border-color); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px; box-sizing: border-box; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif; }
+
+        .btn-original {
+            display: inline-block; background-color: var(--text-heading); color: var(--bg-dark);
+            padding: 12px 24px; text-decoration: none; font-family: 'Inter', sans-serif;
+            font-weight: 600; border-radius: 4px; font-size: 0.9rem;
+        }
+
+        /* TTS Glass Highlighter */
+        #tts-highlighter {
+            position: absolute; background-color: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px;
+            pointer-events: none; transition: top 0.14s ease-out, left 0.14s ease-out, width 0.1s ease-out, height 0.1s ease-out, opacity 0.2s;
+            opacity: 0; z-index: 10;
+        }
+
+        /* Custom Toolbar & Draggable Selection Handles */
+        #custom-toolbar {
+            position: absolute; background: #27272a; border: 1px solid #3f3f46;
+            border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            display: none; z-index: 1000; overflow: hidden; flex-direction: row; white-space: nowrap;
+        }
+        #custom-toolbar button {
+            background: none; color: #fff; border: none; border-right: 1px solid #3f3f46;
+            padding: 10px 14px; font-family: 'Inter', sans-serif; font-size: 0.84rem;
+            font-weight: 500; cursor: pointer; outline: none;
+        }
+        #custom-toolbar button:last-child { border-right: none; }
+        #custom-toolbar button:active { background: #3f3f46; }
+
+        .sel-handle {
+            position: absolute; width: 22px; height: 22px; background: var(--accent-blue);
+            z-index: 1001; display: none; touch-action: none; cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+        #handle-start { border-radius: 50% 0 50% 50%; transform: translate(-100%, 2px); }
+        #handle-end { border-radius: 0 50% 50% 50%; transform: translate(0, 2px); }
+
+        /* Scrollable Translator Bottom Sheet */
+        .bottom-sheet {
+            position: fixed; bottom: 0; left: 0; width: 100%; max-height: 75vh;
+            background-color: var(--surface); border-top: 1px solid var(--border-color);
+            border-radius: 16px 16px 0 0; transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2001; padding: 18px 20px 24px 20px; box-sizing: border-box;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.6); font-family: 'Inter', sans-serif;
+            display: flex; flex-direction: column;
+        }
         .bottom-sheet.active { transform: translateY(0); }
-        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--text-heading); font-weight: 600; }
-        .sheet-header-actions { display: flex; gap: 15px; align-items: center; }
-        .btn-icon { background: none; border: none; color: var(--text-body); font-size: 1.2rem; cursor: pointer; }
+        .sheet-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border-color);
+            color: var(--text-heading); font-weight: 600; font-size: 0.95rem; flex-shrink: 0;
+        }
+        .sheet-title { display: flex; align-items: center; gap: 8px; }
+        .sheet-header-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-icon {
+            background: #27272a; border: 1px solid #3f3f46; color: var(--text-heading);
+            width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .btn-icon:hover { background: #3f3f46; }
+        .btn-icon.playing { border-color: var(--text-heading); background: #3f3f46; }
+
+        #sheet-content {
+            overflow-y: auto; overscroll-behavior: contain; flex: 1;
+            font-size: 0.95rem; line-height: 1.7; color: var(--text-body); padding-right: 4px;
+        }
+        #sheet-content::-webkit-scrollbar { width: 5px; }
+        #sheet-content::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        #sheet-content strong { color: var(--text-heading); }
         .loader { color: #71717a; font-size: 0.9rem; }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.75rem; }
+            body { font-size: 17px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="tts-highlighter"></div>
+    <div id="handle-start" class="sel-handle"></div>
+    <div id="handle-end" class="sel-handle"></div>
 
     <div id="menuOverlay" class="menu-overlay"></div>
     <div id="sideMenu" class="side-menu">
         <div class="menu-header">
             <span>Menu</span>
-            <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+            <button id="closeMenuBtn" class="close-menu-btn" aria-label="Close Menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
-        <div class="auth-container" id="auth-container"></div>
+        <div id="auth-container"></div>
     </div>
 
     <div class="nav">
         <a href="index.html">← Back to Feed</a>
         <button id="menuBtn" class="menu-btn" aria-label="Open Menu">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <line x1="3" y1="18" x2="15" y2="18"></line>
@@ -104,14 +269,14 @@
         </button>
     </div>
 
-    <div class="article-container" role="textbox" aria-readonly="true">
-        <img id="art-img" class="hero-img" src="" alt="Article Cover">
+    <div class="article-container">
+        <img id="art-img" class="hero-img" src="" alt="Article Cover" onerror="this.style.display='none'">
         <div class="metadata-container">
             <span id="art-source" class="source-caption"></span>
             <span id="art-date" class="date-caption"></span>
         </div>
         <h1 id="art-title">Loading...</h1>
-        
+
         <div class="action-buttons">
             <button id="btn-listen" class="btn-action">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
@@ -122,14 +287,24 @@
                 Save Article
             </button>
         </div>
-        
+
         <div id="art-content" class="content"></div>
-        
-        <div class="summary-box">
-            <h3>Summary by Just Prova</h3>
-            <div id="art-summary"></div>
+
+        <div class="summary-wrapper">
+            <button id="btn-generate-summary" class="btn-summary-trigger">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+                <span>Summary by Just Prova</span>
+            </button>
+            <div id="summary-box" class="summary-box">
+                <h3>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+                    Summary by Just Prova
+                </h3>
+                <div id="art-summary"></div>
+            </div>
         </div>
-        <a id="art-link" href="#" target="_blank" class="btn-original">Read Original Article</a>
+
+        <a id="art-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-original">Read Original Article</a>
     </div>
 
     <div id="custom-toolbar">
@@ -140,10 +315,17 @@
 
     <div id="bottom-sheet" class="bottom-sheet">
         <div class="sheet-header">
-            <span>✨ Just Prova Analysis</span>
+            <span class="sheet-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+                Just Prova Analysis
+            </span>
             <div class="sheet-header-actions">
-                <button id="btn-pronounce" class="btn-icon" title="Pronounce word">🔊</button>
-                <button class="close-sheet btn-icon" onclick="closeSheet()">✕</button>
+                <button id="btn-pronounce" class="btn-icon" title="Listen pronunciation" aria-label="Pronounce">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                </button>
+                <button id="btn-close-sheet" class="btn-icon" title="Close" aria-label="Close">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
         </div>
         <div id="sheet-content"></div>
@@ -169,492 +351,899 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev"; 
-        let currentArticleId = null;
-        let currentUser = null;
-        
-        const synth = window.speechSynthesis;
-        let isArticlePlaying = false;
-        window.speechUtterances = []; 
+        const WORKER_URL = "https://just-daily-proxy.siyamulhaquesiyam70.workers.dev";
+        const CATEGORIES = [
+            "Tech & Innovation",
+            "Science & Space",
+            "Business & Economy",
+            "Global Affairs",
+            "Mind & Health"
+        ];
+        const MAX_SAVED_ARTICLES = 50;
 
-        const menuBtn = document.getElementById('menuBtn');
+        let currentArticleId = new URLSearchParams(window.location.search).get('id');
+        let currentArticleData = null;
+        let currentUser = null;
+
+        // DOM Elements
         const sideMenu = document.getElementById('sideMenu');
         const menuOverlay = document.getElementById('menuOverlay');
-        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        const artTitle = document.getElementById('art-title');
+        const artSource = document.getElementById('art-source');
+        const artDate = document.getElementById('art-date');
+        const artImg = document.getElementById('art-img');
+        const artContent = document.getElementById('art-content');
+        const artSummary = document.getElementById('art-summary');
+        const summaryBox = document.getElementById('summary-box');
+        const btnGenSummary = document.getElementById('btn-generate-summary');
+        const artLink = document.getElementById('art-link');
+        const btnSave = document.getElementById('btn-save');
+        const btnListen = document.getElementById('btn-listen');
+        const customToolbar = document.getElementById('custom-toolbar');
+        const btnHighlight = document.getElementById('btn-highlight');
+        const handleStart = document.getElementById('handle-start');
+        const handleEnd = document.getElementById('handle-end');
+        const bottomSheet = document.getElementById('bottom-sheet');
+        const sheetContent = document.getElementById('sheet-content');
 
+        // Menu Toggle
         function toggleMenu() {
             sideMenu.classList.toggle('active');
             menuOverlay.classList.toggle('active');
         }
+        document.getElementById('menuBtn').addEventListener('click', toggleMenu);
+        document.getElementById('closeMenuBtn').addEventListener('click', toggleMenu);
+        menuOverlay.addEventListener('click', () => {
+            sideMenu.classList.remove('active');
+            menuOverlay.classList.remove('active');
+            closeSheet();
+        });
 
-        menuBtn.addEventListener('click', toggleMenu);
-        closeMenuBtn.addEventListener('click', toggleMenu);
-        menuOverlay.addEventListener('click', toggleMenu);
-
-        // Date format helper: DD-MM-YYYY
         function formatDMY(dateString) {
             if (!dateString) return '';
             const d = new Date(dateString);
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}-${month}-${year}`;
+            if (isNaN(d)) return '';
+            return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
         }
 
-        async function fetchSavedArticles() {
+        // Saved Articles Cache & Sync (Max 50)
+        function renderSavedListFromCache() {
             const container = document.getElementById('saved-articles-container');
-            container.innerHTML = '<div style="padding:20px 15px; color:#a1a1aa; font-size:0.85rem; text-align:center;">Loading articles...</div>';
-            
+            if (!container) return false;
+            const cached = localStorage.getItem('jd_saved_list');
+            if (!cached) return false;
+            try {
+                const list = JSON.parse(cached);
+                if (!list.length) {
+                    container.innerHTML = '<div style="padding:16px; color:#71717a; font-size:0.84rem; text-align:center;">No saved articles yet.</div>';
+                    return true;
+                }
+                container.innerHTML = list.map(item => `
+                    <a href="article.html?id=${item.id}" class="saved-article-item">
+                        <span class="saved-article-title">${item.title}</span>
+                        ${item.date ? `<span class="saved-article-date">Saved on: ${formatDMY(item.date)}</span>` : ''}
+                    </a>
+                `).join('');
+                return true;
+            } catch (e) { return false; }
+        }
+
+        async function syncSavedArticles() {
+            if (!currentUser) return;
+            const container = document.getElementById('saved-articles-container');
+            const hadCache = renderSavedListFromCache();
+            if (!hadCache && container) {
+                container.innerHTML = '<div style="padding:16px; color:#a1a1aa; font-size:0.84rem; text-align:center;">Loading...</div>';
+            }
+
             try {
                 const q = collection(db, "users", currentUser.uid, "saved_articles");
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    container.innerHTML = '<div style="padding:20px 15px; color:#71717a; font-size:0.85rem; text-align:center;">No saved articles yet.</div>';
-                    return;
+                const snap = await getDocs(q);
+                let items = [];
+                snap.forEach(d => {
+                    const data = d.data();
+                    items.push(data);
+                    localStorage.setItem(`jd_art_${data.id}`, JSON.stringify(data));
+                });
+
+                items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+                if (items.length > MAX_SAVED_ARTICLES) {
+                    const extra = items.slice(MAX_SAVED_ARTICLES);
+                    items = items.slice(0, MAX_SAVED_ARTICLES);
+                    for (const oldItem of extra) {
+                        deleteDoc(doc(db, "users", currentUser.uid, "saved_articles", oldItem.id)).catch(() => {});
+                        localStorage.removeItem(`jd_art_${oldItem.id}`);
+                    }
                 }
 
-                let html = '';
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const dateStr = formatDMY(data.date);
-                    html += `
-                        <a href="article.html?id=${data.id}" class="saved-article-item">
-                            <span class="saved-article-title">${data.title}</span>
-                            ${dateStr ? `<span class="saved-article-date">Saved on: ${dateStr}</span>` : ''}
-                        </a>
-                    `;
-                });
-                container.innerHTML = html;
-            } catch (error) {
-                console.error("Firestore Error:", error);
-                container.innerHTML = `<div style="padding:20px 15px; color:#ef4444; font-size:0.85rem; text-align:center;">Error loading. Check Firebase Rules.</div>`;
+                const lightList = items.map(({ id, title, date }) => ({ id, title, date }));
+                localStorage.setItem('jd_saved_list', JSON.stringify(lightList));
+                renderSavedListFromCache();
+            } catch (err) {
+                if (!hadCache && container) {
+                    container.innerHTML = '<div style="padding:16px; color:#ef4444; font-size:0.84rem; text-align:center;">Failed to sync.</div>';
+                }
             }
+        }
+
+        function renderInterestsDropdown() {
+            const box = document.getElementById('interests-container');
+            if (!box) return;
+            const currentInterest = localStorage.getItem('jd_interest') || CATEGORIES[0];
+            box.innerHTML = CATEGORIES.map(cat => `
+                <div class="interest-item ${cat === currentInterest ? 'selected' : ''}" data-cat="${cat}">
+                    <span>${cat}</span>
+                    ${cat === currentInterest ? '<span>✓</span>' : ''}
+                </div>
+            `).join('');
+
+            box.querySelectorAll('.interest-item').forEach(el => {
+                el.addEventListener('click', async () => {
+                    const chosen = el.getAttribute('data-cat');
+                    localStorage.setItem('jd_interest', chosen);
+                    renderInterestsDropdown();
+                    if (currentUser) {
+                        setDoc(doc(db, "users", currentUser.uid), { interest: chosen }, { merge: true }).catch(() => {});
+                    }
+                });
+            });
         }
 
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             const authContainer = document.getElementById('auth-container');
-            const btnSave = document.getElementById('btn-save');
-            
+
             if (user) {
                 authContainer.innerHTML = `
                     <div class="user-info">
                         <img src="${user.photoURL}" class="user-avatar" alt="User" referrerpolicy="no-referrer">
-                        <span class="user-name">${user.displayName || 'User'}</span>
+                        <span class="user-name">${user.displayName || 'Reader'}</span>
                     </div>
-                    
+
+                    <button id="btn-interests-toggle" class="btn-menu-item">
+                        <span style="display:flex; align-items:center; gap:10px;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            Your Interests
+                        </span>
+                        <span style="font-size: 0.75rem; color:#71717a;">▼</span>
+                    </button>
+                    <div id="interests-container" class="dropdown-box"></div>
+
                     <button id="btn-saved-toggle" class="btn-menu-item">
                         <span style="display:flex; align-items:center; gap:10px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                             Saved Articles
                         </span>
-                        <span style="font-size: 0.8rem;">▼</span>
+                        <span style="font-size: 0.75rem; color:#71717a;">▼</span>
                     </button>
-                    <div id="saved-articles-container" class="saved-articles-container"></div>
-                    
+                    <div id="saved-articles-container" class="dropdown-box"></div>
+
                     <button id="btn-logout" class="btn-logout">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                         Sign Out
                     </button>
                 `;
-                
+
+                renderInterestsDropdown();
+
+                document.getElementById('btn-interests-toggle').addEventListener('click', () => {
+                    const box = document.getElementById('interests-container');
+                    box.style.display = box.style.display === 'block' ? 'none' : 'block';
+                });
+
                 document.getElementById('btn-saved-toggle').addEventListener('click', () => {
-                    const container = document.getElementById('saved-articles-container');
-                    if (container.style.display === 'block') {
-                        container.style.display = 'none';
+                    const box = document.getElementById('saved-articles-container');
+                    if (box.style.display === 'block') {
+                        box.style.display = 'none';
                     } else {
-                        container.style.display = 'block';
-                        fetchSavedArticles();
+                        box.style.display = 'block';
+                        renderSavedListFromCache();
+                        syncSavedArticles();
                     }
                 });
 
                 document.getElementById('btn-logout').addEventListener('click', () => {
-                    signOut(auth);
-                    toggleMenu();
+                    if (confirm("Are you sure you want to sign out?")) {
+                        signOut(auth);
+                        toggleMenu();
+                    }
                 });
+
                 btnSave.style.display = 'inline-flex';
+                syncSavedArticles();
                 checkIfSaved();
+                checkGlobalSummary();
             } else {
                 authContainer.innerHTML = `<button id="btn-login" class="btn-auth">Sign In</button>`;
                 document.getElementById('btn-login').addEventListener('click', () => {
-                    signInWithPopup(auth, provider).then(() => { toggleMenu(); });
+                    signInWithPopup(auth, provider).then(() => toggleMenu());
                 });
                 btnSave.style.display = 'none';
             }
         });
 
-        async function checkIfSaved() {
-            if(!currentUser || !currentArticleId) return;
-            try {
-                const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
-                const docSnap = await getDoc(docRef);
-                const btnSave = document.getElementById('btn-save');
-                if (docSnap.exists()) {
-                    btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Saved';
-                    btnSave.classList.add('saved');
-                    
-                    const data = docSnap.data();
-                    if(data.contentHtml) {
-                        document.getElementById('art-content').innerHTML = data.contentHtml;
-                    }
-                } else {
-                    btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Save Article';
-                    btnSave.classList.remove('saved');
-                }
-            } catch (error) {}
+        // Summary Display & Global On-Demand Caching
+        function showSummaryUI(html) {
+            if (!html || html.includes("Summary not available") || html.includes("Failed to generate")) return;
+            artSummary.innerHTML = html;
+            btnGenSummary.style.display = 'none';
+            summaryBox.style.display = 'block';
+            localStorage.setItem(`jd_sum_${currentArticleId}`, html);
         }
 
-        document.getElementById('btn-save').addEventListener('click', async () => {
-            if(!currentUser || !currentArticleId) return;
-            const btnSave = document.getElementById('btn-save');
+        async function checkGlobalSummary() {
+            if (!currentArticleId) return;
+            const localSum = localStorage.getItem(`jd_sum_${currentArticleId}`);
+            if (localSum) {
+                showSummaryUI(localSum);
+                return;
+            }
+            try {
+                const sumSnap = await getDoc(doc(db, "article_summaries", currentArticleId));
+                if (sumSnap.exists() && sumSnap.data().summary) {
+                    showSummaryUI(sumSnap.data().summary);
+                }
+            } catch (e) {}
+        }
+
+        btnGenSummary.addEventListener('click', async () => {
+            if (!currentArticleId) return;
+            const rawText = artContent.innerText.trim();
+            if (!rawText) return;
+
+            btnGenSummary.disabled = true;
+            btnGenSummary.querySelector('span').innerText = 'Generating Summary...';
+
+            try {
+                const res = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'summarize', text: rawText })
+                });
+                const data = await res.json();
+                if (data.result) {
+                    showSummaryUI(data.result);
+                    setDoc(doc(db, "article_summaries", currentArticleId), {
+                        id: currentArticleId,
+                        summary: data.result,
+                        updatedAt: new Date().toISOString()
+                    }).catch(() => {});
+
+                    if (btnSave.classList.contains('saved')) {
+                        saveHighlights();
+                    }
+                } else {
+                    btnGenSummary.querySelector('span').innerText = 'Summary by Just Prova (Retry)';
+                    btnGenSummary.disabled = false;
+                }
+            } catch (e) {
+                btnGenSummary.querySelector('span').innerText = 'Summary by Just Prova (Retry)';
+                btnGenSummary.disabled = false;
+            }
+        });
+
+        // Article Rendering & Fast Saved Article Loading
+        function applyArticleToDOM(art) {
+            currentArticleData = art;
+            artTitle.innerText = art.title || 'Untitled';
+            artSource.innerText = art.category ? `${art.source || 'News'} • ${art.category}` : (art.source || 'Just Daily');
+            artDate.innerText = art.articleDate || art.date || '';
+            artContent.innerHTML = art.contentHtml || art.full_text || '';
+            if (art.link) artLink.href = art.link;
+
+            if (art.image) {
+                artImg.src = art.image;
+                artImg.style.display = 'block';
+            }
+
+            const savedHighlights = localStorage.getItem(`highlight_${currentArticleId}`);
+            if (savedHighlights) {
+                artContent.innerHTML = savedHighlights;
+            }
+
+            const existingSum = art.summaryHtml || art.summary || localStorage.getItem(`jd_sum_${currentArticleId}`);
+            if (existingSum) {
+                showSummaryUI(existingSum);
+            }
+        }
+
+        async function loadArticle() {
+            if (!currentArticleId) return;
+
+            // 1. Instant 0.1s Load from Local Saved Cache if available
+            const cachedArt = localStorage.getItem(`jd_art_${currentArticleId}`);
+            if (cachedArt) {
+                try { applyArticleToDOM(JSON.parse(cachedArt)); } catch (e) {}
+            }
+
+            // 2. Check news.json for fresh feed articles
+            try {
+                const res = await fetch(`news.json`);
+                const data = await res.json();
+                const found = data.articles.find(a => a.id === currentArticleId);
+                if (found) {
+                    applyArticleToDOM(found);
+                }
+            } catch (e) {}
+
+            checkGlobalSummary();
+        }
+
+        function updateSaveButtonUI(isSaved) {
+            if (isSaved) {
+                btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Saved';
+                btnSave.classList.add('saved');
+            } else {
+                btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Save Article';
+                btnSave.classList.remove('saved');
+            }
+        }
+
+        async function checkIfSaved() {
+            if (!currentUser || !currentArticleId) return;
+            if (localStorage.getItem(`jd_art_${currentArticleId}`)) {
+                updateSaveButtonUI(true);
+            }
+            try {
+                const snap = await getDoc(doc(db, "users", currentUser.uid, "saved_articles", currentArticleId));
+                if (snap.exists()) {
+                    updateSaveButtonUI(true);
+                    const data = snap.data();
+                    localStorage.setItem(`jd_art_${currentArticleId}`, JSON.stringify(data));
+                    if (!currentArticleData) applyArticleToDOM(data);
+                    else {
+                        if (data.contentHtml) artContent.innerHTML = data.contentHtml;
+                        if (data.summaryHtml) showSummaryUI(data.summaryHtml);
+                    }
+                } else {
+                    updateSaveButtonUI(false);
+                    localStorage.removeItem(`jd_art_${currentArticleId}`);
+                }
+            } catch (e) {}
+        }
+
+        btnSave.addEventListener('click', async () => {
+            if (!currentUser || !currentArticleId) return;
             const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
 
             if (btnSave.classList.contains('saved')) {
+                updateSaveButtonUI(false);
+                localStorage.removeItem(`jd_art_${currentArticleId}`);
                 await deleteDoc(docRef);
-                btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Save Article';
-                btnSave.classList.remove('saved');
             } else {
-                await setDoc(docRef, {
+                const payload = {
                     id: currentArticleId,
-                    title: document.getElementById('art-title').innerText,
+                    title: artTitle.innerText,
+                    source: currentArticleData?.source || artSource.innerText,
+                    category: currentArticleData?.category || '',
+                    articleDate: artDate.innerText,
                     date: new Date().toISOString(),
-                    contentHtml: document.getElementById('art-content').innerHTML
-                });
-                btnSave.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Saved';
-                btnSave.classList.add('saved');
+                    image: currentArticleData?.image || (artImg.style.display !== 'none' ? artImg.src : ''),
+                    link: artLink.href,
+                    contentHtml: artContent.innerHTML,
+                    summaryHtml: artSummary.innerHTML || ''
+                };
+                updateSaveButtonUI(true);
+                localStorage.setItem(`jd_art_${currentArticleId}`, JSON.stringify(payload));
+                await setDoc(docRef, payload);
             }
-            
-            const container = document.getElementById('saved-articles-container');
-            if(container && container.style.display === 'block') { fetchSavedArticles(); }
+            syncSavedArticles();
         });
 
-        async function loadArticle() {
-            const params = new URLSearchParams(window.location.search);
-            currentArticleId = params.get('id');
+        async function saveHighlights() {
             if (!currentArticleId) return;
+            const contentHtml = artContent.innerHTML;
+            localStorage.setItem(`highlight_${currentArticleId}`, contentHtml);
 
-            try {
-                const response = await fetch(`news.json`);
-                const data = await response.json();
-                const article = data.articles.find(a => a.id === currentArticleId);
-
-                if (article) {
-                    document.getElementById('art-title').innerText = article.title;
-                    document.getElementById('art-source').innerText = `${article.source} • ${article.category}`;
-                    if (article.date) document.getElementById('art-date').innerText = article.date;
-                    
-                    document.getElementById('art-content').innerHTML = article.full_text;
-                    document.getElementById('art-summary').innerHTML = article.summary;
-                    document.getElementById('art-link').href = article.link;
-
-                    if (article.image) {
-                        const imgEl = document.getElementById('art-img');
-                        imgEl.src = article.image;
-                        imgEl.style.display = 'block';
-                    }
-                    
-                    restoreHighlights(); 
-                    checkIfSaved(); 
-                }
-            } catch (error) {}
+            if (currentUser && btnSave.classList.contains('saved')) {
+                try {
+                    const cached = JSON.parse(localStorage.getItem(`jd_art_${currentArticleId}`) || '{}');
+                    cached.contentHtml = contentHtml;
+                    cached.summaryHtml = artSummary.innerHTML || '';
+                    localStorage.setItem(`jd_art_${currentArticleId}`, JSON.stringify(cached));
+                    await setDoc(doc(db, "users", currentUser.uid, "saved_articles", currentArticleId), {
+                        contentHtml,
+                        summaryHtml: artSummary.innerHTML || ''
+                    }, { merge: true });
+                } catch (e) {}
+            }
         }
 
-        const customToolbar = document.getElementById('custom-toolbar');
-        const bottomSheet = document.getElementById('bottom-sheet');
-        const sheetContent = document.getElementById('sheet-content');
+        // Selection, Draggable Handles, Corner-Safe Toolbar & Smart Unhighlight
         let selectedText = "";
+        let currentTranslatedText = "";
         let selectionRange = null;
+        let isDraggingHandle = false;
+        let activeHandle = null;
+        let dragAnchorNode = null;
+        let dragAnchorOffset = 0;
 
-        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('contextmenu', e => e.preventDefault());
 
+        function getCaretFromPoint(x, y) {
+            if (document.caretPositionFromPoint) {
+                const pos = document.caretPositionFromPoint(x, y);
+                return pos ? { node: pos.offsetNode, offset: pos.offset } : null;
+            }
+            if (document.caretRangeFromPoint) {
+                const r = document.caretRangeFromPoint(x, y);
+                return r ? { node: r.startContainer, offset: r.startOffset } : null;
+            }
+            return null;
+        }
+
+        function getHighlightedAncestor(node) {
+            let curr = node && node.nodeType === 3 ? node.parentElement : node;
+            return curr ? curr.closest('.highlighted-text') : null;
+        }
+
+        function isSelectionHighlighted(range) {
+            if (!range) return false;
+            if (getHighlightedAncestor(range.commonAncestorContainer)) return true;
+            const frag = range.cloneContents();
+            return !!frag.querySelector('.highlighted-text');
+        }
+
+        function hideSelectionUI() {
+            customToolbar.style.display = 'none';
+            handleStart.style.display = 'none';
+            handleEnd.style.display = 'none';
+        }
+
+        function updateSelectionUI() {
+            const sel = window.getSelection();
+            selectedText = sel.toString().trim();
+
+            if (!selectedText || selectedText.length >= 1000 || sel.rangeCount === 0) {
+                hideSelectionUI();
+                return;
+            }
+
+            selectionRange = sel.getRangeAt(0);
+            const rects = selectionRange.getClientRects();
+            if (rects.length === 0) {
+                hideSelectionUI();
+                return;
+            }
+
+            const boundingRect = selectionRange.getBoundingClientRect();
+            const firstRect = rects[0];
+            const lastRect = rects[rects.length - 1];
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            const scrollX = window.scrollX || document.documentElement.scrollLeft;
+
+            // Update Highlight / Unhighlight button label
+            btnHighlight.innerText = isSelectionHighlighted(selectionRange) ? 'Unhighlight' : 'Highlight';
+
+            // Display & Clamp Toolbar inside Screen Boundaries
+            customToolbar.style.display = 'flex';
+            const tbWidth = customToolbar.offsetWidth || 220;
+            let leftPos = scrollX + boundingRect.left + (boundingRect.width / 2) - (tbWidth / 2);
+            const minLeft = scrollX + 10;
+            const maxLeft = scrollX + window.innerWidth - tbWidth - 10;
+            leftPos = Math.max(minLeft, Math.min(leftPos, maxLeft));
+
+            let topPos = scrollY + firstRect.top - 48;
+            if (firstRect.top < 55) topPos = scrollY + lastRect.bottom + 30;
+
+            customToolbar.style.left = `${leftPos}px`;
+            customToolbar.style.top = `${topPos}px`;
+
+            // Position Teardrop Handles
+            handleStart.style.display = 'block';
+            handleStart.style.left = `${scrollX + firstRect.left}px`;
+            handleStart.style.top = `${scrollY + firstRect.bottom}px`;
+
+            handleEnd.style.display = 'block';
+            handleEnd.style.left = `${scrollX + lastRect.right}px`;
+            handleEnd.style.top = `${scrollY + lastRect.bottom}px`;
+        }
+
+        document.addEventListener('selectionchange', () => {
+            if (!isDraggingHandle) updateSelectionUI();
+        });
+
+        // Handle Dragging Logic (Touch & Mouse)
+        function startHandleDrag(type, e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!selectionRange) return;
+            isDraggingHandle = true;
+            activeHandle = type;
+
+            if (type === 'start') {
+                dragAnchorNode = selectionRange.endContainer;
+                dragAnchorOffset = selectionRange.endOffset;
+            } else {
+                dragAnchorNode = selectionRange.startContainer;
+                dragAnchorOffset = selectionRange.startOffset;
+            }
+        }
+
+        function moveHandleDrag(e) {
+            if (!isDraggingHandle || !dragAnchorNode) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = (e.touches ? e.touches[0].clientY : e.clientY) - 18;
+
+            const caret = getCaretFromPoint(clientX, clientY);
+            if (!caret || !caret.node || !artContent.contains(caret.node)) return;
+
+            const sel = window.getSelection();
+            const newRange = document.createRange();
+
+            try {
+                const cmp = dragAnchorNode.compareDocumentPosition(caret.node);
+                let isCaretBefore = false;
+                if (caret.node === dragAnchorNode) {
+                    isCaretBefore = caret.offset < dragAnchorOffset;
+                } else {
+                    isCaretBefore = !!(cmp & Node.DOCUMENT_POSITION_PRECEDING);
+                }
+
+                if (isCaretBefore) {
+                    newRange.setStart(caret.node, caret.offset);
+                    newRange.setEnd(dragAnchorNode, dragAnchorOffset);
+                } else {
+                    newRange.setStart(dragAnchorNode, dragAnchorOffset);
+                    newRange.setEnd(caret.node, caret.offset);
+                }
+
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+                updateSelectionUI();
+            } catch (err) {}
+        }
+
+        function endHandleDrag() {
+            if (isDraggingHandle) {
+                isDraggingHandle = false;
+                activeHandle = null;
+                updateSelectionUI();
+            }
+        }
+
+        handleStart.addEventListener('touchstart', e => startHandleDrag('start', e), { passive: false });
+        handleEnd.addEventListener('touchstart', e => startHandleDrag('end', e), { passive: false });
+        handleStart.addEventListener('mousedown', e => startHandleDrag('start', e));
+        handleEnd.addEventListener('mousedown', e => startHandleDrag('end', e));
+
+        document.addEventListener('touchmove', moveHandleDrag, { passive: true });
+        document.addEventListener('mousemove', moveHandleDrag);
+        document.addEventListener('touchend', endHandleDrag);
+        document.addEventListener('mouseup', endHandleDrag);
+
+        // Tap-to-Select Word (or Existing Highlight)
         document.querySelector('.article-container').addEventListener('click', function(e) {
-            if (e.target.closest('#custom-toolbar') || e.target.closest('a') || e.target.classList.contains('highlighted-text') || e.target.closest('.action-buttons')) return;
+            if (e.target.closest('#custom-toolbar') || e.target.closest('.sel-handle') || e.target.closest('a') || e.target.closest('.action-buttons') || e.target.closest('.summary-wrapper')) return;
 
             const sel = window.getSelection();
             if (!sel.isCollapsed && sel.toString().trim().includes(" ")) return;
 
-            let x = e.clientX, y = e.clientY, textNode, offset;
-
-            if (document.caretPositionFromPoint) {
-                let pos = document.caretPositionFromPoint(x, y);
-                if (!pos) return;
-                textNode = pos.offsetNode;
-                offset = pos.offset;
-            } else if (document.caretRangeFromPoint) {
-                let range = document.caretRangeFromPoint(x, y);
-                if (!range) return;
-                textNode = range.startContainer;
-                offset = range.startOffset;
+            // If user clicked an already highlighted span, select that highlight so toolbar shows "Unhighlight"
+            const hlSpan = e.target.closest('.highlighted-text');
+            if (hlSpan) {
+                const r = document.createRange();
+                r.selectNodeContents(hlSpan);
+                sel.removeAllRanges();
+                sel.addRange(r);
+                updateSelectionUI();
+                return;
             }
 
-            if (textNode && textNode.nodeType === 3) { 
-                let text = textNode.nodeValue, start = offset, end = offset;
-                const isWordChar = (char) => /[^\s\.,;:!?\(\)\[\]"'\-—]/.test(char);
+            const caret = getCaretFromPoint(e.clientX, e.clientY);
+            if (!caret || !caret.node || caret.node.nodeType !== 3) return;
 
-                if (start < text.length && !isWordChar(text[start])) {
-                   if (start > 0 && isWordChar(text[start-1])) { start--; end--; } 
-                   else { return; } 
-                }
-                while (start > 0 && isWordChar(text[start - 1])) start--;
-                while (end < text.length && isWordChar(text[end])) end++;
+            const text = caret.node.nodeValue;
+            let start = caret.offset, end = caret.offset;
+            const isWordChar = (ch) => /[^\s\.,;:!?\(\)\[\]"'“”‘’\-—]/.test(ch);
 
-                if (start !== end) {
-                    let newRange = document.createRange();
-                    newRange.setStart(textNode, start);
-                    newRange.setEnd(textNode, end);
-                    sel.removeAllRanges();
-                    sel.addRange(newRange);
-                    setTimeout(() => document.dispatchEvent(new Event('selectionchange')), 10);
-                }
+            if (start < text.length && !isWordChar(text[start])) {
+                if (start > 0 && isWordChar(text[start - 1])) { start--; end--; }
+                else return;
+            }
+            while (start > 0 && isWordChar(text[start - 1])) start--;
+            while (end < text.length && isWordChar(text[end])) end++;
+
+            if (start !== end) {
+                const newRange = document.createRange();
+                newRange.setStart(caret.node, start);
+                newRange.setEnd(caret.node, end);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+                updateSelectionUI();
             }
         });
 
-        document.addEventListener('selectionchange', () => {
-            const selection = window.getSelection();
-            selectedText = selection.toString().trim();
-            
-            if (selectedText.length > 0 && selectedText.length < 1000) {
-                if(selection.rangeCount > 0) {
-                    selectionRange = selection.getRangeAt(0);
-                    const rect = selectionRange.getBoundingClientRect();
-                    
-                    let scrollY = window.scrollY || document.documentElement.scrollTop;
-                    let scrollX = window.scrollX || document.documentElement.scrollLeft;
-
-                    customToolbar.style.top = `${scrollY + rect.top - 50}px`;
-                    customToolbar.style.left = `${scrollX + rect.left + (rect.width / 2) - 120}px`;
-                    customToolbar.style.display = 'flex';
-                }
-            } else { customToolbar.style.display = 'none'; }
-        });
-
-        // Improved Selection Dismissal Logic
+        // Dismiss Selection on Outside Touch/Click
         const handleDismiss = (e) => {
-            if (customToolbar.contains(e.target)) return;
+            if (customToolbar.contains(e.target) || e.target.closest('.sel-handle') || bottomSheet.contains(e.target)) return;
             const sel = window.getSelection();
             if (!sel.isCollapsed) {
-                let clientX = e.clientX;
-                let clientY = e.clientY;
-                if (e.touches && e.touches.length > 0) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                }
-                
-                let clickedInside = false;
+                const clientX = e.touches?.[0]?.clientX ?? e.clientX;
+                const clientY = e.touches?.[0]?.clientY ?? e.clientY;
+                let inside = false;
                 if (sel.rangeCount > 0 && clientX !== undefined) {
-                    const rects = sel.getRangeAt(0).getClientRects();
-                    for (let r of rects) {
-                        if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
-                            clickedInside = true; break;
+                    for (let r of sel.getRangeAt(0).getClientRects()) {
+                        if (clientX >= r.left - 10 && clientX <= r.right + 10 && clientY >= r.top - 10 && clientY <= r.bottom + 10) {
+                            inside = true; break;
                         }
                     }
                 }
-                if (!clickedInside) {
+                if (!inside) {
                     sel.removeAllRanges();
-                    customToolbar.style.display = 'none';
+                    hideSelectionUI();
                 }
             } else {
-                customToolbar.style.display = 'none';
+                hideSelectionUI();
             }
         };
-
         document.addEventListener('mousedown', handleDismiss);
-        document.addEventListener('touchstart', handleDismiss, {passive: true});
+        document.addEventListener('touchstart', handleDismiss, { passive: true });
 
-        document.getElementById('btn-highlight').addEventListener('mousedown', (e) => {
-            e.preventDefault(); 
-            if (selectionRange && currentArticleId) {
-                const span = document.createElement('span');
-                span.className = 'highlighted-text';
-                selectionRange.surroundContents(span);
-                saveHighlights();
-                window.getSelection().removeAllRanges();
-                customToolbar.style.display = 'none';
+        // Smart Highlight / Unhighlight Action
+        function unwrapSpan(span) {
+            const parent = span.parentNode;
+            if (!parent) return;
+            while (span.firstChild) parent.insertBefore(span.firstChild, span);
+            parent.removeChild(span);
+        }
+
+        btnHighlight.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!selectionRange || !currentArticleId) return;
+
+            if (isSelectionHighlighted(selectionRange)) {
+                const ancestorHl = getHighlightedAncestor(selectionRange.commonAncestorContainer);
+                if (ancestorHl) {
+                    unwrapSpan(ancestorHl);
+                } else {
+                    artContent.querySelectorAll('.highlighted-text').forEach(sp => {
+                        if (selectionRange.intersectsNode(sp)) unwrapSpan(sp);
+                    });
+                }
+                artContent.normalize();
+            } else {
+                try {
+                    const span = document.createElement('span');
+                    span.className = 'highlighted-text';
+                    const contents = selectionRange.extractContents();
+                    contents.querySelectorAll('.highlighted-text').forEach(unwrapSpan);
+                    span.appendChild(contents);
+                    selectionRange.insertNode(span);
+                    artContent.normalize();
+                } catch (err) {}
             }
-        });
-        
-        // Fixed Unhighlight on click
-        document.getElementById('art-content').addEventListener('click', (e) => {
-            if(e.target.classList.contains('highlighted-text')) {
-                const parent = e.target.parentNode;
-                while(e.target.firstChild) { parent.insertBefore(e.target.firstChild, e.target); }
-                parent.removeChild(e.target);
-                
-                window.getSelection().removeAllRanges();
-                document.getElementById('custom-toolbar').style.display = 'none';
-                saveHighlights();
-            }
+
+            saveHighlights();
+            window.getSelection().removeAllRanges();
+            hideSelectionUI();
         });
 
+        // Copy Action
         document.getElementById('btn-copy').addEventListener('mousedown', (e) => {
             e.preventDefault();
             if (selectedText) {
                 navigator.clipboard.writeText(selectedText);
                 window.getSelection().removeAllRanges();
-                customToolbar.style.display = 'none';
+                hideSelectionUI();
             }
         });
+
+        // Translate Action & Scroll-Locked Bottom Sheet
+        function openSheet() {
+            bottomSheet.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSheet() {
+            bottomSheet.classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('btn-pronounce').classList.remove('playing');
+        }
+        document.getElementById('btn-close-sheet').addEventListener('click', closeSheet);
 
         document.getElementById('btn-translate').addEventListener('mousedown', async (e) => {
             e.preventDefault();
             if (!selectedText) return;
-            customToolbar.style.display = 'none';
-            bottomSheet.classList.add('active');
+            currentTranslatedText = selectedText;
+            window.getSelection().removeAllRanges();
+            hideSelectionUI();
+
+            openSheet();
             sheetContent.innerHTML = '<span class="loader">Analyzing with Just Prova...</span>';
             try {
                 const res = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: selectedText })
+                    body: JSON.stringify({ action: 'translate', text: currentTranslatedText })
                 });
                 const data = await res.json();
-                sheetContent.innerHTML = data.result ? data.result : 'Translation failed.';
-            } catch (err) { sheetContent.innerHTML = 'Error communicating with server.'; }
+                sheetContent.innerHTML = data.result || 'Translation failed.';
+            } catch (err) {
+                sheetContent.innerHTML = 'Error communicating with server.';
+            }
         });
 
+        // Reliable Word/Sentence Pronunciation
+        const synth = window.speechSynthesis;
+        let currentAudio = null;
+
+        document.getElementById('btn-pronounce').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!currentTranslatedText) return;
+            const btnPronounce = document.getElementById('btn-pronounce');
+
+            if (isArticlePlaying) stopArticleTTS();
+            synth.cancel();
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+            btnPronounce.classList.add('playing');
+            const u = new SpeechSynthesisUtterance(currentTranslatedText);
+            u.lang = 'en-US';
+            u.rate = 0.9;
+            u.onend = () => btnPronounce.classList.remove('playing');
+            u.onerror = () => btnPronounce.classList.remove('playing');
+            synth.speak(u);
+            if (synth.paused) synth.resume();
+        });
+
+        // Universal Cross-Platform TTS & Glass Highlighter (PC onboundary + Mobile Fallback)
+        let isArticlePlaying = false;
         let ttsMapping = [];
+        let ttsWords = [];
         let ttsText = "";
+        let mobileWordTimer = null;
+        let boundaryFired = false;
 
         function prepareTTS() {
             ttsMapping = [];
+            ttsWords = [];
             ttsText = "";
-            const contentDiv = document.getElementById('art-content');
-            
+
             function traverse(node) {
-                if (node.nodeType === 3) { 
-                    let text = node.nodeValue;
-                    ttsMapping.push({ node: node, start: ttsText.length, text: text });
+                if (node.nodeType === 3) {
+                    const text = node.nodeValue;
+                    const baseOffset = ttsText.length;
+                    ttsMapping.push({ node, start: baseOffset, text });
                     ttsText += text;
-                } else if (node.nodeType === 1) { 
+
+                    const regex = /[^\s\.,;:!?\(\)\[\]"'“”‘’\-—]+/g;
+                    let match;
+                    while ((match = regex.exec(text)) !== null) {
+                        ttsWords.push({
+                            charIndex: baseOffset + match.index,
+                            length: match[0].length
+                        });
+                    }
+                } else if (node.nodeType === 1) {
                     const tag = node.tagName.toLowerCase();
                     const isBlock = ['p', 'h1', 'h2', 'h3', 'h4', 'div', 'li', 'ul', 'br'].includes(tag);
-                    
-                    if (isBlock && ttsText.length > 0 && !ttsText.endsWith(" ")) { ttsText += " "; }
-                    for (let child of node.childNodes) { traverse(child); }
-                    if (isBlock && !ttsText.endsWith(" ")) { ttsText += " "; }
+                    if (isBlock && ttsText.length > 0 && !ttsText.endsWith(" ")) ttsText += " ";
+                    for (let child of node.childNodes) traverse(child);
+                    if (isBlock && !ttsText.endsWith(" ")) ttsText += " ";
                 }
             }
-            traverse(contentDiv);
+            traverse(artContent);
             return ttsText;
         }
 
         function getPosByOffset(offset) {
             for (let i = 0; i < ttsMapping.length; i++) {
-                let map = ttsMapping[i];
-                let nodeEnd = map.start + map.text.length;
-                if (offset >= map.start && offset < nodeEnd) { return { node: map.node, localOffset: offset - map.start }; }
+                const map = ttsMapping[i];
+                const nodeEnd = map.start + map.text.length;
+                if (offset >= map.start && offset < nodeEnd) {
+                    return { node: map.node, localOffset: offset - map.start };
+                }
             }
-            let last = ttsMapping[ttsMapping.length - 1];
-            if (last && offset >= last.start + last.text.length) { return { node: last.node, localOffset: last.text.length }; }
+            const last = ttsMapping[ttsMapping.length - 1];
+            if (last && offset >= last.start + last.text.length) {
+                return { node: last.node, localOffset: last.text.length };
+            }
             return null;
         }
 
         function highlightTTSWord(startOffset, length) {
-            let startPos = getPosByOffset(startOffset);
-            let endPos = getPosByOffset(startOffset + length);
-            
-            if (startPos && endPos) {
-                let range = document.createRange();
-                try {
-                    range.setStart(startPos.node, startPos.localOffset);
-                    range.setEnd(endPos.node, endPos.localOffset);
-                    
-                    let rects = range.getClientRects();
-                    if (rects.length > 0) {
-                        let rect = rects[0];
-                        let highlighter = document.getElementById('tts-highlighter');
-                        let scrollY = window.scrollY || document.documentElement.scrollTop;
-                        let scrollX = window.scrollX || document.documentElement.scrollLeft;
+            const startPos = getPosByOffset(startOffset);
+            const endPos = getPosByOffset(startOffset + length);
+            if (!startPos || !endPos) return;
 
-                        highlighter.style.top = (rect.top + scrollY - 2) + 'px';
-                        highlighter.style.left = (rect.left + scrollX - 2) + 'px';
-                        highlighter.style.width = (rect.width + 4) + 'px';
-                        highlighter.style.height = (rect.height + 4) + 'px';
-                        highlighter.style.opacity = '1'; 
-                        
-                        const safeTop = 150;
-                        const safeBottom = window.innerHeight - 150;
-                        if (rect.top < safeTop || rect.bottom > safeBottom) {
-                            window.scrollTo({ top: scrollY + rect.top - window.innerHeight / 2, behavior: 'smooth' });
-                        }
+            try {
+                const range = document.createRange();
+                range.setStart(startPos.node, startPos.localOffset);
+                range.setEnd(endPos.node, endPos.localOffset);
+
+                const rects = range.getClientRects();
+                if (rects.length > 0) {
+                    const rect = rects[0];
+                    const highlighter = document.getElementById('tts-highlighter');
+                    const scrollY = window.scrollY || document.documentElement.scrollTop;
+                    const scrollX = window.scrollX || document.documentElement.scrollLeft;
+
+                    highlighter.style.top = `${rect.top + scrollY - 2}px`;
+                    highlighter.style.left = `${rect.left + scrollX - 2}px`;
+                    highlighter.style.width = `${rect.width + 4}px`;
+                    highlighter.style.height = `${rect.height + 4}px`;
+                    highlighter.style.opacity = '1';
+
+                    const safeTop = 140;
+                    const safeBottom = window.innerHeight - 140;
+                    if (rect.top < safeTop || rect.bottom > safeBottom) {
+                        window.scrollTo({ top: scrollY + rect.top - window.innerHeight / 2, behavior: 'smooth' });
                     }
-                } catch(err) {}
-            }
+                }
+            } catch (err) {}
         }
 
-        document.getElementById('btn-listen').addEventListener('click', () => {
-            const btn = document.getElementById('btn-listen');
-            const highlighter = document.getElementById('tts-highlighter');
-            
+        function startMobileFallbackTracker(rate) {
+            let wordIdx = 0;
+            function stepWord() {
+                if (!isArticlePlaying || boundaryFired || wordIdx >= ttsWords.length) return;
+                const w = ttsWords[wordIdx];
+                highlightTTSWord(w.charIndex, w.length);
+                wordIdx++;
+                const delay = Math.max(190, (w.length * 58) / rate);
+                mobileWordTimer = setTimeout(stepWord, delay);
+            }
+            stepWord();
+        }
+
+        function stopArticleTTS() {
+            synth.cancel();
+            if (mobileWordTimer) { clearTimeout(mobileWordTimer); mobileWordTimer = null; }
+            isArticlePlaying = false;
+            document.getElementById('tts-highlighter').style.opacity = '0';
+            btnListen.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg> Listen';
+        }
+
+        btnListen.addEventListener('click', () => {
             if (isArticlePlaying) {
-                synth.cancel(); 
-                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg> Listen';
-                isArticlePlaying = false;
-                highlighter.style.opacity = '0';
-            } else {
-                synth.cancel(); 
-                const articleTextToRead = prepareTTS();
-                const utterance = new SpeechSynthesisUtterance(articleTextToRead);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.95; 
-                window.speechUtterances.push(utterance);
-                
-                utterance.onboundary = (e) => {
-                    if (e.name === 'word') {
-                        let wordLength = e.charLength || 0;
-                        if (!wordLength) {
-                            let match = articleTextToRead.substring(e.charIndex).match(/^[^\s\.,;:!?\(\)\[\]"'\-—]+/);
-                            wordLength = match ? match[0].length : 1;
-                        }
-                        highlightTTSWord(e.charIndex, wordLength);
+                stopArticleTTS();
+                return;
+            }
+
+            synth.cancel();
+            const textToRead = prepareTTS();
+            if (!textToRead.trim()) return;
+
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.95;
+            boundaryFired = false;
+
+            utterance.onstart = () => {
+                // If browser doesn't fire onboundary within 400ms (like Android Chrome), activate Mobile Tracker
+                mobileWordTimer = setTimeout(() => {
+                    if (isArticlePlaying && !boundaryFired) {
+                        startMobileFallbackTracker(utterance.rate);
                     }
-                };
-                
-                utterance.onend = () => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg> Listen'; isArticlePlaying = false; highlighter.style.opacity = '0'; };
-                utterance.onerror = () => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg> Listen'; isArticlePlaying = false; highlighter.style.opacity = '0'; };
+                }, 400);
+            };
 
-                synth.speak(utterance);
-                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> Stop';
-                isArticlePlaying = true;
-            }
-        });
+            utterance.onboundary = (e) => {
+                if (e.name === 'word') {
+                    boundaryFired = true;
+                    if (mobileWordTimer) { clearTimeout(mobileWordTimer); mobileWordTimer = null; }
+                    let wordLength = e.charLength || 0;
+                    if (!wordLength) {
+                        const match = textToRead.substring(e.charIndex).match(/^[^\s\.,;:!?\(\)\[\]"'“”‘’\-—]+/);
+                        wordLength = match ? match[0].length : 1;
+                    }
+                    highlightTTSWord(e.charIndex, wordLength);
+                }
+            };
 
-        document.getElementById('btn-pronounce').addEventListener('click', () => {
-            if (selectedText) {
-                synth.cancel(); 
-                const utterance = new SpeechSynthesisUtterance(selectedText);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                window.speechUtterances.push(utterance);
-                synth.speak(utterance);
-            }
+            utterance.onend = stopArticleTTS;
+            utterance.onerror = stopArticleTTS;
+
+            isArticlePlaying = true;
+            btnListen.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> Stop';
+            synth.speak(utterance);
+            if (synth.paused) synth.resume();
         });
 
         window.addEventListener('beforeunload', () => synth.cancel());
-        window.closeSheet = function() { bottomSheet.classList.remove('active'); synth.cancel(); };
-
-        async function saveHighlights() { 
-            if(!currentArticleId) return;
-            const contentHtml = document.getElementById('art-content').innerHTML;
-            localStorage.setItem(`highlight_${currentArticleId}`, contentHtml);
-            
-            const btnSave = document.getElementById('btn-save');
-            if (currentUser && btnSave.classList.contains('saved')) {
-                try {
-                    const docRef = doc(db, "users", currentUser.uid, "saved_articles", currentArticleId);
-                    await setDoc(docRef, { contentHtml: contentHtml }, { merge: true });
-                } catch(e) {}
-            }
-        }
-        
-        function restoreHighlights() {
-            if(!currentArticleId) return;
-            const savedContent = localStorage.getItem(`highlight_${currentArticleId}`);
-            if(savedContent) document.getElementById('art-content').innerHTML = savedContent;
-        }
-
-        window.speechSynthesis.cancel();
+        synth.cancel();
         loadArticle();
     </script>
 </body>
