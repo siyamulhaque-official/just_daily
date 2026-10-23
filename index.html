@@ -7,8 +7,7 @@
     
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="apple-touch-icon" href="logo.jpg">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #161618;
@@ -20,7 +19,7 @@
 
         body {
             margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-body);
-            font-family: 'Inter', sans-serif; line-height: 1.7;
+            font-family: 'Inter', sans-serif; line-height: 1.7; overflow-x: hidden;
         }
 
         .app-header {
@@ -38,50 +37,65 @@
         .menu-btn { background: none; border: none; color: var(--text-heading); cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
         .menu-btn:hover { color: #fff; }
 
-        .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .menu-overlay.active { opacity: 1; pointer-events: all; }
         
-        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background-color: var(--bg-dark); z-index: 2000; transition: left 0.3s ease; border-right: 1px solid var(--border-color); padding: 25px 20px; box-sizing: border-box; box-shadow: 4px 0 15px rgba(0,0,0,0.5); overflow-y: auto; }
+        .side-menu {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+            background-color: var(--bg-dark); z-index: 2000; transition: left 0.25s ease;
+            border-right: 1px solid var(--border-color); padding: 25px 20px;
+            box-sizing: border-box; box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+        }
         .side-menu.active { left: 0; }
         
-        .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem; }
-        .close-menu-btn { background: none; border: none; color: var(--text-body); font-size: 1.5rem; cursor: pointer; padding: 0; display: flex; }
+        .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-heading); font-family: 'Merriweather', serif; font-size: 1.2rem; }
+        .close-menu-btn { background: none; border: none; color: var(--text-body); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
         .close-menu-btn:hover { color: var(--text-heading); }
 
-        #auth-container { display: flex; flex-direction: column; width: 100%; align-items: flex-start; }
-        .premium-login-btn { display: flex; align-items: center; justify-content: center; width: 100%; gap: 8px; background-color: #e4e4e7; color: #161618; border: none; padding: 10px 18px; border-radius: 20px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .premium-login-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1); }
+        #auth-container { display: flex; flex-direction: column; width: 100%; flex: 1; overflow-y: auto; }
+        .premium-login-btn { display: flex; align-items: center; justify-content: center; width: 100%; gap: 8px; background-color: var(--text-heading); color: var(--bg-dark); border: none; padding: 10px 18px; border-radius: 20px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: opacity 0.2s ease; }
+        .premium-login-btn:hover { opacity: 0.9; }
         
-        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; width: 100%; }
-        .user-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #27272a; object-fit: cover; }
-        .user-name { color: var(--text-heading); font-weight: 600; font-size: 1.05rem; }
+        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; width: 100%; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color); object-fit: cover; }
+        .user-name { color: var(--text-heading); font-weight: 600; font-size: 1rem; }
 
-        .btn-menu-item { background: none; border: none; color: var(--text-heading); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; text-align: left; padding: 12px 0; width: 100%; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
+        .btn-menu-item { background: none; border: none; color: var(--text-heading); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.92rem; text-align: left; padding: 12px 0; width: 100%; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
         .btn-menu-item:hover { color: #fff; }
         
-        .btn-logout { background: #3f3f46; color: var(--text-heading); border: none; padding: 12px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem; width: 100%; margin-top: 25px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-logout:hover { background: #52525b; }
+        .dropdown-box { display: none; max-height: 230px; overflow-y: auto; margin-top: 8px; margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface); width: 100%; }
+        .dropdown-box::-webkit-scrollbar { width: 5px; }
+        .dropdown-box::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
 
-        .saved-articles-container { display: none; max-height: 250px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface); width: 100%; }
-        .saved-articles-container::-webkit-scrollbar { width: 6px; }
-        .saved-articles-container::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-        .saved-article-item { display: block; padding: 12px; border-bottom: 1px solid var(--border-color); text-decoration: none; transition: background 0.2s; }
+        .interest-item { padding: 10px 12px; font-size: 0.85rem; color: var(--text-body); cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .interest-item:last-child { border-bottom: none; }
+        .interest-item:hover { background: #27272a; color: var(--text-heading); }
+        .interest-item.selected { color: var(--text-heading); font-weight: 600; background: rgba(255,255,255,0.04); }
+
+        .saved-article-item { display: block; padding: 10px 12px; border-bottom: 1px solid var(--border-color); text-decoration: none; transition: background 0.2s; }
         .saved-article-item:last-child { border-bottom: none; }
         .saved-article-item:hover { background: #27272a; }
-        .saved-article-title { color: var(--text-heading); font-size: 0.85rem; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
-        .saved-article-date { color: #71717a; font-size: 0.75rem; margin-top: 4px; display: block; }
+        .saved-article-title { color: var(--text-heading); font-size: 0.84rem; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .saved-article-date { color: #71717a; font-size: 0.72rem; margin-top: 4px; display: block; }
+
+        .btn-logout {
+            background: none; color: #71717a; border: none; padding: 12px 0; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.85rem;
+            width: 100%; margin-top: auto; border-top: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+        }
+        .btn-logout:hover { color: #ef4444; }
 
         .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: grid; gap: 30px; }
-        .news-card { background-color: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease; text-decoration: none; display: block; overflow: hidden; }
+        .news-card { background-color: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 28px 25px; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease; text-decoration: none; display: block; }
         .news-card:hover { transform: translateY(-2px); border-color: #3f3f46; }
-        .card-img { width: 100%; height: 220px; object-fit: cover; border-radius: 4px; margin-bottom: 20px; filter: brightness(0.9); }
         .news-category { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #a1a1aa; margin-bottom: 12px; display: block; font-weight: 600; }
-        .news-title { font-family: 'Merriweather', serif; color: var(--text-heading); font-size: 1.4rem; margin: 0 0 15px 0; line-height: 1.4; }
+        .news-title { font-family: 'Merriweather', serif; color: var(--text-heading); font-size: 1.45rem; margin: 0 0 15px 0; line-height: 1.4; }
         .news-source { font-size: 0.85rem; color: #71717a; }
 
         @media (max-width: 600px) {
-            .news-title { font-size: 1.2rem; }
-            .card-img { height: 180px; }
+            .news-title { font-size: 1.25rem; }
             header h1 { font-size: 1.8rem; }
         }
     </style>
@@ -92,7 +106,9 @@
     <div id="sideMenu" class="side-menu">
         <div class="menu-header">
             <span>Menu</span>
-            <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+            <button id="closeMenuBtn" class="close-menu-btn" aria-label="Close Menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
         <div id="auth-container"></div>
     </div>
@@ -104,7 +120,7 @@
         </div>
         <div class="header-right">
             <button id="menuBtn" class="menu-btn" aria-label="Open Menu">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" y1="12" x2="21" y2="12"></line>
                     <line x1="3" y1="6" x2="21" y2="6"></line>
                     <line x1="3" y1="18" x2="15" y2="18"></line>
@@ -118,7 +134,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCVvKKMF56vXQpqExWfeFq7xvFLDIcNxc8",
@@ -134,104 +150,206 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
-        
+
+        const CATEGORIES = [
+            "Tech & Innovation",
+            "Science & Space",
+            "Business & Economy",
+            "Global Affairs",
+            "Mind & Health"
+        ];
+        const MAX_SAVED_ARTICLES = 50;
+
         let currentUser = null;
+        let allArticles = [];
         const authContainer = document.getElementById('auth-container');
         const newsContainer = document.getElementById('news-container');
-
-        const menuBtn = document.getElementById('menuBtn');
         const sideMenu = document.getElementById('sideMenu');
         const menuOverlay = document.getElementById('menuOverlay');
-        const closeMenuBtn = document.getElementById('closeMenuBtn');
 
         function toggleMenu() {
             sideMenu.classList.toggle('active');
             menuOverlay.classList.toggle('active');
         }
 
-        menuBtn.addEventListener('click', toggleMenu);
-        closeMenuBtn.addEventListener('click', toggleMenu);
+        document.getElementById('menuBtn').addEventListener('click', toggleMenu);
+        document.getElementById('closeMenuBtn').addEventListener('click', toggleMenu);
         menuOverlay.addEventListener('click', toggleMenu);
 
-        // Date format helper: DD-MM-YYYY
         function formatDMY(dateString) {
             if (!dateString) return '';
             const d = new Date(dateString);
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}-${month}-${year}`;
+            if (isNaN(d)) return '';
+            return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
         }
 
-        async function fetchSavedArticles() {
+        function renderFeed() {
+            if (!allArticles.length) return;
+            const preferredCategory = localStorage.getItem('jd_interest') || CATEGORIES[0];
+            let matched = allArticles.filter(a => a.category === preferredCategory);
+            if (!matched.length) matched = [allArticles[0]];
+
+            newsContainer.innerHTML = matched.map(article => `
+                <a href="article.html?id=${article.id}" class="news-card">
+                    <span class="news-category">${article.category}</span>
+                    <h2 class="news-title">${article.title}</h2>
+                    <span class="news-source">${article.source}</span>
+                </a>
+            `).join('');
+        }
+
+        function renderSavedListFromCache() {
             const container = document.getElementById('saved-articles-container');
-            container.innerHTML = '<div style="padding:20px 15px; color:#a1a1aa; font-size:0.85rem; text-align:center;">Loading articles...</div>';
-            
+            if (!container) return false;
+            const cached = localStorage.getItem('jd_saved_list');
+            if (!cached) return false;
+            try {
+                const list = JSON.parse(cached);
+                if (!list.length) {
+                    container.innerHTML = '<div style="padding:16px; color:#71717a; font-size:0.84rem; text-align:center;">No saved articles yet.</div>';
+                    return true;
+                }
+                container.innerHTML = list.map(item => `
+                    <a href="article.html?id=${item.id}" class="saved-article-item">
+                        <span class="saved-article-title">${item.title}</span>
+                        ${item.date ? `<span class="saved-article-date">Saved on: ${formatDMY(item.date)}</span>` : ''}
+                    </a>
+                `).join('');
+                return true;
+            } catch (e) { return false; }
+        }
+
+        async function syncSavedArticles() {
+            if (!currentUser) return;
+            const container = document.getElementById('saved-articles-container');
+            const hadCache = renderSavedListFromCache();
+            if (!hadCache && container) {
+                container.innerHTML = '<div style="padding:16px; color:#a1a1aa; font-size:0.84rem; text-align:center;">Loading...</div>';
+            }
+
             try {
                 const q = collection(db, "users", currentUser.uid, "saved_articles");
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    container.innerHTML = '<div style="padding:20px 15px; color:#71717a; font-size:0.85rem; text-align:center;">No saved articles yet.</div>';
-                    return;
+                const snap = await getDocs(q);
+                let items = [];
+                snap.forEach(d => {
+                    const data = d.data();
+                    items.push(data);
+                    localStorage.setItem(`jd_art_${data.id}`, JSON.stringify(data));
+                });
+
+                items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+                if (items.length > MAX_SAVED_ARTICLES) {
+                    const extra = items.slice(MAX_SAVED_ARTICLES);
+                    items = items.slice(0, MAX_SAVED_ARTICLES);
+                    for (const oldItem of extra) {
+                        deleteDoc(doc(db, "users", currentUser.uid, "saved_articles", oldItem.id)).catch(() => {});
+                        localStorage.removeItem(`jd_art_${oldItem.id}`);
+                    }
                 }
 
-                let html = '';
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const dateStr = formatDMY(data.date);
-                    html += `
-                        <a href="article.html?id=${data.id}" class="saved-article-item">
-                            <span class="saved-article-title">${data.title}</span>
-                            ${dateStr ? `<span class="saved-article-date">Saved on: ${dateStr}</span>` : ''}
-                        </a>
-                    `;
-                });
-                container.innerHTML = html;
+                const lightList = items.map(({ id, title, date }) => ({ id, title, date }));
+                localStorage.setItem('jd_saved_list', JSON.stringify(lightList));
+                renderSavedListFromCache();
             } catch (error) {
-                console.error("Firestore Loading Error:", error);
-                container.innerHTML = `<div style="padding:20px 15px; color:#ef4444; font-size:0.85rem; text-align:center;">Error loading. Check Firebase Rules.</div>`;
+                if (!hadCache && container) {
+                    container.innerHTML = '<div style="padding:16px; color:#ef4444; font-size:0.84rem; text-align:center;">Error loading articles.</div>';
+                }
             }
         }
 
-        onAuthStateChanged(auth, (user) => {
+        function renderInterestsDropdown() {
+            const box = document.getElementById('interests-container');
+            if (!box) return;
+            const currentInterest = localStorage.getItem('jd_interest') || CATEGORIES[0];
+            box.innerHTML = CATEGORIES.map(cat => `
+                <div class="interest-item ${cat === currentInterest ? 'selected' : ''}" data-cat="${cat}">
+                    <span>${cat}</span>
+                    ${cat === currentInterest ? '<span>✓</span>' : ''}
+                </div>
+            `).join('');
+
+            box.querySelectorAll('.interest-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const chosen = el.getAttribute('data-cat');
+                    localStorage.setItem('jd_interest', chosen);
+                    renderInterestsDropdown();
+                    renderFeed();
+                    if (currentUser) {
+                        setDoc(doc(db, "users", currentUser.uid), { interest: chosen }, { merge: true }).catch(() => {});
+                    }
+                });
+            });
+        }
+
+        onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
                 authContainer.innerHTML = `
                     <div class="user-info">
                         <img src="${user.photoURL}" alt="Profile" class="user-avatar" referrerpolicy="no-referrer">
-                        <span class="user-name">${user.displayName || 'User'}</span>
+                        <span class="user-name">${user.displayName || 'Reader'}</span>
                     </div>
-                    
+
+                    <button id="btn-interests-toggle" class="btn-menu-item">
+                        <span style="display:flex; align-items:center; gap:10px;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            Your Interests
+                        </span>
+                        <span style="font-size: 0.75rem; color:#71717a;">▼</span>
+                    </button>
+                    <div id="interests-container" class="dropdown-box"></div>
+
                     <button id="btn-saved-toggle" class="btn-menu-item">
                         <span style="display:flex; align-items:center; gap:10px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                             Saved Articles
                         </span>
-                        <span style="font-size: 0.8rem;">▼</span>
+                        <span style="font-size: 0.75rem; color:#71717a;">▼</span>
                     </button>
-                    <div id="saved-articles-container" class="saved-articles-container"></div>
-                    
+                    <div id="saved-articles-container" class="dropdown-box"></div>
+
                     <button id="btn-logout" class="btn-logout">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                         Sign Out
                     </button>
                 `;
-                
+
+                renderInterestsDropdown();
+
+                document.getElementById('btn-interests-toggle').addEventListener('click', () => {
+                    const box = document.getElementById('interests-container');
+                    box.style.display = box.style.display === 'block' ? 'none' : 'block';
+                });
+
                 document.getElementById('btn-saved-toggle').addEventListener('click', () => {
                     const container = document.getElementById('saved-articles-container');
                     if (container.style.display === 'block') {
                         container.style.display = 'none';
                     } else {
                         container.style.display = 'block';
-                        fetchSavedArticles();
+                        renderSavedListFromCache();
+                        syncSavedArticles();
                     }
                 });
 
                 document.getElementById('btn-logout').addEventListener('click', () => {
-                    const confirmLogout = confirm("Are you sure you want to sign out?");
-                    if(confirmLogout) { signOut(auth); toggleMenu(); }
+                    if (confirm("Are you sure you want to sign out?")) {
+                        signOut(auth);
+                        toggleMenu();
+                    }
                 });
+
+                // Background Pre-fetch Saved Articles & Sync User Interest
+                syncSavedArticles();
+                try {
+                    const userSnap = await getDoc(doc(db, "users", user.uid));
+                    if (userSnap.exists() && userSnap.data().interest) {
+                        localStorage.setItem('jd_interest', userSnap.data().interest);
+                        renderInterestsDropdown();
+                        renderFeed();
+                    }
+                } catch (e) {}
             } else {
                 authContainer.innerHTML = `
                     <button class="premium-login-btn" id="loginBtn">
@@ -239,33 +357,19 @@
                         Sign In
                     </button>
                 `;
-                
                 document.getElementById('loginBtn').addEventListener('click', () => {
-                    signInWithPopup(auth, provider).then(() => { toggleMenu(); });
+                    signInWithPopup(auth, provider).then(() => toggleMenu());
                 });
             }
         });
 
         async function fetchNews() {
             try {
-                const response = await fetch(`news.json?t=${new Date().getTime()}`);
+                const response = await fetch(`news.json?t=${Date.now()}`);
                 const data = await response.json();
-                
-                document.getElementById('last-updated').innerText = data.last_updated;
-                
-                let html = '';
-                data.articles.forEach(article => {
-                    const imgHtml = article.image ? `<img src="${article.image}" class="card-img" alt="Banner">` : '';
-                    html += `
-                        <a href="article.html?id=${article.id}" class="news-card">
-                            ${imgHtml}
-                            <span class="news-category">${article.category}</span>
-                            <h2 class="news-title">${article.title}</h2>
-                            <span class="news-source">${article.source}</span>
-                        </a>
-                    `;
-                });
-                newsContainer.innerHTML = html;
+                document.getElementById('last-updated').innerText = data.last_updated || '';
+                allArticles = data.articles || [];
+                renderFeed();
             } catch (error) {
                 newsContainer.innerHTML = '<p>Failed to load news. Please try again later.</p>';
             }
